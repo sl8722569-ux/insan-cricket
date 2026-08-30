@@ -256,7 +256,17 @@
         <div class="w-36 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
           <div id="staminaBar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full w-[92%] transition-all duration-300"></div>
         </div>
+        <div class="relative w-36 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700 mt-1">
+          <div class="absolute left-[42%] right-[42%] top-0 bottom-0 bg-amber-400/50"></div>
+          <div id="timingNeedle" class="absolute top-0 bottom-0 w-1 bg-white" style="left:50%"></div>
+        </div>
+        <div class="text-[9px] text-slate-500">TIMING</div>
         <div class="text-[10px] text-slate-400" id="batterStanceText">Right-Hand Batter • Aggressive</div>
+        <div class="grid grid-cols-3 gap-1 pt-1">
+          <button onclick="setFieldSet('attacking')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">ATTACK</button>
+          <button onclick="setFieldSet('normal')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">NORMAL</button>
+          <button onclick="setFieldSet('defensive')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">DEFEND</button>
+        </div>
       </div>
 
       <!-- Right Action Pad: Swing Shot / Bowl Delivery Trigger -->
@@ -275,6 +285,7 @@
         <div class="grid grid-cols-2 gap-1">
           <button onclick="simulateNextBall()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">SIM BALL</button>
           <button onclick="simulateToEvent()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">SIM OVER</button>
+          <button onclick="changeBowler()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700 col-span-2">CHANGE BOWLER</button>
         </div>
       </div>
 
@@ -333,7 +344,7 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.4</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.5</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
@@ -675,6 +686,7 @@
             <div class="text-[10px] text-amber-400 tracking-[0.2em] font-bold">PLAYER HUB</div>
             <h3 id="hubName" class="text-2xl font-black mt-1">Arjun Sharma</h3>
             <p id="hubMeta" class="text-xs text-slate-400">District · Right-handed · Batting All-Rounder</p>
+            <p id="hubForm" class="text-xs text-amber-300 mt-1">Form 50 · Fitness 80</p>
             <div id="hubLadder" class="flex flex-wrap gap-1 mt-3 text-[10px]"></div>
             <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
               <button onclick="openStatisticsView()" class="bg-slate-800 py-2 rounded-lg">Statistics</button>
@@ -841,7 +853,7 @@
     SA:['Liam Ross','Ethan Adams','Noah James','Caleb Smith','Ryan Bell','Aiden Brown','Mason Hill','Luke White','Kai Jones','Dylan Green','Owen Reed']
   };
   const LOCATIONS={India:{states:['Punjab','Tamil Nadu','Maharashtra','Karnataka'],districts:{Punjab:['Bathinda','Amritsar','Ludhiana'],'Tamil Nadu':['Chennai','Madurai']},towns:{Bathinda:['Mansa','Rampura'],Amritsar:['Ajnala']}},Australia:{states:['Victoria','New South Wales'],districts:{Victoria:['Melbourne','Geelong']},towns:{Melbourne:['Footscray']}},England:{states:['Yorkshire','Surrey'],districts:{Yorkshire:['Leeds','Bradford']},towns:{Leeds:['Headingley ward']}},Pakistan:{states:['Punjab','Sindh'],districts:{Punjab:['Lahore','Rawalpindi']},towns:{Lahore:['Model Town']}},'South Africa':{states:['Gauteng','Western Cape'],districts:{Gauteng:['Johannesburg']},towns:{Johannesburg:['Soweto']}},'New Zealand':{states:['Auckland','Canterbury'],districts:{Auckland:['Auckland City']},towns:{'Auckland City':['Eden']}},'West Indies':{states:['Barbados','Jamaica','Trinidad'],districts:{Barbados:['Bridgetown']},towns:{Bridgetown:['Fontabelle']}},Bangladesh:{states:['Dhaka','Chattogram'],districts:{Dhaka:['Dhaka']},towns:{Dhaka:['Mirpur']}},'Sri Lanka':{states:['Western','Central'],districts:{Western:['Colombo']},towns:{Colombo:['Kollupitiya']}}};
-  const GAME_STATE={player:{created:false,name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'Town Cricket',stamina:92,fitness:80,look:{skin:0xc47a4a,hair:'short',hairCol:0x1c1917,eyes:0x1e1b16,height:1,build:1},attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50},stats:{runs:0,wickets:0,matches:0,balls:0,fours:0,sixes:0,fifties:0,hundreds:0,catches:0,stumpings:0,captainWins:0,captainMatches:0},contract:null},settings:{control:'team',autoPause:true,difficulty:'NORMAL',lang:'en',gfx:'HIGH',gfxMode:'quality',fps:60,uiScale:'medium',hiContrast:false,reduceMotion:false,haptics:true,shake:true,audio:{masterOn:true,master:.8,music:.5,crowd:.7,bat:.8,menu:.4,fxOn:true}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
+  const GAME_STATE={player:{created:false,name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'Town Cricket',stamina:92,fitness:80,form:50,recent:[],look:{skin:0xc47a4a,hair:'short',hairCol:0x1c1917,eyes:0x1e1b16,height:1,build:1},attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50},stats:{runs:0,wickets:0,matches:0,balls:0,fours:0,sixes:0,fifties:0,hundreds:0,catches:0,stumpings:0,captainWins:0,captainMatches:0},contract:null},settings:{control:'team',autoPause:true,difficulty:'NORMAL',lang:'en',gfx:'HIGH',gfxMode:'quality',fps:60,uiScale:'medium',hiContrast:false,reduceMotion:false,haptics:true,shake:true,audio:{masterOn:true,master:.8,music:.5,crowd:.7,bat:.8,menu:.4,fxOn:true}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
   const I18N={
     en:{MENU_CAREER:'Career',MENU_QUICK_PLAY:'Quick Play',MENU_TRAINING:'Training',MENU_TOURNAMENTS:'Tournaments',MENU_CUSTOM_TEAMS:'Custom Teams',MENU_STATISTICS:'Statistics',MENU_SETTINGS:'Settings',MENU_TAG:'INSAN Sports · original 3D career · Riverbend Stadium',MENU_CAREER_SUB:'Create a cricketer, then play the ladder.',MENU_QUICK_SUB:'Teams, venue, weather — no career lock.',MENU_TRAIN_SUB:'Batting, bowling, keeping, fielding.',MENU_TOURN_SUB:'Career-locked competitions.',MENU_CUSTOM_SUB:'Import JSON squads. Never eval.',MENU_STATS_SUB:'Runs, wickets, catches from play.',MENU_SET_SUB:'Graphics, language, audio, controls.',LOAD_PITCH:'Preparing the pitch...',LOAD_STADIUM:'Loading stadium...',LOAD_TEAMS:'Preparing teams...',LOAD_CAREER:'Loading career...',LOAD_COND:'Setting match conditions...',LOAD_PLAYERS:'Preparing players...',LOAD_FAIL:'Unable to load this content.',RETRY:'RETRY',BACK:'BACK',CREATE_TITLE:'Create your cricketer',CREATE_SUB:'Career first-time setup. Saved locally. 3D look applies in matches.',MATCH_TOSS:'Toss',MATCH_BATTING:'Batting',MATCH_BOWLING:'Bowling'},
     hi:{MENU_CAREER:'कैरियर',MENU_QUICK_PLAY:'क्विक प्ले',MENU_TRAINING:'प्रशिक्षण',MENU_TOURNAMENTS:'टूर्नामेंट',MENU_CUSTOM_TEAMS:'कस्टम टीमें',MENU_STATISTICS:'आँकड़े',MENU_SETTINGS:'सेटिंग्स',LOAD_PITCH:'पिच तैयार हो रही है...',LOAD_STADIUM:'स्टेडियम लोड हो रहा है...',LOAD_TEAMS:'टीमें तैयार हो रही हैं...',LOAD_CAREER:'कैरियर लोड हो रहा है...',LOAD_FAIL:'यह सामग्री लोड नहीं हो सकी।',RETRY:'फिर कोशिश',BACK:'वापस'}
@@ -870,6 +882,18 @@
     try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.frequency.value=740; g.gain.value=0.025*(a.menu||.4)*(a.master||.8); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.05);}catch(e){}
     if(GAME_STATE.settings.haptics&&navigator.vibrate) navigator.vibrate(8);
   }
+  function icVol(kind){const a=GAME_STATE.settings.audio||{}; if(a.masterOn===false)return 0; const m=a.master||.8; if(kind==='crowd')return m*(a.crowd||.7); if(kind==='bat')return m*(a.bat||.8); if(kind==='menu')return m*(a.menu||.4); return m;}
+  function ensureAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended')audioCtx.resume(); return audioCtx;}catch(e){return null;}}
+  function batCrack(){if((GAME_STATE.settings.audio||{}).fxOn===false)return; const ctx=ensureAudio(); if(!ctx)return; const t=ctx.currentTime, v=icVol('bat')*0.18; const o=ctx.createOscillator(), g=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(70,t+.12); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.14); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+.15);}
+  function ballThud(){if((GAME_STATE.settings.audio||{}).fxOn===false)return; const ctx=ensureAudio(); if(!ctx)return; const t=ctx.currentTime, o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=90; g.gain.setValueAtTime(icVol('bat')*0.08,t); g.gain.exponentialRampToValueAtTime(.001,t+.08); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(t+.09);}
+  function crowdCheer(ms){if((GAME_STATE.settings.audio||{}).fxOn===false)return; const ctx=ensureAudio(); if(!ctx)return; const t=ctx.currentTime, dur=(ms||800)/1000; const buf=ctx.createBuffer(1, ctx.sampleRate*dur, ctx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.4; const src=ctx.createBufferSource(); src.buffer=buf; const g=ctx.createGain(); g.gain.setValueAtTime(icVol('crowd')*0.22,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); src.connect(g); g.connect(ctx.destination); src.start();}
+  function icCall(line){if((GAME_STATE.settings.audio||{}).fxOn===false||GAME_STATE.settings.reduceMotion)return; try{window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(line); u.rate=1.02; u.pitch=0.95; u.volume=Math.min(1,icVol('crowd')*1.1); window.speechSynthesis.speak(u);}catch(e){}}
+  const FIELD_SETS={attacking:[[4.2,0,7.2],[3.6,0,3.1],[5.4,0,-0.6],[-4.8,0,6.4],[7.2,0,1.2],[-7.4,0,-1.6],[11,0,-9],[-2.4,0,9.1]],normal:[[8,0,2],[6,0,-2],[-7,0,1],[10,0,-8],[-10,0,-6],[14,0,8],[-12,0,6],[0,0,-16]],defensive:[[15,0,8],[-14,0,6],[12,0,-10],[-12,0,-8],[18,0,1],[-17,0,2],[0,0,-18],[9,0,4]]};
+  function setFieldSet(name){GAME_STATE.match.fieldSet=name||'normal'; const spots=FIELD_SETS[name]||FIELD_SETS.normal; (fielderMeshes||[]).forEach((f,i)=>{ if(!spots[i])return; f.position.set(spots[i][0],0,spots[i][2]); f.userData.home=f.position.clone(); f.lookAt(0,0,0); }); showToast('FIELD '+String(name).toUpperCase(), name==='attacking'?'Slips and catching ring':'Rope protection'); uiClick();}
+  let trailMeshes=[];
+  function ensureTrail(){if(trailMeshes.length||!scene)return; for(let i=0;i<14;i++){ const m=new THREE.Mesh(new THREE.SphereGeometry(.06,6,6), new THREE.MeshBasicMaterial({color:0xf8fafc,transparent:true,opacity:.35-i*.02})); m.visible=false; scene.add(m); trailMeshes.push(m);} }
+  function updateTrail(pos){ensureTrail(); if(!pos){trailMeshes.forEach(m=>m.visible=false); return;} for(let i=trailMeshes.length-1;i>0;i--){ trailMeshes[i].position.copy(trailMeshes[i-1].position); trailMeshes[i].visible=trailMeshes[i-1].visible; } trailMeshes[0].position.copy(pos); trailMeshes[0].visible=true; }
+  function poseRun(p,t){if(!p||!p.userData.joints)return; const j=p.userData.joints; const s=Math.sin(t*20); j.lLeg.rotation.x=s*.95; j.rLeg.rotation.x=-s*.95; j.lArm.rotation.x=-s*.7; j.rArm.rotation.x=s*.7; p.position.y=Math.abs(s)*0.08;}
   function applyUiChrome(){
     document.documentElement.classList.toggle('ui-small',GAME_STATE.settings.uiScale==='small');
     document.documentElement.classList.toggle('ui-medium',GAME_STATE.settings.uiScale!=='small'&&GAME_STATE.settings.uiScale!=='large');
@@ -1208,7 +1232,8 @@
     bowlerMesh.position.set(0,0,-12); bowlerMesh.rotation.y=Math.PI; bowlerMesh.userData.home=bowlerMesh.position.clone(); bowlerMesh.userData.homeY=0; scene.add(bowlerMesh);
     keeperMesh=makePlayer('Keeper','keeper',{keeper:true,shirt:fieldShirt});
     keeperMesh.position.set(0,0,10.4); keeperMesh.userData.home=keeperMesh.position.clone(); keeperMesh.userData.homeY=0; scene.add(keeperMesh);
-    [[8,0,2],[6,0,-2],[-7,0,1],[10,0,-8],[-10,0,-6],[14,0,8],[-12,0,6],[0,0,-16]].forEach((p,i)=>{
+    const spots=FIELD_SETS[GAME_STATE.match.fieldSet||'normal']||FIELD_SETS.normal;
+    spots.forEach((p,i)=>{
       const f=makePlayer('F'+i,'fielder',{shirt:fieldShirt});
       f.position.set(p[0],0,p[2]); f.userData.home=f.position.clone(); f.userData.homeY=0; f.lookAt(0,0,0); scene.add(f); fielderMeshes.push(f);
     });
@@ -1232,7 +1257,8 @@
     const playing=!!ballPath && now<animUntil;
     if(playing){
       const t=Math.max(0,Math.min(1,1-(animUntil-now)/Math.max(200,animDur)));
-      const p=ballPath(t); if(ballMesh&&p)ballMesh.position.copy(p);
+      const p=ballPath(t); if(ballMesh&&p){ ballMesh.position.copy(p); updateTrail(p); }
+      const needle=document.getElementById('timingNeedle'); if(needle&&(actionKind==='bowl'||actionKind==='shot')) needle.style.left=(Math.max(0,Math.min(1,t))*100)+'%';
       if(actionKind==='bowl'){ if(bowlerMesh)poseBowl(bowlerMesh,t); if(batterMesh)poseIdle(batterMesh,tIdle); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
       else if(actionKind==='shot'){ if(batterMesh)poseShot(batterMesh,t); if(bowlerMesh)poseBowl(bowlerMesh,Math.min(1,t*1.15)); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
       else if(actionKind==='catch'||actionKind==='drop'||actionKind==='keeperCatch'||actionKind==='ground'||actionKind==='four'){
@@ -1248,6 +1274,7 @@
           else poseFieldRun(fieldActor,tIdle*2.2);
         }
         if(actionKind==='four'&&t>.75&&batterMesh) poseCelebrate(batterMesh,tIdle);
+        if(actionKind==='ground'&&batterMesh) poseRun(batterMesh,tIdle*2);
       }
       else if(actionKind==='six'){ if(batterMesh){ if(t<.35)poseShot(batterMesh,t/.35); else poseCelebrate(batterMesh,tIdle); } if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
       else if(actionKind==='bowled'||actionKind==='lbw'){ if(batterMesh)poseShot(batterMesh,Math.min(1,t)); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); if(bowlerMesh&&t>.55)poseCelebrate(bowlerMesh,tIdle); }
@@ -1255,7 +1282,7 @@
       else if(actionKind==='trophy'){ const hero=fieldActor||batterMesh; if(hero)poseTrophy(hero,t); [batterMesh,bowlerMesh,keeperMesh].concat(fielderMeshes||[]).forEach(f=>{ if(f&&f!==hero)poseCelebrate(f,tIdle); }); }
       if(actionKind!=='bowl'&&actionKind!=='shot'&&bowlerMesh&&actionKind!=='trophy'&&actionKind!=='celebrate') poseIdle(bowlerMesh,tIdle);
     } else {
-      if(ballPath){ ballPath=null; if(!ceremonyActive){ actionKind=null; restoreFieldHomes(); } }
+      if(ballPath){ ballPath=null; updateTrail(null); if(!ceremonyActive){ actionKind=null; restoreFieldHomes(); } }
       if(ceremonyActive&&fieldActor) poseTrophy(fieldActor,1);
       else {
         poseIdle(batterMesh,tIdle); poseIdle(bowlerMesh,tIdle);
@@ -1288,10 +1315,10 @@
   function syncBowlActions(){const st=(document.getElementById('createBowlStyle')||{}).value||'';const pace=/fast|medium/i.test(st);const sel=document.getElementById('createBowlAction');if(!sel)return;const paceActs=[['short-run','Short run-up'],['medium-run','Medium run-up'],['long-run','Long run-up'],['high-arm','High-arm'],['side-on','Side-on'],['front-on','Front-on']];const spinActs=[['finger-spin','Finger spin'],['wrist-spin','Wrist spin'],['medium-run','Gather / pivot']];const acts=pace?paceActs:spinActs;const cur=sel.value;sel.innerHTML=acts.map(a=>'<option value="'+a[0]+'">'+a[1]+'</option>').join('');if(acts.some(a=>a[0]===cur))sel.value=cur;}
   function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}
   function openCareerHub(){if(!GAME_STATE.player.created){openPlayerCreator();return;}document.getElementById('careerModal').classList.remove('hidden');refreshCareerHub();}
-  function careerNews(){const s=GAME_STATE.player.stats,p=GAME_STATE.player,n=[];if(!s.matches)n.push('No matches yet — news will come from results you play.');if(s.runs)n.push(p.name+' has '+s.runs+' career runs.');if(s.hundreds)n.push(p.name+' has scored '+s.hundreds+' hundred(s).');if(s.wickets>=5)n.push(s.wickets+' wickets attracting franchise scouts.');if(p.contract)n.push('Contract: '+p.contract.team+' for '+p.contract.value+' IC.');n.push('Current level: '+p.level+'.');return n;}
-  function evaluateProgression(){const s=GAME_STATE.player.stats,p=GAME_STATE.player;let lvl=p.level;if(s.matches>=1)lvl='District Level';if(s.runs>=80&&s.matches>=2)lvl='State Cricket';if(p.age<=19&&s.runs>=40)lvl='U-19';if(s.runs>=150||s.wickets>=8)lvl='Domestic';if((s.fifties||0)+(s.hundreds||0)>=2)lvl='List A';if(p.contract)lvl='Franchise';if(s.runs>=300)lvl='National';if(s.runs>=450)lvl='International';if(lvl!==p.level){p.level=lvl;pushEvent('Selection',p.name+' moved to '+lvl+'.');}return lvl;}
+  function careerNews(){const s=GAME_STATE.player.stats,p=GAME_STATE.player,n=[];if(!s.matches)n.push('No matches yet — news will come from results you play.');if(s.runs)n.push(p.name+' has '+s.runs+' career runs.');if(s.hundreds)n.push(p.name+' has scored '+s.hundreds+' hundred(s).');if(s.wickets>=5)n.push(s.wickets+' wickets attracting franchise scouts.');if(p.contract)n.push('Contract: '+p.contract.team+' for '+p.contract.value+' IC.');n.push('Form '+Math.round(p.form||50)+' · Fitness '+Math.round(p.fitness||80)+'.');n.push('Current level: '+p.level+(p.competition?' · '+p.competition:'')+'.');return n;}
+  function evaluateProgression(){const s=GAME_STATE.player.stats,p=GAME_STATE.player;let lvl=p.level;if(s.matches>=1)lvl='District Level';if(s.runs>=80&&s.matches>=2)lvl='State Cricket';if(p.age<=19&&s.runs>=40)lvl='U-19';if(s.runs>=150||s.wickets>=8)lvl='Domestic';if((s.fifties||0)+(s.hundreds||0)>=2)lvl='List A';if(p.contract)lvl='Franchise';if(s.runs>=300)lvl='National';if(s.runs>=450)lvl='International';const comps={'Town Cricket':'Town Shield','District Level':'District Cup','State Cricket':'State Championship','U-19':'U-19 Series','Domestic':'First-class circuit','List A':'List A Cup','Franchise':'Sagar Premier','National':'National squad','International':'International'};p.competition=comps[lvl]||lvl;if(lvl!==p.level){p.level=lvl;pushEvent('Selection',p.name+' moved to '+lvl+' ('+p.competition+').');}return lvl;}
   function pushEvent(kind,text){GAME_STATE.player.events=GAME_STATE.player.events||[];GAME_STATE.player.events.unshift({kind,text,t:Date.now()});GAME_STATE.player.events=GAME_STATE.player.events.slice(0,20);}
-  function refreshCareerHub(){const p=GAME_STATE.player;evaluateProgression();const hn=document.getElementById('hubName');if(hn)hn.innerText=p.name+(p.nick?' “'+p.nick+'”':'');const hm=document.getElementById('hubMeta');if(hm)hm.innerText=p.level+' · '+p.batHand+' · '+p.role+' · '+(p.town||'')+', '+(p.district||'');const order=['Town Cricket','District Level','State Cricket','U-19','Domestic','List A','Franchise','National','International'];const lad=document.getElementById('hubLadder');if(lad)lad.innerHTML=order.map(l=>'<span class="px-2 py-1 rounded-lg border '+(l===p.level?'border-amber-400 text-amber-300':'border-slate-700 text-slate-500')+'">'+l+'</span>').join('');const ev=GAME_STATE.player.events&&GAME_STATE.player.events[0];if(document.getElementById('hubEventTitle'))document.getElementById('hubEventTitle').innerText=ev?ev.kind:'Upcoming fixture';if(document.getElementById('hubEventBody'))document.getElementById('hubEventBody').innerText=ev?ev.text:'District Championship at '+(p.town||'home')+' ground. Selection depends on form, not a fixed match count.';const news=document.getElementById('hubNews');if(news)news.innerHTML=careerNews().map(x=>'<div>• '+x+'</div>').join('');const cal=document.getElementById('hubCal');if(cal)cal.innerText='Today: Training · Tomorrow: '+p.level+' fixture · Rest after match';}
+  function refreshCareerHub(){const p=GAME_STATE.player;evaluateProgression();const hn=document.getElementById('hubName');if(hn)hn.innerText=p.name+(p.nick?' “'+p.nick+'”':'');const hm=document.getElementById('hubMeta');if(hm)hm.innerText=p.level+' · '+p.batHand+' · '+p.role+' · '+(p.town||'')+', '+(p.district||'');const hf=document.getElementById('hubForm');if(hf)hf.innerText='Form '+Math.round(p.form||50)+' · Fitness '+Math.round(p.fitness||80)+' · Stamina '+Math.round(p.stamina||0);const order=['Town Cricket','District Level','State Cricket','U-19','Domestic','List A','Franchise','National','International'];const lad=document.getElementById('hubLadder');if(lad)lad.innerHTML=order.map(l=>'<span class="px-2 py-1 rounded-lg border '+(l===p.level?'border-amber-400 text-amber-300':'border-slate-700 text-slate-500')+'">'+l+'</span>').join('');const ev=GAME_STATE.player.events&&GAME_STATE.player.events[0];if(document.getElementById('hubEventTitle'))document.getElementById('hubEventTitle').innerText=ev?ev.kind:'Upcoming fixture';if(document.getElementById('hubEventBody'))document.getElementById('hubEventBody').innerText=ev?ev.text:'District Championship at '+(p.town||'home')+' ground. Selection depends on form, not a fixed match count.';const news=document.getElementById('hubNews');if(news)news.innerHTML=careerNews().map(x=>'<div>• '+x+'</div>').join('');const cal=document.getElementById('hubCal');if(cal)cal.innerText='Today: Training · Tomorrow: '+p.level+' fixture · Rest after match';}
   function exportCareer(){const blob=new Blob([JSON.stringify({player:GAME_STATE.player,settings:GAME_STATE.settings,v:2},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='insan-cricket-career.json';a.click();}
   function importCareerFile(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.player)throw new Error('no player');if(!confirm('Replace local career with imported file?'))return;Object.assign(GAME_STATE.player,d.player);if(d.settings)Object.assign(GAME_STATE.settings,d.settings);saveCareerSlot();refreshCareerHub();}catch(err){alert('Invalid career file');}};r.readAsText(f);}
   function openFranchiseAuction(){document.getElementById('auctionModal').classList.remove('hidden');document.getElementById('auctionLog').innerText='Sagar Lions, Coastal Titans, Highlanders, River Kings waiting to bid.';}
@@ -1305,7 +1332,7 @@
   function applySettings(){const s=GAME_STATE.settings;s.control=document.getElementById('setControl').value;s.autoPause=document.getElementById('setAutoPause').checked;s.difficulty=document.getElementById('setDiff').value;if(document.getElementById('setGfx'))s.gfx=document.getElementById('setGfx').value;if(document.getElementById('setGfxMode'))s.gfxMode=document.getElementById('setGfxMode').value;if(document.getElementById('setFps'))s.fps=+document.getElementById('setFps').value||60;if(document.getElementById('setLang'))s.lang=document.getElementById('setLang').value||'en';if(document.getElementById('setUiScale'))s.uiScale=document.getElementById('setUiScale').value;if(document.getElementById('setHiContrast'))s.hiContrast=document.getElementById('setHiContrast').checked;if(document.getElementById('setReduceMotion'))s.reduceMotion=document.getElementById('setReduceMotion').checked;if(document.getElementById('setHaptics'))s.haptics=document.getElementById('setHaptics').checked;if(document.getElementById('setShake'))s.shake=document.getElementById('setShake').value!=='off';s.audio={masterOn:document.getElementById('audMasterOn')?document.getElementById('audMasterOn').checked:true,master:(+(document.getElementById('audMaster')||{value:80}).value)/100,music:(+(document.getElementById('audMusic')||{value:50}).value)/100,crowd:(+(document.getElementById('audCrowd')||{value:70}).value)/100,bat:(+(document.getElementById('audBat')||{value:80}).value)/100,menu:(+(document.getElementById('audMenu')||{value:40}).value)/100,fxOn:document.getElementById('audFxOn')?document.getElementById('audFxOn').checked:true};applyGraphics();saveCareerSlot();closeModal('settingsModal');}
   function saveCareerSlot(){try{localStorage.setItem('insan-cricket-career',JSON.stringify({player:GAME_STATE.player,settings:GAME_STATE.settings}));showToast('CAREER SAVED','Slot 1');}catch(e){}}
   function loadCareerSlot(){try{const raw=localStorage.getItem('insan-cricket-career');if(!raw)return;const d=JSON.parse(raw);if(d.player){Object.assign(GAME_STATE.player,d.player);if(d.player.name)GAME_STATE.player.created=true;}if(d.settings)Object.assign(GAME_STATE.settings,d.settings, {audio:Object.assign({},GAME_STATE.settings.audio||{},(d.settings&&d.settings.audio)||{})});applyUiChrome();}catch(e){}}
-  function doDrill(attr){const p=GAME_STATE.player;if(p.stamina<8){document.getElementById('trainingResult').innerText='Too tired. Rest first.';return;}p.stamina=Math.max(20,p.stamina-8);p.attrs[attr]=Math.min(99,(p.attrs[attr]||50)+1.5);document.getElementById('trainingResult').innerText=`${attr} now ${p.attrs[attr].toFixed(0)}. Stamina ${Math.round(p.stamina)}%.`;saveCareerSlot();}
+  function doDrill(attr){const p=GAME_STATE.player;if(p.stamina<8){document.getElementById('trainingResult').innerText='Too tired. Rest first.';return;}p.stamina=Math.max(20,p.stamina-8);p.attrs[attr]=Math.min(99,(p.attrs[attr]||50)+1.5);p.fitness=Math.min(99,(p.fitness||80)+1.2);document.getElementById('trainingResult').innerText=`${attr} now ${p.attrs[attr].toFixed(0)}. Fitness ${Math.round(p.fitness)}. Stamina ${Math.round(p.stamina)}%.`;saveCareerSlot();}
   function importCustomTeam(){const box=document.getElementById('customTeamPreview');let data;try{data=JSON.parse(document.getElementById('customTeamJson').value);}catch(e){box.innerText='Invalid JSON. Nothing imported.';return;}if(!data||typeof data!=='object'||Array.isArray(data)){box.innerText='Root must be an object.';return;}if(typeof data.name!=='string'||data.name.length<2){box.innerText='name required.';return;}if(!Array.isArray(data.players)||!data.players.length){box.innerText='players[] required.';return;}const players=data.players.slice(0,11).map(p=>({name:String(p.name||'Player').slice(0,40),role:String(p.role||'Player').slice(0,32)}));GAME_STATE.customTeam={name:data.name.slice(0,40),colours:Array.isArray(data.colours)?data.colours.slice(0,2):[],players};box.innerText='Imported '+GAME_STATE.customTeam.name+' ('+players.length+' players). Safe preview only.';}
   const SAGAR_TEAMS=['Sagar Lions','Coastal Titans','Highlanders','River Kings'];
   function runAuction(skip){const log=document.getElementById('auctionLog');const value=80+Math.round(GAME_STATE.player.stats.runs/10)+GAME_STATE.player.attrs.power;const bids=SAGAR_TEAMS.map(t=>({t,v:value+Math.floor(Math.random()*40)}));bids.sort((a,b)=>b.v-a.v);const win=bids[0];function finish(){GAME_STATE.player.contract={team:win.t,value:win.v};log.innerText=`SOLD\nPLAYER: ${GAME_STATE.player.name}\nTEAM: ${win.t}\nCONTRACT: ${win.v} IC`;saveCareerSlot();}if(skip){finish();return;}log.innerText='Opening bid...';let i=0;const id=setInterval(()=>{i++;log.innerText=bids.slice(0,i).map(b=>b.t+': '+b.v).join('\n');if(i>=bids.length){clearInterval(id);setTimeout(finish,400);}},500);}
@@ -1318,7 +1345,7 @@
   function continueToToss(){document.getElementById('lineupOverlay').classList.add('hidden');document.getElementById('tossOverlay').classList.remove('hidden');setText('tossTitle','Call the toss');setText('tossSub','Your captain calls. The opposition captain flips the coin.');document.getElementById('tossButtons').classList.remove('hidden');document.getElementById('tossDecision').classList.add('hidden');}
   function callToss(call){const m=GAME_STATE.match;const result=Math.random()<.5?'Heads':'Tails';setText('tossCoin',result);const userWins=call===result;m.tossWinner=userWins?m.userTeam:m.oppTeam;setTimeout(()=>{document.getElementById('tossButtons').classList.add('hidden');if(userWins){setText('tossTitle','Toss won!');setText('tossSub',`${TEAM_NAMES[m.userTeam]} captain: choose your innings.`);document.getElementById('tossDecision').classList.remove('hidden');}else{const cpuDecision=Math.random()<.5?'bat':'bowl';setText('tossTitle',`${TEAM_NAMES[m.oppTeam]} won the toss`);setText('tossSub',`${TEAM_NAMES[m.oppTeam]} chose to ${cpuDecision} first.`);setTimeout(()=>beginMatch(cpuDecision==='bowl'?'bowl':'bat'),900);}},650);}
   function chooseTossDecision(decision){beginMatch(decision);}
-  function beginMatch(decision){const m=GAME_STATE.match;document.getElementById('tossOverlay').classList.add('hidden');m.active=true;m.innings=1;if(decision==='bat'){m.battingTeam=m.userTeam;m.bowlingTeam=m.oppTeam;}else{m.battingTeam=m.oppTeam;m.bowlingTeam=m.userTeam;}resetInningsPlayers();showGameplay();showToast(`${TEAM_NAMES[m.battingTeam]} will BAT first`,`Toss complete • ${m.format}`);}
+  function beginMatch(decision){const m=GAME_STATE.match;document.getElementById('tossOverlay').classList.add('hidden');m.active=true;m.innings=1;if(decision==='bat'){m.battingTeam=m.userTeam;m.bowlingTeam=m.oppTeam;}else{m.battingTeam=m.oppTeam;m.bowlingTeam=m.userTeam;}resetInningsPlayers();showGameplay();showToast(`${TEAM_NAMES[m.battingTeam]} will BAT first`,`Toss complete • ${m.format}`); icCall('INSAN Sports. '+(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' will bat first.');}
   function resetInningsPlayers(){const m=GAME_STATE.match;m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;m.batters=makeXI(m.battingTeam).map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false}));m.bowlers=makeXI(m.bowlingTeam).map(n=>({name:n,overs:0,runs:0,wickets:0,balls:0}));if(scene)refreshOnFieldPlayers();updateHUD();}
   function showGameplay(){document.getElementById('mainMenuOverlay').classList.add('hidden');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');updateHUD();}
   function modesForBatting(){return GAME_STATE.match.battingTeam===GAME_STATE.match.userTeam;}
@@ -1328,14 +1355,60 @@
   function setPower(p){GAME_STATE.match.power=p;showToast('POWER '+p,'Does not guarantee a six');}
   function triggerLoftedShot(){GAME_STATE.match.isLofted=!GAME_STATE.match.isLofted;showToast(GAME_STATE.match.isLofted?'LOFTED ON':'LOFTED OFF','Shot mode changed');}
   function timingLabel(t){if(t<.12)return 'VERY EARLY';if(t<.28)return 'EARLY';if(t>.88)return 'VERY LATE';if(t>.72)return 'LATE';if(t>0.42&&t<0.58)return 'PERFECT';return 'GOOD';}
-  function resolveShot(){const m=GAME_STATE.match,p=GAME_STATE.player,diff={BEGINNER:.08,EASY:.05,NORMAL:0,HARD:-.04,PRO:-.07,LEGEND:-.1}[GAME_STATE.settings.difficulty]||0;const t=m.shotT==null?0.5:m.shotT;const label=timingLabel(t);const power={DEFENSIVE:0.35,SOFT:0.55,NORMAL:0.75,STRONG:0.9,POWER:1.05,MAXIMUM:1.2}[m.power]||0.75;const stam=p.stamina/100;const skill=(p.attrs.timing+p.attrs.power)/200;const contact=1-Math.abs(t-0.5)*2;let quality=contact*0.55+skill*0.25+stam*0.1+diff;if(m.pitchType==='Green')quality-=0.04;if(m.pitchType==='Flat')quality+=0.03;if(m.weather==='Overcast')quality-=0.03;if(m.power==='MAXIMUM')quality-=0.08;if(label==='PERFECT')quality+=0.12;if(label==='VERY EARLY'||label==='VERY LATE')quality-=0.22;if(m.targetDir==='DEFENCE')quality+=0.05;quality=Math.max(0,Math.min(1,quality));let wicket=false,r=0;m.dismiss=null;if(quality<0.18){wicket=Math.random()<0.55;r=0;}else if(quality<0.32){r=Math.random()<0.5?0:1;if(Math.random()<0.12)wicket=true;}else if(quality<0.5){r=Math.random()<0.4?1:0;}else if(quality<0.7){r=m.isLofted?(Math.random()<0.25*power?4:2):(Math.random()<0.2?4:1);}else{const sixChance=(m.isLofted?0.22:0.04)*power*quality;const fourChance=0.28*power*quality;const roll=Math.random();if(roll<sixChance)r=6;else if(roll<sixChance+fourChance)r=4;else r=Math.random()<0.45?2:1;}if(m.isLofted&&!wicket&&r<=2&&quality>0.18&&quality<0.64){const field=0.28+(m.bowlingTeam===m.userTeam?(p.attrs.catching||50)/380:0.12);if(Math.random()<field){wicket=true;r=0;m.dismiss='catch';}}if(wicket&&!m.dismiss){if(m.isLofted||Math.random()<0.42)m.dismiss=Math.random()<0.28?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}m.lastTiming=label;return {r,wicket,label,quality};}
+  function resolveShot(){
+    const m=GAME_STATE.match,p=GAME_STATE.player,diff={BEGINNER:.08,EASY:.05,NORMAL:0,HARD:-.04,PRO:-.07,LEGEND:-.1}[GAME_STATE.settings.difficulty]||0;
+    const t=m.shotT==null?0.5:m.shotT; const label=timingLabel(t);
+    const power={DEFENSIVE:0.35,SOFT:0.55,NORMAL:0.75,STRONG:0.9,POWER:1.05,MAXIMUM:1.2}[m.power]||0.75;
+    const stam=p.stamina/100; const form=((p.form||50)-50)/400; const fit=((p.fitness||80)-70)/500;
+    const skill=(p.attrs.timing+p.attrs.power)/200; const contact=1-Math.abs(t-0.5)*2;
+    let quality=contact*0.5+skill*0.22+stam*0.08+diff+form+fit;
+    if(m.pitchType==='Green')quality-=0.04; if(m.pitchType==='Flat')quality+=0.03; if(m.weather==='Overcast')quality-=0.03;
+    if(m.power==='MAXIMUM')quality-=0.08; if(label==='PERFECT')quality+=0.14; if(label==='VERY EARLY'||label==='VERY LATE')quality-=0.24;
+    if(m.targetDir==='DEFENCE')quality+=0.05; if(m.variation==='yorker')quality-=0.06; if(m.variation==='bouncer'&&!m.isLofted)quality-=0.04;
+    quality=Math.max(0,Math.min(1,quality));
+    const fieldMul=m.fieldSet==='attacking'?1.35:m.fieldSet==='defensive'?0.72:1;
+    const boundMul=m.fieldSet==='defensive'?0.72:m.fieldSet==='attacking'?1.12:1;
+    let wicket=false,r=0; m.dismiss=null;
+    if(quality<0.18){wicket=Math.random()<0.58;r=0;}
+    else if(quality<0.32){r=Math.random()<0.5?0:1;if(Math.random()<0.12*fieldMul)wicket=true;}
+    else if(quality<0.5){r=Math.random()<0.4?1:0;}
+    else if(quality<0.7){r=m.isLofted?(Math.random()<0.25*power*boundMul?4:2):(Math.random()<0.2*boundMul?4:1);}
+    else{const sixChance=(m.isLofted?0.24:0.05)*power*quality*boundMul; const fourChance=0.3*power*quality*boundMul; const roll=Math.random(); if(roll<sixChance)r=6; else if(roll<sixChance+fourChance)r=4; else r=Math.random()<0.45?2:1;}
+    if(m.isLofted&&!wicket&&r<=2&&quality>0.18&&quality<0.66){const field=(0.28+(m.bowlingTeam===m.userTeam?(p.attrs.catching||50)/380:0.12))*fieldMul; if(Math.random()<field){wicket=true;r=0;m.dismiss='catch';}}
+    if(wicket&&!m.dismiss){if(m.isLofted||Math.random()<0.42)m.dismiss=Math.random()<0.28?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}
+    m.lastTiming=label; m.lastQuality=quality; return {r,wicket,label,quality};
+  }
   function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active)return;if(GAME_STATE.settings.control==='spectate'){simulateNextBall();return;}if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900));showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
   function startUserDelivery(batting){const m=GAME_STATE.match;if(m.pending)return;m.pending=true;m.shotT=null;const preview=resolveShot();animateDelivery(batting,preview.r,preview.wicket);m.animUntil=animUntil;setTimeout(()=>{if(m.shotT==null)m.shotT=0.92;const res=resolveShot();afterBallPitch(res.r,res.wicket,res.label);},1100);}
   function playUserShot(){startUserDelivery(true);}
   function bowlUserDelivery(){const m=GAME_STATE.match;m.pending=true;const pace=/fast|medium/i.test(GAME_STATE.player.bowlStyle);const vars=pace?['yorker','bouncer','slower','cutter','inswinger','outswinger','seam']:['leg-break','googly','top-spinner','arm-ball','flight','slider'];m.variation=vars[Math.floor(Math.random()*vars.length)];const r=Math.random()<.08?6:Math.random()<.2?4:Math.random()<.48?1:Math.random()<.63?2:0;const wicket=Math.random()<(/yorker|googly/.test(m.variation)?0.14:0.08);if(wicket)m.dismiss=Math.random()<0.45?'catch':Math.random()<0.5?'bowled':'lbw';else m.dismiss=null;animateDelivery(false,r,wicket);setTimeout(()=>{afterBallPitch(r,wicket,m.variation);},1100);}
   function simulateNextBall(){const m=GAME_STATE.match;if(!m.active||m.pending)return;m.pending=true;const r=Math.random()<.06?6:Math.random()<.18?4:Math.random()<.5?1:Math.random()<.65?2:0;const wicket=Math.random()<0.07;if(wicket)m.dismiss=Math.random()<0.5?'catch':'bowled';else m.dismiss=null;animateDelivery(modesForBatting(),r,wicket);setTimeout(()=>afterBallPitch(r,wicket,'SIM'),1100);}
   function simulateToEvent(){let n=0;const step=()=>{if(!GAME_STATE.match.active||n>=6)return;n++;simulateNextBall();if(GAME_STATE.match.active)setTimeout(step,200);};step();}
-  function animateDelivery(batting,r,wicket){actionKind=batting?'shot':'bowl';if(bowlerMesh)bowlerMesh.position.z=-13;const start=new THREE.Vector3(0.15,1.7,-8.2),end=new THREE.Vector3((GAME_STATE.match.targetDir==='LEG'?-.8:GAME_STATE.match.targetDir==='OFF'?.8:0),.45,8.05);if(ballMesh){ballMesh.visible=true;ballMesh.position.copy(start);}ballPath=t=>{const u=Math.max(0,Math.min(1,(t-0.35)/0.65));const p=start.clone().lerp(end,u);p.y+=Math.sin(Math.PI*u)*(1.1+(r>=4?1.2:0));p.x+=Math.sin(u*10)*.08;return p;};animDur=1100;animUntil=performance.now()+1100;GAME_STATE.match.cameraMode=batting?'Batting':'Bowling';setText('camLabel',GAME_STATE.match.cameraMode);}
+  function changeBowler(){const m=GAME_STATE.match; if(!m.active)return; m.currentBowler=(m.currentBowler+1)%Math.max(1,Math.min(m.bowlers.length,7)); updateHUD(); const b=m.bowlers[m.currentBowler]; showToast('NEW BOWLER', b?b.name:'—'); uiClick();}
+  function animateDelivery(batting,r,wicket){
+    actionKind=batting?'shot':'bowl'; if(bowlerMesh)bowlerMesh.position.z=-13;
+    const m=GAME_STATE.match; const dir=m.targetDir||'STRAIGHT';
+    let x=dir==='LEG'||dir==='PULL'||dir==='SWEEP'?-.85:dir==='OFF'||dir==='CUT'||dir==='COVER'?.85:0;
+    let peak=1.05, endY=.42;
+    if(m.variation==='yorker'){ peak=.28; endY=.14; }
+    else if(m.variation==='bouncer'){ peak=2.35; endY=.85; }
+    else if(m.variation==='slower'||m.variation==='flight') peak=1.55;
+    if(m.variation==='inswinger') x-=.35; if(m.variation==='outswinger') x+=.35;
+    if(/spin|googly|break/i.test(m.variation||'')) x+=(Math.random()-.5)*.5;
+    const start=new THREE.Vector3(0.15,1.7,-8.2), end=new THREE.Vector3(x,endY,8.05);
+    if(ballMesh){ballMesh.visible=true;ballMesh.position.copy(start);} ensureTrail();
+    ballPath=t=>{
+      const u=Math.max(0,Math.min(1,(t-0.35)/0.65));
+      const p=start.clone().lerp(end,u);
+      p.y+=Math.sin(Math.PI*u)*peak;
+      const swing=(m.variation==='inswinger'?-1:m.variation==='outswinger'?1:0)*Math.sin(u*Math.PI)*.45;
+      p.x+=swing+Math.sin(u*12)*.04;
+      return p;
+    };
+    animDur=1100; animUntil=performance.now()+1100;
+    GAME_STATE.match.cameraMode=batting?'Batting':'Bowling'; setText('camLabel',GAME_STATE.match.cameraMode);
+    ballThud();
+  }
   function playKind(r,wicket){const m=GAME_STATE.match;if(wicket)return m.dismiss||(m.isLofted?'catch':'bowled');if(r===6)return 'six';if(r===4)return 'four';if(r>=1)return 'ground';return m.isLofted?'drop':'dot';}
   function nearestFielder(target){let best=null,d=1e9;(fielderMeshes||[]).forEach(f=>{const dd=f.position.distanceTo(target);if(dd<d){d=dd;best=f;}});return best;}
   function shotTarget(kind,r){
@@ -1370,7 +1443,7 @@
     animDur=dur; animUntil=performance.now()+dur;
     GAME_STATE.match.cameraMode=kind==='six'||kind==='four'?'Follow':(kind==='catch'||kind==='keeperCatch'||kind==='drop'||kind==='ground')?'Fielding':kind==='bowled'||kind==='lbw'?'Wicket':'Follow';
     setText('camLabel',GAME_STATE.match.cameraMode);
-    if(kind==='six'||kind==='four'||kind==='catch'||kind==='keeperCatch') roarCrowd(dur);
+    if(kind==='six'||kind==='four'||kind==='catch'||kind==='keeperCatch'){ roarCrowd(dur); crowdCheer(dur); }
     setTimeout(()=>finishFieldingPlay(kind,r,wicket,timing),dur);
   }
   function finishFieldingPlay(kind,r,wicket,timing){
@@ -1391,13 +1464,13 @@
     if(!s||!b){m.pending=false;return;}
     m.pending=false; m.balls++; s.balls++; b.balls++; b.runs+=r; if(r===4)s.fours++; if(r===6)s.sixes++;
     kind=kind||playKind(r,wicket);
-    if(m.battingTeam===m.userTeam){GAME_STATE.player.stats.balls++;if(!wicket)GAME_STATE.player.stats.runs+=r;if(r===4)GAME_STATE.player.stats.fours++;if(r===6)GAME_STATE.player.stats.sixes++;}
+    if(m.battingTeam===m.userTeam){GAME_STATE.player.stats.balls++;if(!wicket)GAME_STATE.player.stats.runs+=r;if(r===4)GAME_STATE.player.stats.fours++;if(r===6)GAME_STATE.player.stats.sixes++; const rec=GAME_STATE.player.recent=GAME_STATE.player.recent||[]; rec.push(wicket?0:r); GAME_STATE.player.recent=rec.slice(-12); GAME_STATE.player.form=Math.max(20,Math.min(95,40+GAME_STATE.player.recent.reduce((a,b)=>a+b,0)/1.6));}
     if((kind==='catch'||kind==='keeperCatch')&&m.bowlingTeam===m.userTeam) GAME_STATE.player.stats.catches++;
     if(wicket){
       s.out=true; m.wickets++; b.wickets++;
       if(m.bowlingTeam===m.userTeam) GAME_STATE.player.stats.wickets++;
       const how=kind==='catch'?'CAUGHT!':kind==='keeperCatch'?'CAUGHT BEHIND!':kind==='bowled'?'BOWLED!':kind==='lbw'?'LBW!':'WICKET!';
-      showToast(how,`${s.name} is out${timing?' • '+timing:''}`);
+      showToast(how,`${s.name} is out${timing?' • '+timing:''}`); icCall('INSAN Sports. Wicket. '+s.name+' is gone.'); crowdCheer(900);
       if(b.wickets===5&&GAME_STATE.settings.autoPause) triggerMilestoneCelebration('FIVE-FOR',b.name+' has five wickets','wicket');
       if(m.wickets>=10){endInnings();return;}
       m.striker=Math.min(m.wickets+1,10); if(m.striker===m.nonStriker)m.striker=Math.min(m.striker+1,10);
@@ -1414,10 +1487,10 @@
     GAME_STATE.player.stamina=Math.max(20,GAME_STATE.player.stamina-(m.battingTeam===m.userTeam?(m.power==='MAXIMUM'?2.2:m.isLofted?1.8:.7):.4));
     updateHUD();
     if(!wicket){
-      if(r===6) showToast('SIX!',`${s.name} • ${m.targetDir} • ${timing||''}`);
-      else if(r===4) showToast('FOUR!',`${s.name} • ${m.targetDir} • ${timing||''}`);
+      if(r===6){ showToast('SIX!',`${s.name} • ${m.targetDir} • ${timing||''}`); batCrack(); crowdCheer(1400); icCall('INSAN Sports. Six. Over the rope at Riverbend.'); }
+      else if(r===4){ showToast('FOUR!',`${s.name} • ${m.targetDir} • ${timing||''}`); batCrack(); crowdCheer(900); icCall('INSAN Sports. Four.'); }
       else if(kind==='drop') showToast('DROPPED!',timing||'Chance gone');
-      else showToast(r===0?'DOT BALL':`${r} RUN${r>1?'S':''}`,timing||'Next delivery');
+      else { showToast(r===0?'DOT BALL':`${r} RUN${r>1?'S':''}`,timing||'Next delivery'); if(r>0) batCrack(); }
     }
   }
   function endInnings(){const m=GAME_STATE.match;m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});if(m.innings===1){m.target=m.runs+1;m.innings=2;[m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];m.active=true;resetInningsPlayers();showGameplay();showToast('INNINGS BREAK',`${TEAM_NAMES[m.battingTeam]} need ${m.target} to win`);}else{endMatch(m.runs===m.target-1?'MATCH TIED':`${TEAM_NAMES[m.inningsScores[0].team]} WIN`);}}
