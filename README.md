@@ -10,7 +10,7 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
-v1.5: timing meter, attack/normal/defend fields, swing/bounce bowling, form/fitness, original competitions (Town Shield → Sagar Premier), running on singles, ball trail, bat/crowd audio, original INSAN Sports calls (not licensed commentary), change bowler. Still a browser Three.js prototype — not photoreal Cricket 26 / WCC3.
+v1.6: original INSAN Sports commentary in English, Hindi, Punjabi (other languages fall back to English if no voice). Commentary on/off in Settings. Photoreal-leaning pass: ACES tone mapping, soft shadows, denser grass/pitch/sky textures, better skin/eyes. Still not scanned photoreal like Real Cricket 24.
 
 Download (GitHub Releases):
 - `INSAN-CRICKET-Android-WebCompanion.zip` — Android PWA pack (Chrome → Add to Home screen)
