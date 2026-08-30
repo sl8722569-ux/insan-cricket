@@ -10,7 +10,7 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
-v1.3 Premium: Riverbend Stadium (striped outfield, worn pitch, tiered stands, roof, floodlights, original ad boards), cinematic menu camera, INSAN Sports broadcast bar, kit/helmet/cap players, catching/fielding/trophy.
+v1.4: cinematic main menu (Career / Quick Play / Training / Tournaments / Custom Teams / Statistics / Settings). Player Creator removed from the start screen — first Career run opens the 3D creator, returning careers go to the hub. Loading overlay with rotating messages (no fake %). Graphics LOW–ULTRA, performance/quality, FPS cap, language keys (English + Hindi, others fall back to English), audio sliders, UI scale / contrast / reduced motion. Appearance (skin, hair, eyes, height, build) and bowling action change the 3D player.
 
 Download: `downloads/INSAN-CRICKET-Web.zip` or the GitHub source ZIP. Android APK is a WebView of the live game.
 

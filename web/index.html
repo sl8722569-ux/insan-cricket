@@ -127,8 +127,24 @@
     }
     #canvas3dContainer.crowd-roar { animation: roarPulse .45s ease-in-out 3; }
 
+    html.ui-small { font-size: 14px; }
+    html.ui-medium { font-size: 16px; }
+    html.ui-large { font-size: 18px; }
+    html.hi-contrast { filter: contrast(1.18) saturate(1.1); }
+    html.hi-contrast .cinema-menu, html.hi-contrast .panel-ic { background: rgba(2,6,23,.92) !important; }
+
+    @keyframes spinSlow { to { transform: rotate(360deg); } }
+    .ic-spinner { animation: spinSlow 1.1s linear infinite; }
+    #loadingOverlay { background: radial-gradient(ellipse at 50% 40%, rgba(15,23,42,.35), rgba(2,6,23,.92)); }
+
+    .creator-step { display: none; }
+    .creator-step.on { display: block; }
+
+    .set-tab { display: none; }
+    .set-tab.on { display: block; }
+
     @media (prefers-reduced-motion: reduce) {
-      .floodlit, .live-dot, .scan-sheen::after, .sparkle-ring, #canvas3dContainer.crowd-roar { animation: none !important; }
+      .floodlit, .live-dot, .scan-sheen::after, .sparkle-ring, #canvas3dContainer.crowd-roar, .ic-spinner { animation: none !important; }
     }
   </style>
 </head>
@@ -141,6 +157,20 @@
     
     <!-- 3D WebGL Canvas Layer -->
     <div id="canvas3dContainer" class="absolute inset-0 z-0 bg-slate-950"></div>
+
+    <div id="loadingOverlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-auto text-center px-6">
+      <div class="ic-spinner w-16 h-16 rounded-full border-2 border-amber-500/30 border-t-amber-400 mb-5"></div>
+      <div class="font-display text-3xl font-black tracking-[0.2em]"><span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span></div>
+      <p id="loadingMsg" class="mt-3 text-sm text-slate-300" data-i18n="LOAD_PITCH">Preparing the pitch...</p>
+      <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-widest">Riverbend Stadium</p>
+      <div id="loadingFail" class="hidden mt-6 space-y-3">
+        <p class="text-red-400 text-sm" data-i18n="LOAD_FAIL">Unable to load this content.</p>
+        <div class="flex gap-2 justify-center">
+          <button onclick="retryLoading()" class="btn-press bg-amber-500 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs" data-i18n="RETRY">RETRY</button>
+          <button onclick="cancelLoading()" class="btn-press bg-slate-800 border border-slate-600 px-5 py-2 rounded-xl text-xs" data-i18n="BACK">BACK</button>
+        </div>
+      </div>
+    </div>
 
     <!-- MAIN GAME HUD / OVERLAYS -->
     <!-- Top HUD Navigation / Scoreboard -->
@@ -303,85 +333,54 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.3</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.4</span>
             </h1>
-            <p class="text-xs text-slate-400">INSAN Sports · original 3D career · Riverbend Stadium</p>
+            <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
-        </div>
-
-        <!-- Active Career Status Badge -->
-        <div id="careerPlayerBadge" class="hidden sm:flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span class="text-slate-400">Career:</span>
-          <span id="menuPlayerName" class="font-bold text-amber-400">A. Sharma (Town Level)</span>
         </div>
       </div>
 
-      <!-- Main Navigation Menu Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-auto">
-        
-        <!-- Option 1: Career Mode -->
-        <div onclick="openCareerHub()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-amber-500/80 hover:shadow-[0_12px_32px_-8px_rgba(245,158,11,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition">
-            <i class="fa-solid fa-user-ninja"></i>
-          </div>
-          <div class="mt-4">
-            <h3 class="font-bold text-white text-base group-hover:text-amber-400">Career Mode</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Town $\rightarrow$ District $\rightarrow$ State $\rightarrow$ Franchise $\rightarrow$ International.</p>
-          </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-auto">
+        <div onclick="enterCareer()" class="menu-card bg-slate-900/70 border border-amber-500/30 hover:border-amber-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl"><i class="fa-solid fa-user-ninja"></i></div>
+          <h3 class="font-bold text-white text-base mt-3 group-hover:text-amber-400" data-i18n="MENU_CAREER">Career</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_CAREER_SUB">Create a cricketer, then play the ladder.</p>
         </div>
-
-        <!-- Option 2: Quick Match -->
-        <div onclick="openQuickMatchSetup()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-emerald-500/80 hover:shadow-[0_12px_32px_-8px_rgba(16,185,129,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition">
-            <i class="fa-solid fa-bolt"></i>
-          </div>
-          <div class="mt-4">
-            <h3 class="font-bold text-white text-base group-hover:text-emerald-400">Quick Match</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Full freedom. Choose teams, venue, weather & overs.</p>
-          </div>
+        <div onclick="enterQuickPlay()" class="menu-card bg-slate-900/70 border border-emerald-500/30 hover:border-emerald-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl"><i class="fa-solid fa-bolt"></i></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_QUICK_PLAY">Quick Play</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_QUICK_SUB">Teams, venue, weather — no career lock.</p>
         </div>
-
-        <!-- Option 3: Player Creator -->
-        <div onclick="openPlayerCreator()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-blue-500/80 hover:shadow-[0_12px_32px_-8px_rgba(2,132,199,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl group-hover:scale-110 transition">
-            <i class="fa-solid fa-pen-ruler"></i>
-          </div>
-          <div class="mt-4">
-            <h3 class="font-bold text-white text-base group-hover:text-blue-400">Player Creator</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Create 3D cricketer, stance, role & bowling action.</p>
-          </div>
-        </div>
-
-        <div onclick="openFranchiseAuction()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-purple-500/80 hover:shadow-[0_12px_32px_-8px_rgba(168,85,247,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
-          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl group-hover:scale-110 transition">
-            <i class="fa-solid fa-gavel"></i>
-          </div>
-          <div class="mt-4">
-            <h3 class="font-bold text-white text-base group-hover:text-purple-400">Franchise Auction</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Original Sagar Premier bidding. Watch or skip.</p>
-          </div>
-        </div>
-        <div onclick="openTrainingHub()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-sky-500/80 p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+        <div onclick="enterTraining()" class="menu-card bg-slate-900/70 border border-sky-500/30 hover:border-sky-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl"><i class="fa-solid fa-dumbbell"></i></div>
-          <div class="mt-4"><h3 class="font-bold text-white text-base">Training</h3><p class="text-[11px] text-slate-400 mt-1">Batting, bowling, keeping, fielding drills that raise attributes.</p></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_TRAINING">Training</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_TRAIN_SUB">Batting, bowling, keeping, fielding.</p>
         </div>
-        <div onclick="openSettingsHub()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-slate-500 p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+        <div onclick="enterTournaments()" class="menu-card bg-slate-900/70 border border-blue-500/30 hover:border-blue-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl"><i class="fa-solid fa-sitemap"></i></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_TOURNAMENTS">Tournaments</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_TOURN_SUB">Career-locked competitions.</p>
+        </div>
+        <div onclick="enterCustomTeams()" class="menu-card bg-slate-900/70 border border-teal-500/30 hover:border-teal-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 text-xl"><i class="fa-solid fa-users"></i></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_CUSTOM_TEAMS">Custom Teams</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_CUSTOM_SUB">Import JSON squads. Never eval.</p>
+        </div>
+        <div onclick="enterStatistics()" class="menu-card bg-slate-900/70 border border-amber-500/20 hover:border-amber-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl"><i class="fa-solid fa-chart-line"></i></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_STATISTICS">Statistics</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_STATS_SUB">Runs, wickets, catches from play.</p>
+        </div>
+        <div onclick="enterSettings()" class="menu-card bg-slate-900/70 border border-slate-600 hover:border-slate-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-200 text-xl"><i class="fa-solid fa-gear"></i></div>
-          <div class="mt-4"><h3 class="font-bold text-white text-base">Settings</h3><p class="text-[11px] text-slate-400 mt-1">Control mode, auto-pause, difficulty, save slots.</p></div>
+          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_SETTINGS">Settings</h3>
+          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_SET_SUB">Graphics, language, audio, controls.</p>
         </div>
-
       </div>
 
-      <!-- Bottom Status & System Controls -->
-      <div class="flex justify-between items-center border-t border-slate-800 pt-3 text-xs text-slate-400">
-        <div class="flex space-x-4">
-          <span onclick="openStatisticsView()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-chart-line text-amber-400 mr-1"></i> Statistics</span>
-          <span onclick="openCustomTeamCreator()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-users text-emerald-400 mr-1"></i> Custom Teams</span>
-          <span onclick="openTournamentHub()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-sitemap text-blue-400 mr-1"></i> Tournaments</span>
-          <span onclick="openSettingsHub()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-gear text-slate-300 mr-1"></i> Settings</span>
-        </div>
-        <span class="font-mono text-[11px]">3D Engine: WebGL Responsive</span>
+      <div class="flex justify-between items-center border-t border-slate-800/80 pt-3 text-xs text-slate-400">
+        <span class="font-mono text-[11px]">WebGL · landscape · INSAN CREATIONS</span>
+        <span id="gfxBadge" class="text-amber-400/80">GFX HIGH</span>
       </div>
 
     </div>
@@ -392,9 +391,10 @@
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-user-gear text-amber-400"></i> Player Creation & 3D Stance System
+              <i class="fa-solid fa-user-gear text-amber-400"></i> <span data-i18n="CREATE_TITLE">Create your cricketer</span>
             </h2>
-            <p class="text-xs text-slate-400">Configure personal info, batting stance, bowling style, and appearance.</p>
+            <p class="text-xs text-slate-400" data-i18n="CREATE_SUB">Career first-time setup. Saved locally. 3D look applies in matches.</p>
+            <div id="creatorStepLabel" class="text-[10px] text-amber-400 mt-1 uppercase tracking-widest">1 / 5 · Identity</div>
           </div>
           <button onclick="closeModal('creatorModal')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i> Close</button>
         </div>
@@ -426,6 +426,10 @@
                   <option value="England">England</option>
                   <option value="Pakistan">Pakistan</option>
                   <option value="South Africa">South Africa</option>
+                  <option value="New Zealand">New Zealand</option>
+                  <option value="West Indies">West Indies</option>
+                  <option value="Bangladesh">Bangladesh</option>
+                  <option value="Sri Lanka">Sri Lanka</option>
                 </select>
               </div>
             </div>
@@ -472,7 +476,7 @@
               </div>
               <div>
                 <label class="block text-slate-400 mb-1">Bowling Action</label>
-                <select id="createBowlStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                <select id="createBowlStyle" onchange="syncBowlActions()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
                   <option value="Right-arm fast">Right-arm Fast</option>
                   <option value="Right-arm fast-medium">Right-arm Fast-Medium</option>
                   <option value="Right-arm medium">Right-arm Medium</option>
@@ -503,13 +507,70 @@
               <div>
                 <label class="block text-slate-400 mb-1">Batting style</label>
                 <select id="createBatStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
-                  <option>Balanced</option><option>Technical</option><option>Aggressive</option><option>Power hitter</option><option>Anchor</option><option>Defensive</option>
+                  <option>Balanced</option><option>Technical</option><option>Classical</option><option>Aggressive</option><option>Power hitter</option><option>Anchor</option><option>Defensive</option><option>Unorthodox</option>
                 </select>
               </div>
             </div>
 
+            <h3 class="font-bold text-amber-400 uppercase text-[11px] mt-2">3. 3D appearance</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">Skin tone</label>
+                <select id="createSkin" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="0xe8c4a8">Fair</option>
+                  <option value="0xc47a4a" selected>Tan</option>
+                  <option value="0xa15c38">Brown</option>
+                  <option value="0x6b3b24">Deep</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Hair</label>
+                <select id="createHair" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="short">Short</option>
+                  <option value="curly">Curly</option>
+                  <option value="long">Long</option>
+                  <option value="bun">Bun</option>
+                  <option value="bald">Bald</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Hair colour</label>
+                <select id="createHairCol" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="0x1c1917">Black</option>
+                  <option value="0x44403c">Dark brown</option>
+                  <option value="0x78350f">Brown</option>
+                  <option value="0xfef3c7">Blonde</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Eyes</label>
+                <select id="createEyes" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="0x1e1b16">Dark</option>
+                  <option value="0x78350f">Brown</option>
+                  <option value="0x57534e">Hazel</option>
+                  <option value="0x166534">Green</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Height</label>
+                <select id="createHeight" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="0.94">Short</option>
+                  <option value="1" selected>Average</option>
+                  <option value="1.08">Tall</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Build</label>
+                <select id="createBuild" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white">
+                  <option value="0.92">Slim</option>
+                  <option value="1" selected>Athletic</option>
+                  <option value="1.12">Solid</option>
+                </select>
+              </div>
+            </div>
+            <p id="createConfirm" class="text-[11px] text-slate-400 mt-2"></p>
             <button type="submit" class="btn-press glow-amber w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl uppercase text-xs tracking-wider mt-2">
-              Save Cricketer Profile
+              Confirm &amp; enter Career Hub
             </button>
           </div>
         </form>
@@ -603,7 +664,7 @@
     </div>
 
     <!-- MODAL 3: CAREER HUB — two-side cinematic -->
-    <div id="careerModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-4 overflow-y-auto pointer-events-auto">
+    <div id="careerModal" class="hidden absolute inset-0 z-40 cinema-menu p-4 overflow-y-auto pointer-events-auto">
       <div class="max-w-6xl mx-auto">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
           <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-user-ninja text-amber-400"></i> Career World</h2>
@@ -617,7 +678,9 @@
             <div id="hubLadder" class="flex flex-wrap gap-1 mt-3 text-[10px]"></div>
             <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
               <button onclick="openStatisticsView()" class="bg-slate-800 py-2 rounded-lg">Statistics</button>
+              <button onclick="openPlayerCreator()" class="bg-slate-800 py-2 rounded-lg">Edit cricketer</button>
               <button onclick="openTrainingHub()" class="bg-slate-800 py-2 rounded-lg">Prepare / Train</button>
+              <button onclick="openFranchiseAuction()" class="bg-slate-800 py-2 rounded-lg">Franchise auction</button>
               <button onclick="exportCareer()" class="bg-slate-800 py-2 rounded-lg">Export save</button>
               <label class="bg-slate-800 py-2 rounded-lg text-center cursor-pointer">Import save<input type="file" accept="application/json" class="hidden" onchange="importCareerFile(event)"></label>
             </div>
@@ -646,21 +709,93 @@
       </div>
     </div>
     <div id="settingsModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
-      <div class="max-w-xl mx-auto space-y-4 text-xs">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3"><h2 class="text-xl font-bold">Settings</h2><button onclick="closeModal('settingsModal')" class="text-slate-400">Close</button></div>
-        <label class="block text-slate-400">Play control</label>
-        <select id="setControl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
-          <option value="player">Play as my player</option>
-          <option value="team">Play as team</option>
-          <option value="spectate">Spectate / simulate</option>
-        </select>
-        <label class="flex items-center gap-2 text-slate-300"><input type="checkbox" id="setAutoPause" checked> Auto-pause on century / 5-for / last over</label>
-        <label class="block text-slate-400">Difficulty</label>
-        <select id="setDiff" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
-          <option>BEGINNER</option><option>EASY</option><option selected>NORMAL</option><option>HARD</option><option>PRO</option><option>LEGEND</option>
-        </select>
+      <div class="max-w-2xl mx-auto space-y-3 text-xs">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3"><h2 class="text-xl font-bold" data-i18n="MENU_SETTINGS">Settings</h2><button onclick="closeModal('settingsModal')" class="text-slate-400">Close</button></div>
+        <div class="flex flex-wrap gap-1" id="setTabBar">
+          <button onclick="showSetTab('game')" class="px-2 py-1 rounded-lg border border-amber-500/40">Gameplay</button>
+          <button onclick="showSetTab('gfx')" class="px-2 py-1 rounded-lg border border-slate-700">Graphics</button>
+          <button onclick="showSetTab('lang')" class="px-2 py-1 rounded-lg border border-slate-700">Language</button>
+          <button onclick="showSetTab('audio')" class="px-2 py-1 rounded-lg border border-slate-700">Audio</button>
+          <button onclick="showSetTab('access')" class="px-2 py-1 rounded-lg border border-slate-700">Access</button>
+          <button onclick="showSetTab('data')" class="px-2 py-1 rounded-lg border border-slate-700">Data</button>
+        </div>
+        <div id="set-game" class="set-tab on space-y-3">
+          <label class="block text-slate-400">Play control</label>
+          <select id="setControl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="player">Play as my player</option>
+            <option value="team">Play as team</option>
+            <option value="spectate">Spectate / simulate</option>
+          </select>
+          <label class="flex items-center gap-2 text-slate-300"><input type="checkbox" id="setAutoPause" checked> Auto-pause on century / 5-for / last over</label>
+          <label class="block text-slate-400">Difficulty</label>
+          <select id="setDiff" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option>BEGINNER</option><option>EASY</option><option selected>NORMAL</option><option>HARD</option><option>PRO</option><option>LEGEND</option>
+          </select>
+          <label class="block text-slate-400">Camera shake</label>
+          <select id="setShake" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"><option value="on">On</option><option value="off">Off</option></select>
+        </div>
+        <div id="set-gfx" class="set-tab space-y-3">
+          <label class="block text-slate-400">Preset</label>
+          <select id="setGfx" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option>LOW</option><option>MEDIUM</option><option selected>HIGH</option><option>ULTRA</option>
+          </select>
+          <label class="block text-slate-400">Mode</label>
+          <select id="setGfxMode" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="quality">Quality</option>
+            <option value="performance">Performance</option>
+          </select>
+          <label class="block text-slate-400">FPS cap</label>
+          <select id="setFps" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="30">30</option><option value="60" selected>60</option><option value="120">120</option>
+          </select>
+          <p class="text-slate-500">Recommended: <span id="gfxRecommend">HIGH</span>. ULTRA uses more GPU. Laptop-safe default is HIGH or MEDIUM.</p>
+        </div>
+        <div id="set-lang" class="set-tab space-y-3">
+          <label class="block text-slate-400">Language (falls back to English)</label>
+          <select id="setLang" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="pa">Punjabi</option>
+            <option value="bn">Bengali</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="mr">Marathi</option>
+            <option value="gu">Gujarati</option>
+            <option value="ur">Urdu</option>
+            <option value="ne">Nepali</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="pt">Portuguese</option>
+            <option value="ar">Arabic</option>
+            <option value="id">Indonesian</option>
+          </select>
+        </div>
+        <div id="set-audio" class="set-tab space-y-3">
+          <label class="flex items-center gap-2"><input type="checkbox" id="audMasterOn" checked> Master</label>
+          <label>Master <input id="audMaster" type="range" min="0" max="100" value="80" class="w-full"></label>
+          <label>Music <input id="audMusic" type="range" min="0" max="100" value="50" class="w-full"></label>
+          <label>Crowd <input id="audCrowd" type="range" min="0" max="100" value="70" class="w-full"></label>
+          <label>Bat / ball <input id="audBat" type="range" min="0" max="100" value="80" class="w-full"></label>
+          <label>Menu <input id="audMenu" type="range" min="0" max="100" value="40" class="w-full"></label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="audFxOn" checked> Effects</label>
+          <p class="text-slate-500">No licensed commentary pack. Crowd roar is visual; UI clicks use a short tone when Effects are on.</p>
+        </div>
+        <div id="set-access" class="set-tab space-y-3">
+          <label>UI scale</label>
+          <select id="setUiScale" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option>
+          </select>
+          <label class="flex items-center gap-2"><input type="checkbox" id="setHiContrast"> High contrast</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="setReduceMotion"> Reduced motion</label>
+          <label class="flex items-center gap-2"><input type="checkbox" id="setHaptics" checked> Haptic (where supported)</label>
+        </div>
+        <div id="set-data" class="set-tab space-y-3">
+          <button onclick="saveCareerSlot()" class="w-full bg-slate-800 border border-slate-700 py-3 rounded-xl">Manual save career</button>
+          <button onclick="exportCareer()" class="w-full bg-slate-800 border border-slate-700 py-3 rounded-xl">Export JSON</button>
+          <p class="text-slate-500">Google cloud login is not connected. Local slot + JSON export only.</p>
+        </div>
         <button onclick="applySettings()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-xl">Save settings</button>
-        <button onclick="saveCareerSlot()" class="w-full bg-slate-800 border border-slate-700 py-3 rounded-xl">Manual save career</button>
       </div>
     </div>
     <div id="auctionModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
@@ -705,8 +840,68 @@
     ENG:['James Wood','Oliver King','Harry Stone','George Lane','Jack Ford','Henry Cole','William Fox','Charlie Hunt','Leo Ward','Sam West','Tom Gray'],
     SA:['Liam Ross','Ethan Adams','Noah James','Caleb Smith','Ryan Bell','Aiden Brown','Mason Hill','Luke White','Kai Jones','Dylan Green','Owen Reed']
   };
-  const LOCATIONS={India:{states:['Punjab','Tamil Nadu','Maharashtra','Karnataka'],districts:{Punjab:['Bathinda','Amritsar','Ludhiana'],'Tamil Nadu':['Chennai','Madurai']},towns:{Bathinda:['Mansa','Rampura'],Amritsar:['Ajnala']}},Australia:{states:['Victoria','New South Wales'],districts:{Victoria:['Melbourne','Geelong']},towns:{Melbourne:['Footscray']}},England:{states:['Yorkshire','Surrey'],districts:{Yorkshire:['Leeds','Bradford']},towns:{Leeds:['Headingley ward']}},Pakistan:{states:['Punjab','Sindh'],districts:{Punjab:['Lahore','Rawalpindi']},towns:{Lahore:['Model Town']}},'South Africa':{states:['Gauteng','Western Cape'],districts:{Gauteng:['Johannesburg']},towns:{Johannesburg:['Soweto']}}};
-  const GAME_STATE={player:{name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'District Level',stamina:92,fitness:80,attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50},stats:{runs:0,wickets:0,matches:0,balls:0,fours:0,sixes:0,fifties:0,hundreds:0,catches:0,stumpings:0,captainWins:0,captainMatches:0},contract:null},settings:{control:'team',autoPause:true,difficulty:'NORMAL'},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
+  const LOCATIONS={India:{states:['Punjab','Tamil Nadu','Maharashtra','Karnataka'],districts:{Punjab:['Bathinda','Amritsar','Ludhiana'],'Tamil Nadu':['Chennai','Madurai']},towns:{Bathinda:['Mansa','Rampura'],Amritsar:['Ajnala']}},Australia:{states:['Victoria','New South Wales'],districts:{Victoria:['Melbourne','Geelong']},towns:{Melbourne:['Footscray']}},England:{states:['Yorkshire','Surrey'],districts:{Yorkshire:['Leeds','Bradford']},towns:{Leeds:['Headingley ward']}},Pakistan:{states:['Punjab','Sindh'],districts:{Punjab:['Lahore','Rawalpindi']},towns:{Lahore:['Model Town']}},'South Africa':{states:['Gauteng','Western Cape'],districts:{Gauteng:['Johannesburg']},towns:{Johannesburg:['Soweto']}},'New Zealand':{states:['Auckland','Canterbury'],districts:{Auckland:['Auckland City']},towns:{'Auckland City':['Eden']}},'West Indies':{states:['Barbados','Jamaica','Trinidad'],districts:{Barbados:['Bridgetown']},towns:{Bridgetown:['Fontabelle']}},Bangladesh:{states:['Dhaka','Chattogram'],districts:{Dhaka:['Dhaka']},towns:{Dhaka:['Mirpur']}},'Sri Lanka':{states:['Western','Central'],districts:{Western:['Colombo']},towns:{Colombo:['Kollupitiya']}}};
+  const GAME_STATE={player:{created:false,name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'Town Cricket',stamina:92,fitness:80,look:{skin:0xc47a4a,hair:'short',hairCol:0x1c1917,eyes:0x1e1b16,height:1,build:1},attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50},stats:{runs:0,wickets:0,matches:0,balls:0,fours:0,sixes:0,fifties:0,hundreds:0,catches:0,stumpings:0,captainWins:0,captainMatches:0},contract:null},settings:{control:'team',autoPause:true,difficulty:'NORMAL',lang:'en',gfx:'HIGH',gfxMode:'quality',fps:60,uiScale:'medium',hiContrast:false,reduceMotion:false,haptics:true,shake:true,audio:{masterOn:true,master:.8,music:.5,crowd:.7,bat:.8,menu:.4,fxOn:true}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
+  const I18N={
+    en:{MENU_CAREER:'Career',MENU_QUICK_PLAY:'Quick Play',MENU_TRAINING:'Training',MENU_TOURNAMENTS:'Tournaments',MENU_CUSTOM_TEAMS:'Custom Teams',MENU_STATISTICS:'Statistics',MENU_SETTINGS:'Settings',MENU_TAG:'INSAN Sports · original 3D career · Riverbend Stadium',MENU_CAREER_SUB:'Create a cricketer, then play the ladder.',MENU_QUICK_SUB:'Teams, venue, weather — no career lock.',MENU_TRAIN_SUB:'Batting, bowling, keeping, fielding.',MENU_TOURN_SUB:'Career-locked competitions.',MENU_CUSTOM_SUB:'Import JSON squads. Never eval.',MENU_STATS_SUB:'Runs, wickets, catches from play.',MENU_SET_SUB:'Graphics, language, audio, controls.',LOAD_PITCH:'Preparing the pitch...',LOAD_STADIUM:'Loading stadium...',LOAD_TEAMS:'Preparing teams...',LOAD_CAREER:'Loading career...',LOAD_COND:'Setting match conditions...',LOAD_PLAYERS:'Preparing players...',LOAD_FAIL:'Unable to load this content.',RETRY:'RETRY',BACK:'BACK',CREATE_TITLE:'Create your cricketer',CREATE_SUB:'Career first-time setup. Saved locally. 3D look applies in matches.',MATCH_TOSS:'Toss',MATCH_BATTING:'Batting',MATCH_BOWLING:'Bowling'},
+    hi:{MENU_CAREER:'कैरियर',MENU_QUICK_PLAY:'क्विक प्ले',MENU_TRAINING:'प्रशिक्षण',MENU_TOURNAMENTS:'टूर्नामेंट',MENU_CUSTOM_TEAMS:'कस्टम टीमें',MENU_STATISTICS:'आँकड़े',MENU_SETTINGS:'सेटिंग्स',LOAD_PITCH:'पिच तैयार हो रही है...',LOAD_STADIUM:'स्टेडियम लोड हो रहा है...',LOAD_TEAMS:'टीमें तैयार हो रही हैं...',LOAD_CAREER:'कैरियर लोड हो रहा है...',LOAD_FAIL:'यह सामग्री लोड नहीं हो सकी।',RETRY:'फिर कोशिश',BACK:'वापस'}
+  };
+  function t(key){const lang=GAME_STATE.settings.lang||'en';return (I18N[lang]&&I18N[lang][key])||(I18N.en&&I18N.en[key])||key;}
+  function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.getAttribute('data-i18n'));});}
+  const GFX_PRESETS={LOW:{pixel:1,shadows:false,crowd:50,aa:false},MEDIUM:{pixel:1.25,shadows:true,crowd:120,aa:true},HIGH:{pixel:1.5,shadows:true,crowd:220,aa:true},ULTRA:{pixel:2,shadows:true,crowd:280,aa:true}};
+  function recommendGfx(){const cores=navigator.hardwareConcurrency||4;const mob=/Mobi|Android/i.test(navigator.userAgent);if(mob||cores<=4)return 'MEDIUM';if(cores>=8&&(devicePixelRatio||1)>=2)return 'ULTRA';return 'HIGH';}
+  let loadTimer=null,loadFailFn=null,audioCtx=null,lastFrame=0;
+  function showLoading(msgs,then){
+    const ov=document.getElementById('loadingOverlay'), fail=document.getElementById('loadingFail'), msg=document.getElementById('loadingMsg');
+    if(!ov){ if(then)then(); return; }
+    ov.classList.remove('hidden'); if(fail)fail.classList.add('hidden');
+    let i=0; const list=msgs&&msgs.length?msgs:[t('LOAD_PITCH')];
+    if(msg)msg.textContent=t(list[0])===list[0]?list[0]:t(list[0]);
+    clearInterval(loadTimer);
+    loadTimer=setInterval(()=>{i=(i+1)%list.length; if(msg)msg.textContent=I18N.en[list[i]]?t(list[i]):list[i];},900);
+    const go=()=>{clearInterval(loadTimer); ov.classList.add('hidden'); try{then&&then();}catch(e){showLoadFail();}};
+    setTimeout(go, GAME_STATE.settings.reduceMotion?200:1100);
+  }
+  function showLoadFail(){const ov=document.getElementById('loadingOverlay'),f=document.getElementById('loadingFail');if(ov)ov.classList.remove('hidden');if(f)f.classList.remove('hidden');}
+  function retryLoading(){document.getElementById('loadingFail').classList.add('hidden');showLoading(['LOAD_PITCH','LOAD_STADIUM'],()=>openMainMenu());}
+  function cancelLoading(){document.getElementById('loadingOverlay').classList.add('hidden');openMainMenu();}
+  function uiClick(){
+    const a=GAME_STATE.settings.audio||{}; if(a.fxOn===false||a.masterOn===false)return;
+    try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.frequency.value=740; g.gain.value=0.025*(a.menu||.4)*(a.master||.8); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.05);}catch(e){}
+    if(GAME_STATE.settings.haptics&&navigator.vibrate) navigator.vibrate(8);
+  }
+  function applyUiChrome(){
+    document.documentElement.classList.toggle('ui-small',GAME_STATE.settings.uiScale==='small');
+    document.documentElement.classList.toggle('ui-medium',GAME_STATE.settings.uiScale!=='small'&&GAME_STATE.settings.uiScale!=='large');
+    document.documentElement.classList.toggle('ui-large',GAME_STATE.settings.uiScale==='large');
+    document.documentElement.classList.toggle('hi-contrast',!!GAME_STATE.settings.hiContrast);
+    if(GAME_STATE.settings.reduceMotion) document.documentElement.classList.add('reduce-motion');
+    applyI18n();
+    const b=document.getElementById('gfxBadge'); if(b)b.textContent='GFX '+(GAME_STATE.settings.gfx||'HIGH')+' · '+(GAME_STATE.settings.fps||60)+' FPS';
+  }
+  function applyGraphics(){
+    const name=GAME_STATE.settings.gfxMode==='performance'?'MEDIUM':(GAME_STATE.settings.gfx||'HIGH');
+    const p=GFX_PRESETS[name]||GFX_PRESETS.HIGH;
+    if(renderer){ renderer.setPixelRatio(Math.min(devicePixelRatio||1,p.pixel)); renderer.shadowMap.enabled=!!p.shadows; if(sunLight)sunLight.castShadow=!!p.shadows; }
+    rebuildCrowd(p.crowd);
+    applyUiChrome();
+  }
+  function rebuildCrowd(n){
+    if(!scene||!crowdGroup)return;
+    scene.remove(crowdGroup); crowdGroup=new THREE.Group();
+    const geo=new THREE.BoxGeometry(.38,.62,.38); const cols=[0xf59e0b,0x334155,0x1d4ed8,0xb45309,0xf8fafc,0x10b981];
+    const count=Math.max(40,n||120);
+    for(let i=0;i<count;i++){ const a=(i/count)*Math.PI*2,r=70+Math.random()*10; const d=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:cols[i%cols.length]})); d.position.set(Math.cos(a)*r,5.4+(i%3)*3.1+Math.random()*.4,Math.sin(a)*r); crowdGroup.add(d); }
+    scene.add(crowdGroup);
+  }
+  function enterCareer(){uiClick();showLoading(['LOAD_CAREER','LOAD_PLAYERS'],()=>{if(GAME_STATE.player.created)openCareerHub();else openPlayerCreator();});}
+  function enterQuickPlay(){uiClick();showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>openQuickMatchSetup());}
+  function enterTraining(){uiClick();showLoading(['LOAD_PLAYERS','LOAD_PITCH'],()=>openTrainingHub());}
+  function enterTournaments(){uiClick();showLoading(['LOAD_CAREER'],()=>openTournamentHub());}
+  function enterCustomTeams(){uiClick();openCustomTeamCreator();}
+  function enterStatistics(){uiClick();openStatisticsView();}
+  function enterSettings(){uiClick();openSettingsHub();}
+  function showSetTab(id){['game','gfx','lang','audio','access','data'].forEach(k=>{const el=document.getElementById('set-'+k);if(el)el.classList.toggle('on',k===id);});}
   let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,keeperMesh,fielderMeshes=[],ballPath=null,batGroup=null,animUntil=0,actionKind=null,animDur=1100,fieldActor=null,trophyMesh=null,confettiGroup=null,ceremonyActive=false,crowdRoarUntil=0,podiumMesh=null;
   function isPhysicallyPortrait(){return window.matchMedia('(orientation: portrait)').matches;}
   async function tryNativeLandscapeLock(){try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');document.documentElement.classList.add('orientation-locked');return true;}}catch(e){}return false;}
@@ -717,9 +912,11 @@
   function limb(geo,mat,shadow){const m=new THREE.Mesh(geo,mat);m.castShadow=!!shadow;m.receiveShadow=false;return m;}
   function makePlayer(name,role='Player',opts={}){
     const g=new THREE.Group();
+    const look=Object.assign({},GAME_STATE.player.look||{},opts.look||{});
     const left=!!opts.left, keeper=!!opts.keeper, bowlLeft=!!opts.bowlLeft;
     const wearHelm=role==='batter'||role==='keeper';
-    const skin=new THREE.MeshStandardMaterial({color:opts.skin||0xc47a4a,roughness:.62});
+    const skinHex=opts.skin||look.skin||0xc47a4a;
+    const skin=new THREE.MeshStandardMaterial({color:skinHex,roughness:.62});
     const shirt=new THREE.MeshStandardMaterial({color:opts.shirt||0x1d4ed8,roughness:.48});
     const trim=new THREE.MeshStandardMaterial({color:opts.trim||0xf59e0b,roughness:.4});
     const white=new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:.62});
@@ -746,6 +943,16 @@
     const neck=limb(new THREE.CylinderGeometry(.075,.085,.15,8),skin,true); neck.position.y=.64; spine.add(neck);
     const head=new THREE.Group(); head.position.y=.84; spine.add(head);
     head.add(limb(new THREE.SphereGeometry(.165,12,10),skin,true));
+    const eyeM=new THREE.MeshStandardMaterial({color:look.eyes||0x1e1b16});
+    const eL=limb(new THREE.SphereGeometry(.025,6,6),eyeM); eL.position.set(-.05,.02,.15); head.add(eL);
+    const eR=eL.clone(); eR.position.x=.05; head.add(eR);
+    if(look.hair!=='bald' && !wearHelm){
+      const hairM=new THREE.MeshStandardMaterial({color:look.hairCol||0x1c1917,roughness:.7});
+      if(look.hair==='curly'){ const h=limb(new THREE.SphereGeometry(.18,8,6),hairM,true); h.position.y=.08; head.add(h); }
+      else if(look.hair==='long'){ const h=limb(new THREE.SphereGeometry(.17,8,6,0,Math.PI*2,0,Math.PI/1.4),hairM,true); h.position.y=.04; head.add(h); const tail=limb(new THREE.BoxGeometry(.08,.22,.08),hairM); tail.position.set(0,-.08,-.12); head.add(tail); }
+      else if(look.hair==='bun'){ const h=limb(new THREE.SphereGeometry(.17,8,6,0,Math.PI*2,0,Math.PI/1.8),hairM,true); h.position.y=.06; head.add(h); const bun=limb(new THREE.SphereGeometry(.07,8,6),hairM); bun.position.set(0,.14,-.08); head.add(bun); }
+      else { const h=limb(new THREE.SphereGeometry(.175,8,6,0,Math.PI*2,0,Math.PI/2.1),hairM,true); h.position.y=.06; head.add(h); }
+    }
     if(wearHelm){
       const helm=limb(new THREE.SphereGeometry(.19,12,8,0,Math.PI*2,0,Math.PI/1.65),dark,true); helm.position.y=.04; head.add(helm);
       const grille=limb(new THREE.BoxGeometry(.2,.11,.13),dark); grille.position.set(0,-.04,.13); head.add(grille);
@@ -776,7 +983,8 @@
     const lArm=arm(-1,bowlSide<0), rArm=arm(1,bowlSide>0);
     g.userData.joints={hips,spine,head,lLeg,rLeg,lArm,rArm,lKnee:lLeg.userData.knee,rKnee:rLeg.userData.knee};
     g.userData.name=name; g.userData.left=left; g.userData.role=role;
-    g.position.y=0; return g;
+    const hy=look.height||1, bd=look.build||1;
+    g.scale.set(bd,hy,bd); g.position.y=0; return g;
   }
   function poseIdle(p,t){
     if(!p||!p.userData.joints)return;
@@ -789,15 +997,22 @@
   function poseBowl(p,t){
     if(!p||!p.userData.joints)return;
     const j=p.userData.joints; const arm=p.userData.bowlArm||j.rArm;
-    if(t<0.45){ const u=t/0.45; p.position.z=-13+u*5.5; j.lLeg.rotation.x=Math.sin(u*18)*.7; j.rLeg.rotation.x=-Math.sin(u*18)*.7; arm.rotation.x=-.4; }
-    else if(t<0.7){ const u=(t-.45)/.25; p.position.z=-7.5; j.lLeg.rotation.x=.5; j.rLeg.rotation.x=-.9; arm.rotation.x=-2.1-u*.4; j.spine.rotation.x=-.25; }
-    else { const u=(t-.7)/.3; p.position.z=-7.5; arm.rotation.x=-2.5+u*3.6; j.spine.rotation.x=-.15+u*.4; j.rLeg.rotation.x=-.3; }
+    const act=GAME_STATE.player.bowlAction||'medium-run';
+    const run=act==='short-run'?3.2:act==='long-run'?8.2:5.5;
+    const high=act==='high-arm'?1.15:1;
+    const side=act==='side-on'?0.35:act==='front-on'?-0.1:0;
+    const spin=/spin|finger|wrist/i.test(act)||/spin/i.test(GAME_STATE.player.bowlStyle||'');
+    if(t<0.45){ const u=t/0.45; p.position.z=-13+u*run; j.lLeg.rotation.x=Math.sin(u*18)*.7; j.rLeg.rotation.x=-Math.sin(u*18)*.7; arm.rotation.x=-.4; j.spine.rotation.y=side; }
+    else if(t<0.7){ const u=(t-.45)/.25; p.position.z=-13+run; j.lLeg.rotation.x=.5; j.rLeg.rotation.x=-.9; arm.rotation.x=(-2.1-u*.4)*high; j.spine.rotation.x=-.25; if(spin)arm.rotation.z=u*1.1; }
+    else { const u=(t-.7)/.3; p.position.z=-13+run; arm.rotation.x=(-2.5+u*3.6)*high; j.spine.rotation.x=-.15+u*.4; j.rLeg.rotation.x=-.3; if(spin)arm.rotation.z=1.1-u*1.1; }
   }
   function poseShot(p,t){
     if(!p||!p.userData.joints)return;
     const j=p.userData.joints; const bat=p.userData.bat; const sign=p.userData.left?-1:1;
-    if(t<.45){ const u=t/.45; j.spine.rotation.y=-.25*sign*u; if(bat)bat.rotation.x=-1.1*u; }
-    else { const u=Math.min(1,(t-.45)/.35); j.spine.rotation.y=(-.25+u*1.1)*sign; if(bat)bat.rotation.x=-1.1+u*2.4; j.rLeg.rotation.x=u*.35; }
+    const st=(GAME_STATE.player.batStyle||'Balanced');
+    const agg=/Aggressive|Power/i.test(st)?1.25:/Defensive|Anchor/i.test(st)?0.7:/Technical|Classical/i.test(st)?0.9:1;
+    if(t<.45){ const u=t/.45; j.spine.rotation.y=-.25*sign*u*agg; if(bat)bat.rotation.x=-1.1*u*agg; j.rLeg.rotation.x=/Technical/i.test(st)?u*.2:0; }
+    else { const u=Math.min(1,(t-.45)/.35); j.spine.rotation.y=(-.25+u*1.1)*sign*agg; if(bat)bat.rotation.x=-1.1+u*2.4*agg; j.rLeg.rotation.x=u*.35*agg; }
   }
   function poseKeepReady(p,t){
     if(!p||!p.userData.joints)return;
@@ -939,8 +1154,9 @@
     crowdGroup=new THREE.Group();
     const geo=new THREE.BoxGeometry(.38,.62,.38);
     const cols=[0xf59e0b,0x334155,0x1d4ed8,0xb45309,0xf8fafc,0x10b981];
-    for(let i=0;i<220;i++){
-      const a=(i/220)*Math.PI*2, r=70+Math.random()*10;
+    const crowdN=(GFX_PRESETS[(GAME_STATE.settings.gfx||'HIGH')]||GFX_PRESETS.HIGH).crowd;
+    for(let i=0;i<crowdN;i++){
+      const a=(i/crowdN)*Math.PI*2, r=70+Math.random()*10;
       const d=new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:cols[i%cols.length]}));
       d.position.set(Math.cos(a)*r, 5.4+(i%3)*3.1+Math.random()*.4, Math.sin(a)*r);
       crowdGroup.add(d);
@@ -986,7 +1202,7 @@
     (fielderMeshes||[]).forEach(m=>scene.remove(m)); fielderMeshes=[];
     const left=/left/i.test(GAME_STATE.player.batHand);
     const batShirt=0x1d4ed8, fieldShirt=0xb45309;
-    batterMesh=makePlayer(GAME_STATE.player.name,'batter',{left,keeper:false,shirt:batShirt});
+    batterMesh=makePlayer(GAME_STATE.player.name,'batter',{left,keeper:false,shirt:batShirt,look:GAME_STATE.player.look,skin:(GAME_STATE.player.look&&GAME_STATE.player.look.skin)||0xc47a4a});
     batterMesh.position.set(.25,0,8.2); batterMesh.userData.home=batterMesh.position.clone(); batterMesh.userData.homeY=0; scene.add(batterMesh);
     bowlerMesh=makePlayer('Bowler','bowler',{bowlLeft:/left-arm/i.test(GAME_STATE.player.bowlStyle),shirt:fieldShirt});
     bowlerMesh.position.set(0,0,-12); bowlerMesh.rotation.y=Math.PI; bowlerMesh.userData.home=bowlerMesh.position.clone(); bowlerMesh.userData.homeY=0; scene.add(bowlerMesh);
@@ -1010,7 +1226,9 @@
   }
   function animate3DRender(){
     requestAnimationFrame(animate3DRender); if(!renderer)return;
-    const now=performance.now(); const tIdle=now*0.001;
+    const now=performance.now();
+    const cap=GAME_STATE.settings.fps||60; if(now-lastFrame<1000/cap-1) return; lastFrame=now;
+    const tIdle=now*0.001;
     const playing=!!ballPath && now<animUntil;
     if(playing){
       const t=Math.max(0,Math.min(1,1-(animUntil-now)/Math.max(200,animDur)));
@@ -1066,32 +1284,34 @@
   }
   function setText(id,v){const e=document.getElementById(id);if(e)e.innerText=v;}
   function openMainMenu(){ceremonyActive=false;if(confettiGroup)confettiGroup.visible=false;if(ballMesh)ballMesh.visible=true;document.getElementById('milestoneBanner').classList.add('hidden');document.getElementById('mainMenuOverlay').classList.remove('hidden');document.getElementById('gameplayControlHUD').classList.add('hidden');document.getElementById('liveScoreWidget').classList.add('hidden');document.getElementById('hudCamBtn').classList.add('hidden');document.getElementById('hudPauseBtn').classList.add('hidden');document.getElementById('matchInfo').classList.add('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.add('hidden');GAME_STATE.match.active=false;}
-  function openPlayerCreator(){document.getElementById('creatorModal').classList.remove('hidden');fillLocations();}function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}
-  function openCareerHub(){document.getElementById('careerModal').classList.remove('hidden');refreshCareerHub();}
+  function openPlayerCreator(){document.getElementById('creatorModal').classList.remove('hidden');fillLocations();const p=GAME_STATE.player;const set=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};set('createName',p.name);set('createNick',p.nick);set('createAge',p.age);set('createNation',p.nationality);set('createState',p.state);set('createDistrict',p.district);set('createTown',p.town);set('createRole',p.role);set('createBatHand',p.batHand);set('createBowlStyle',p.bowlStyle);set('createBowlAction',p.bowlAction);set('createBatStyle',p.batStyle);if(p.look){if(document.getElementById('createSkin'))document.getElementById('createSkin').value='0x'+(p.look.skin>>>0).toString(16);set('createHair',p.look.hair);if(document.getElementById('createHairCol'))document.getElementById('createHairCol').value='0x'+(p.look.hairCol>>>0).toString(16);if(document.getElementById('createEyes'))document.getElementById('createEyes').value='0x'+(p.look.eyes>>>0).toString(16);set('createHeight',p.look.height);set('createBuild',p.look.build);}syncBowlActions();}
+  function syncBowlActions(){const st=(document.getElementById('createBowlStyle')||{}).value||'';const pace=/fast|medium/i.test(st);const sel=document.getElementById('createBowlAction');if(!sel)return;const paceActs=[['short-run','Short run-up'],['medium-run','Medium run-up'],['long-run','Long run-up'],['high-arm','High-arm'],['side-on','Side-on'],['front-on','Front-on']];const spinActs=[['finger-spin','Finger spin'],['wrist-spin','Wrist spin'],['medium-run','Gather / pivot']];const acts=pace?paceActs:spinActs;const cur=sel.value;sel.innerHTML=acts.map(a=>'<option value="'+a[0]+'">'+a[1]+'</option>').join('');if(acts.some(a=>a[0]===cur))sel.value=cur;}
+  function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}
+  function openCareerHub(){if(!GAME_STATE.player.created){openPlayerCreator();return;}document.getElementById('careerModal').classList.remove('hidden');refreshCareerHub();}
   function careerNews(){const s=GAME_STATE.player.stats,p=GAME_STATE.player,n=[];if(!s.matches)n.push('No matches yet — news will come from results you play.');if(s.runs)n.push(p.name+' has '+s.runs+' career runs.');if(s.hundreds)n.push(p.name+' has scored '+s.hundreds+' hundred(s).');if(s.wickets>=5)n.push(s.wickets+' wickets attracting franchise scouts.');if(p.contract)n.push('Contract: '+p.contract.team+' for '+p.contract.value+' IC.');n.push('Current level: '+p.level+'.');return n;}
   function evaluateProgression(){const s=GAME_STATE.player.stats,p=GAME_STATE.player;let lvl=p.level;if(s.matches>=1)lvl='District Level';if(s.runs>=80&&s.matches>=2)lvl='State Cricket';if(p.age<=19&&s.runs>=40)lvl='U-19';if(s.runs>=150||s.wickets>=8)lvl='Domestic';if((s.fifties||0)+(s.hundreds||0)>=2)lvl='List A';if(p.contract)lvl='Franchise';if(s.runs>=300)lvl='National';if(s.runs>=450)lvl='International';if(lvl!==p.level){p.level=lvl;pushEvent('Selection',p.name+' moved to '+lvl+'.');}return lvl;}
   function pushEvent(kind,text){GAME_STATE.player.events=GAME_STATE.player.events||[];GAME_STATE.player.events.unshift({kind,text,t:Date.now()});GAME_STATE.player.events=GAME_STATE.player.events.slice(0,20);}
-  function refreshCareerHub(){const p=GAME_STATE.player;evaluateProgression();const hn=document.getElementById('hubName');if(hn)hn.innerText=p.name+(p.nick?' “'+p.nick+'”':'');const hm=document.getElementById('hubMeta');if(hm)hm.innerText=p.level+' · '+p.batHand+' · '+p.role+' · '+(p.town||'')+', '+(p.district||'');const order=['Town Cricket','District Level','State Cricket','U-19','Domestic','List A','Franchise','National','International'];const lad=document.getElementById('hubLadder');if(lad)lad.innerHTML=order.map(l=>'<span class="px-2 py-1 rounded-lg border '+(l===p.level?'border-amber-400 text-amber-300':'border-slate-700 text-slate-500')+'">'+l+'</span>').join('');const ev=GAME_STATE.player.events&&GAME_STATE.player.events[0];if(document.getElementById('hubEventTitle'))document.getElementById('hubEventTitle').innerText=ev?ev.kind:'Upcoming fixture';if(document.getElementById('hubEventBody'))document.getElementById('hubEventBody').innerText=ev?ev.text:'District Championship at '+(p.town||'home')+' ground. Selection depends on form, not a fixed match count.';const news=document.getElementById('hubNews');if(news)news.innerHTML=careerNews().map(x=>'<div>• '+x+'</div>').join('');const cal=document.getElementById('hubCal');if(cal)cal.innerText='Today: Training · Tomorrow: '+p.level+' fixture · Rest after match';setText('menuPlayerName',p.name+' ('+p.level+')');}
+  function refreshCareerHub(){const p=GAME_STATE.player;evaluateProgression();const hn=document.getElementById('hubName');if(hn)hn.innerText=p.name+(p.nick?' “'+p.nick+'”':'');const hm=document.getElementById('hubMeta');if(hm)hm.innerText=p.level+' · '+p.batHand+' · '+p.role+' · '+(p.town||'')+', '+(p.district||'');const order=['Town Cricket','District Level','State Cricket','U-19','Domestic','List A','Franchise','National','International'];const lad=document.getElementById('hubLadder');if(lad)lad.innerHTML=order.map(l=>'<span class="px-2 py-1 rounded-lg border '+(l===p.level?'border-amber-400 text-amber-300':'border-slate-700 text-slate-500')+'">'+l+'</span>').join('');const ev=GAME_STATE.player.events&&GAME_STATE.player.events[0];if(document.getElementById('hubEventTitle'))document.getElementById('hubEventTitle').innerText=ev?ev.kind:'Upcoming fixture';if(document.getElementById('hubEventBody'))document.getElementById('hubEventBody').innerText=ev?ev.text:'District Championship at '+(p.town||'home')+' ground. Selection depends on form, not a fixed match count.';const news=document.getElementById('hubNews');if(news)news.innerHTML=careerNews().map(x=>'<div>• '+x+'</div>').join('');const cal=document.getElementById('hubCal');if(cal)cal.innerText='Today: Training · Tomorrow: '+p.level+' fixture · Rest after match';}
   function exportCareer(){const blob=new Blob([JSON.stringify({player:GAME_STATE.player,settings:GAME_STATE.settings,v:2},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='insan-cricket-career.json';a.click();}
   function importCareerFile(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.player)throw new Error('no player');if(!confirm('Replace local career with imported file?'))return;Object.assign(GAME_STATE.player,d.player);if(d.settings)Object.assign(GAME_STATE.settings,d.settings);saveCareerSlot();refreshCareerHub();}catch(err){alert('Invalid career file');}};r.readAsText(f);}
   function openFranchiseAuction(){document.getElementById('auctionModal').classList.remove('hidden');document.getElementById('auctionLog').innerText='Sagar Lions, Coastal Titans, Highlanders, River Kings waiting to bid.';}
   function openStatisticsView(){const s=GAME_STATE.player.stats,p=GAME_STATE.player;document.getElementById('statsModal').classList.remove('hidden');document.getElementById('statsBody').innerHTML=`<div>Matches ${s.matches} · Runs ${s.runs} · Balls ${s.balls} · 4s ${s.fours} · 6s ${s.sixes}</div><div>50s ${s.fifties} · 100s ${s.hundreds} · Wickets ${s.wickets} · Catches ${s.catches}</div><div>Avg ${s.balls?((s.runs/(s.matches||1)).toFixed(1)):'—'} · SR ${s.balls?((s.runs/s.balls*100).toFixed(1)):'—'}</div><div>Captaincy ${s.captainMatches} matches / ${s.captainWins} wins</div><div class="text-slate-400 text-xs mt-2">${p.name} · ${p.role} · ${p.level} · ${p.nationality} / ${p.state} / ${p.district} / ${p.town}</div>`;}
   function openCustomTeamCreator(){document.getElementById('customTeamModal').classList.remove('hidden');}function openTournamentHub(){document.getElementById('tournamentModal').classList.remove('hidden');}
-  function openTrainingHub(){document.getElementById('trainingModal').classList.remove('hidden');const drills=[['Defence','defence'],['Timing','timing'],['Power hitting','power'],['Line & length','accuracy'],['Pace nets','pace'],['Catching','catching'],['Composure','composure']];document.getElementById('trainingGrid').innerHTML=drills.map(d=>`<button onclick="doDrill('${d[1]}')" class="bg-slate-800 border border-slate-700 py-3 rounded-xl font-bold">${d[0]}</button>`).join('');}
-  function openSettingsHub(){document.getElementById('settingsModal').classList.remove('hidden');document.getElementById('setControl').value=GAME_STATE.settings.control;document.getElementById('setAutoPause').checked=GAME_STATE.settings.autoPause;document.getElementById('setDiff').value=GAME_STATE.settings.difficulty;}
+  function openTrainingHub(){document.getElementById('trainingModal').classList.remove('hidden');const groups=[['Batting',[['Defence','defence'],['Timing','timing'],['Power hitting','power']]],['Bowling',[['Line & length','accuracy'],['Pace nets','pace']]],['Wicketkeeping',[['Composure','composure']]],['Fielding',[['Catching','catching']]]];document.getElementById('trainingGrid').innerHTML=groups.map(g=>`<div class="col-span-2 md:col-span-4 text-[10px] uppercase text-amber-400 mt-2">${g[0]}</div>`+g[1].map(d=>`<button onclick="doDrill('${d[1]}')" class="bg-slate-800 border border-slate-700 py-3 rounded-xl font-bold">${d[0]}</button>`).join('')).join('');}
+  function openSettingsHub(){document.getElementById('settingsModal').classList.remove('hidden');const s=GAME_STATE.settings;document.getElementById('setControl').value=s.control;document.getElementById('setAutoPause').checked=s.autoPause;document.getElementById('setDiff').value=s.difficulty;if(document.getElementById('setGfx'))document.getElementById('setGfx').value=s.gfx||'HIGH';if(document.getElementById('setGfxMode'))document.getElementById('setGfxMode').value=s.gfxMode||'quality';if(document.getElementById('setFps'))document.getElementById('setFps').value=String(s.fps||60);if(document.getElementById('setLang'))document.getElementById('setLang').value=s.lang||'en';if(document.getElementById('setUiScale'))document.getElementById('setUiScale').value=s.uiScale||'medium';if(document.getElementById('setHiContrast'))document.getElementById('setHiContrast').checked=!!s.hiContrast;if(document.getElementById('setReduceMotion'))document.getElementById('setReduceMotion').checked=!!s.reduceMotion;if(document.getElementById('setHaptics'))document.getElementById('setHaptics').checked=s.haptics!==false;if(document.getElementById('setShake'))document.getElementById('setShake').value=s.shake===false?'off':'on';if(document.getElementById('gfxRecommend'))document.getElementById('gfxRecommend').innerText=recommendGfx();const a=s.audio||{};if(document.getElementById('audMaster'))document.getElementById('audMaster').value=Math.round((a.master||.8)*100);if(document.getElementById('audMusic'))document.getElementById('audMusic').value=Math.round((a.music||.5)*100);if(document.getElementById('audCrowd'))document.getElementById('audCrowd').value=Math.round((a.crowd||.7)*100);if(document.getElementById('audBat'))document.getElementById('audBat').value=Math.round((a.bat||.8)*100);if(document.getElementById('audMenu'))document.getElementById('audMenu').value=Math.round((a.menu||.4)*100);if(document.getElementById('audMasterOn'))document.getElementById('audMasterOn').checked=a.masterOn!==false;if(document.getElementById('audFxOn'))document.getElementById('audFxOn').checked=a.fxOn!==false;showSetTab('game');}
   function closeModal(id){document.getElementById(id).classList.add('hidden');}
   function fillLocations(){const n=document.getElementById('createNation').value;const L=LOCATIONS[n];if(!L)return;const st=document.getElementById('createState');st.value=L.states[0];const ds=L.districts[L.states[0]]||['—'];document.getElementById('createDistrict').value=ds[0];const tw=(L.towns[ds[0]]||['—'])[0];document.getElementById('createTown').value=tw;}
-  function saveCreatedPlayer(e){e.preventDefault();const p=GAME_STATE.player;p.name=document.getElementById('createName').value||'Arjun Sharma';p.nick=document.getElementById('createNick').value||'';p.age=+document.getElementById('createAge').value||18;p.nationality=document.getElementById('createNation').value;p.state=document.getElementById('createState').value;p.district=document.getElementById('createDistrict').value;p.town=document.getElementById('createTown').value;p.role=document.getElementById('createRole').value;p.batHand=document.getElementById('createBatHand').value;p.bowlStyle=document.getElementById('createBowlStyle').value;p.bowlAction=(document.getElementById('createBowlAction')||{}).value||'medium-run';p.batStyle=(document.getElementById('createBatStyle')||{}).value||'Balanced';setText('menuPlayerName',`${p.name} (${p.level})`);setText('batterStanceText',`${p.batHand} • ${p.batStyle}`);document.getElementById('careerPlayerBadge').classList.remove('hidden');if(typeof refreshOnFieldPlayers==='function'&&scene)refreshOnFieldPlayers();saveCareerSlot();closeModal('creatorModal');}
-  function applySettings(){GAME_STATE.settings.control=document.getElementById('setControl').value;GAME_STATE.settings.autoPause=document.getElementById('setAutoPause').checked;GAME_STATE.settings.difficulty=document.getElementById('setDiff').value;saveCareerSlot();closeModal('settingsModal');}
+  function saveCreatedPlayer(e){e.preventDefault();const p=GAME_STATE.player;p.name=document.getElementById('createName').value||'Arjun Sharma';p.nick=document.getElementById('createNick').value||'';p.age=+document.getElementById('createAge').value||18;p.nationality=document.getElementById('createNation').value;p.state=document.getElementById('createState').value;p.district=document.getElementById('createDistrict').value;p.town=document.getElementById('createTown').value;p.role=document.getElementById('createRole').value;p.batHand=document.getElementById('createBatHand').value;p.bowlStyle=document.getElementById('createBowlStyle').value;p.bowlAction=(document.getElementById('createBowlAction')||{}).value||'medium-run';p.batStyle=(document.getElementById('createBatStyle')||{}).value||'Balanced';p.look={skin:Number((document.getElementById('createSkin')||{}).value)||0xc47a4a,hair:(document.getElementById('createHair')||{}).value||'short',hairCol:Number((document.getElementById('createHairCol')||{}).value)||0x1c1917,eyes:Number((document.getElementById('createEyes')||{}).value)||0x1e1b16,height:+((document.getElementById('createHeight')||{}).value||1),build:+((document.getElementById('createBuild')||{}).value||1)};p.created=true;if(!p.level||p.level==='District Level')p.level='Town Cricket';setText('batterStanceText',`${p.batHand} • ${p.batStyle}`);if(typeof refreshOnFieldPlayers==='function'&&scene)refreshOnFieldPlayers();saveCareerSlot();closeModal('creatorModal');openCareerHub();}
+  function applySettings(){const s=GAME_STATE.settings;s.control=document.getElementById('setControl').value;s.autoPause=document.getElementById('setAutoPause').checked;s.difficulty=document.getElementById('setDiff').value;if(document.getElementById('setGfx'))s.gfx=document.getElementById('setGfx').value;if(document.getElementById('setGfxMode'))s.gfxMode=document.getElementById('setGfxMode').value;if(document.getElementById('setFps'))s.fps=+document.getElementById('setFps').value||60;if(document.getElementById('setLang'))s.lang=document.getElementById('setLang').value||'en';if(document.getElementById('setUiScale'))s.uiScale=document.getElementById('setUiScale').value;if(document.getElementById('setHiContrast'))s.hiContrast=document.getElementById('setHiContrast').checked;if(document.getElementById('setReduceMotion'))s.reduceMotion=document.getElementById('setReduceMotion').checked;if(document.getElementById('setHaptics'))s.haptics=document.getElementById('setHaptics').checked;if(document.getElementById('setShake'))s.shake=document.getElementById('setShake').value!=='off';s.audio={masterOn:document.getElementById('audMasterOn')?document.getElementById('audMasterOn').checked:true,master:(+(document.getElementById('audMaster')||{value:80}).value)/100,music:(+(document.getElementById('audMusic')||{value:50}).value)/100,crowd:(+(document.getElementById('audCrowd')||{value:70}).value)/100,bat:(+(document.getElementById('audBat')||{value:80}).value)/100,menu:(+(document.getElementById('audMenu')||{value:40}).value)/100,fxOn:document.getElementById('audFxOn')?document.getElementById('audFxOn').checked:true};applyGraphics();saveCareerSlot();closeModal('settingsModal');}
   function saveCareerSlot(){try{localStorage.setItem('insan-cricket-career',JSON.stringify({player:GAME_STATE.player,settings:GAME_STATE.settings}));showToast('CAREER SAVED','Slot 1');}catch(e){}}
-  function loadCareerSlot(){try{const raw=localStorage.getItem('insan-cricket-career');if(!raw)return;const d=JSON.parse(raw);if(d.player)Object.assign(GAME_STATE.player,d.player);if(d.settings)Object.assign(GAME_STATE.settings,d.settings);setText('menuPlayerName',`${GAME_STATE.player.name} (${GAME_STATE.player.level})`);document.getElementById('careerPlayerBadge').classList.remove('hidden');}catch(e){}}
+  function loadCareerSlot(){try{const raw=localStorage.getItem('insan-cricket-career');if(!raw)return;const d=JSON.parse(raw);if(d.player){Object.assign(GAME_STATE.player,d.player);if(d.player.name)GAME_STATE.player.created=true;}if(d.settings)Object.assign(GAME_STATE.settings,d.settings, {audio:Object.assign({},GAME_STATE.settings.audio||{},(d.settings&&d.settings.audio)||{})});applyUiChrome();}catch(e){}}
   function doDrill(attr){const p=GAME_STATE.player;if(p.stamina<8){document.getElementById('trainingResult').innerText='Too tired. Rest first.';return;}p.stamina=Math.max(20,p.stamina-8);p.attrs[attr]=Math.min(99,(p.attrs[attr]||50)+1.5);document.getElementById('trainingResult').innerText=`${attr} now ${p.attrs[attr].toFixed(0)}. Stamina ${Math.round(p.stamina)}%.`;saveCareerSlot();}
   function importCustomTeam(){const box=document.getElementById('customTeamPreview');let data;try{data=JSON.parse(document.getElementById('customTeamJson').value);}catch(e){box.innerText='Invalid JSON. Nothing imported.';return;}if(!data||typeof data!=='object'||Array.isArray(data)){box.innerText='Root must be an object.';return;}if(typeof data.name!=='string'||data.name.length<2){box.innerText='name required.';return;}if(!Array.isArray(data.players)||!data.players.length){box.innerText='players[] required.';return;}const players=data.players.slice(0,11).map(p=>({name:String(p.name||'Player').slice(0,40),role:String(p.role||'Player').slice(0,32)}));GAME_STATE.customTeam={name:data.name.slice(0,40),colours:Array.isArray(data.colours)?data.colours.slice(0,2):[],players};box.innerText='Imported '+GAME_STATE.customTeam.name+' ('+players.length+' players). Safe preview only.';}
   const SAGAR_TEAMS=['Sagar Lions','Coastal Titans','Highlanders','River Kings'];
   function runAuction(skip){const log=document.getElementById('auctionLog');const value=80+Math.round(GAME_STATE.player.stats.runs/10)+GAME_STATE.player.attrs.power;const bids=SAGAR_TEAMS.map(t=>({t,v:value+Math.floor(Math.random()*40)}));bids.sort((a,b)=>b.v-a.v);const win=bids[0];function finish(){GAME_STATE.player.contract={team:win.t,value:win.v};log.innerText=`SOLD\nPLAYER: ${GAME_STATE.player.name}\nTEAM: ${win.t}\nCONTRACT: ${win.v} IC`;saveCareerSlot();}if(skip){finish();return;}log.innerText='Opening bid...';let i=0;const id=setInterval(()=>{i++;log.innerText=bids.slice(0,i).map(b=>b.t+': '+b.v).join('\n');if(i>=bids.length){clearInterval(id);setTimeout(finish,400);}},500);}
   function teamCode(name){const m={India:'IND',Australia:'AUS',England:'ENG','South Africa':'SA'};return m[name]||name;}
-  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;closeModal('quickMatchModal');applyVenueLook();startMatchSession(u,o,f,true);}
-  function startCareerMatch(){closeModal('careerModal');applyVenueLook();startMatchSession('IND','AUS','T20',false);}
+  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;closeModal('quickMatchModal');showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>{applyVenueLook();startMatchSession(u,o,f,true);});}
+  function startCareerMatch(){if(!GAME_STATE.player.created){openPlayerCreator();return;}closeModal('careerModal');showLoading(['LOAD_STADIUM','LOAD_PLAYERS','LOAD_COND'],()=>{applyVenueLook();startMatchSession('IND','AUS','T20',false);});}
   function makeXI(team){let names=(PLAYER_POOLS[team]||PLAYER_POOLS.IND).slice();if(team==='IND'||team===GAME_STATE.match.userTeam)names[0]=GAME_STATE.player.name;return names;}
   function startMatchSession(userTeam,oppTeam,format,isQuick){const limit=format==='T20'?20:format==='ODI'||format==='50 Overs'||format==='LIST A'?50:format==='TEST'?90:20;Object.assign(GAME_STATE.match,{active:false,userTeam,oppTeam,format,oversLimit:limit,innings:1,runs:0,wickets:0,balls:0,target:null,battingTeam:userTeam,bowlingTeam:oppTeam,batters:makeXI(userTeam).map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:i===0,keeper:i===5})),bowlers:makeXI(oppTeam).map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:i===0,keeper:i===5})),striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null});GAME_STATE.match.isQuick=!!isQuick;refreshOnFieldPlayers();showLineup();}
   function showLineup(){const m=GAME_STATE.match;setText('lineupUserName',TEAM_NAMES[m.userTeam]||m.userTeam);setText('lineupOppName',TEAM_NAMES[m.oppTeam]||m.oppTeam);setText('lineupFormat',m.format+' • '+(m.pitchType||'Flat')+' • '+(m.weather||'Sunny'));document.getElementById('userXI').innerHTML=m.batters.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${p.keeper?'WK · ':''}${i<2?'Opener':i>7?'Bowler':'Batter'} · ${GAME_STATE.player.batHand}</div></div>`).join('');document.getElementById('oppXI').innerHTML=m.bowlers.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${i<4?'Pace/spin':'Player'}</div></div>`).join('');document.getElementById('lineupOverlay').classList.remove('hidden');}
@@ -1273,7 +1493,15 @@
       openScorecard();
     }
   }
-  window.onload=()=>{updateOrientationMode();attachLandscapeGestureListener();init3DEngine();loadCareerSlot();};
+  window.onload=()=>{
+    try{
+      updateOrientationMode(); attachLandscapeGestureListener();
+      loadCareerSlot();
+      if(!GAME_STATE.settings.gfx) GAME_STATE.settings.gfx=recommendGfx();
+      init3DEngine(); applyGraphics(); applyUiChrome();
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }catch(e){ showLoadFail(); }
+  };
   </script>
 </body>
 </html>
