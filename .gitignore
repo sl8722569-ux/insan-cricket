@@ -1,3 +1,8 @@
 .DS_Store
 Thumbs.db
 *.tmp
+# Android build
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
