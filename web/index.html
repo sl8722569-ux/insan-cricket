@@ -1500,6 +1500,7 @@
       if(!GAME_STATE.settings.gfx) GAME_STATE.settings.gfx=recommendGfx();
       init3DEngine(); applyGraphics(); applyUiChrome();
       document.getElementById('loadingOverlay').classList.add('hidden');
+      if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./sw.js'); }catch(swErr){} }
     }catch(e){ showLoadFail(); }
   };
   </script>

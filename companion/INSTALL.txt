@@ -1,0 +1,19 @@
+INSAN CRICKET — Android Web Companion ZIP
+
+This ZIP is the Android web companion (PWA), not a Play Store APK.
+
+Install on Android (Chrome):
+1. Unzip this folder, or skip unzip and use the live game instead.
+2. Open in Chrome:
+   https://sl8722569-ux.github.io/insan-cricket/web/
+3. Chrome menu (three dots) → Add to Home screen / Install app.
+4. Open the icon. Play in landscape.
+
+The APK (WebView companion) is a separate download:
+  INSAN-CRICKET-Android.apk
+Sideload it (allow unknown sources). It wraps the same live game. Not a Play Store listing.
+
+This pack includes a copy of the web game in /web.
+Opening web/index.html needs internet for Three.js / fonts.
+
+INSAN CREATIONS. Original game. Not affiliated with Cricket 26, EA, IPL, BCCI, or ICC.
