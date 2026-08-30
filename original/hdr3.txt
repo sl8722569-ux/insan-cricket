@@ -1,0 +1,40 @@
+HTTP/1.1 303 See Other
+Content-Type: application/binary
+Vary: Origin
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: Mon, 01 Jan 1990 00:00:00 GMT
+Date: Sun, 30 Aug 2026 14:16:39 GMT
+Location: https://drive.usercontent.google.com/download?id=108V-jgqnvKiY4Eo4mgQG6gnz3CWTm8Y&export=download
+Strict-Transport-Security: max-age=31536000
+Accept-CH: Sec-CH-UA-Arch, Sec-CH-UA-Bitness, Sec-CH-UA-Full-Version, Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-UA-WoW64, Sec-CH-UA-Form-Factors, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version
+Permissions-Policy: ch-ua-arch=*, ch-ua-bitness=*, ch-ua-full-version=*, ch-ua-full-version-list=*, ch-ua-model=*, ch-ua-wow64=*, ch-ua-form-factors=*, ch-ua-platform=*, ch-ua-platform-version=*
+Content-Security-Policy: require-trusted-types-for 'script';report-uri /_/DriveUntrustedContentHttp/cspreport
+Content-Security-Policy: script-src 'report-sample' 'nonce-n9ko-Z3n7ISPaCpjbvEyYw' 'unsafe-inline';object-src 'none';base-uri 'self';report-uri /_/DriveUntrustedContentHttp/cspreport;worker-src 'self'
+Cross-Origin-Opener-Policy: same-origin
+Server: ESF
+Content-Length: 0
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+
+HTTP/1.1 404 Not Found
+Content-Type: text/html; charset=utf-8
+X-GUploader-UploadID: AJjja9ZHpfueX4_Hi1T6bgZFCyYUcSydSXhAqyN7eao53b2N9_QJ7tC5TWL2RYF8BHlf_oK0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: Mon, 01 Jan 1990 00:00:00 GMT
+Date: Sun, 30 Aug 2026 14:16:39 GMT
+P3P: CP="This is not a P3P policy! See g.co/p3phelp for more info."
+Content-Security-Policy: require-trusted-types-for 'script';report-uri /_/DriveUntrustedContentHttp/cspreport
+Content-Security-Policy: script-src 'report-sample' 'nonce-KO41pOpPX7IoeoYi4dk2-A' 'unsafe-inline';object-src 'none';base-uri 'self';report-uri /_/DriveUntrustedContentHttp/cspreport;worker-src 'self'
+Permissions-Policy: ch-ua-arch=*, ch-ua-bitness=*, ch-ua-full-version=*, ch-ua-full-version-list=*, ch-ua-model=*, ch-ua-wow64=*, ch-ua-form-factors=*, ch-ua-platform=*, ch-ua-platform-version=*
+Accept-CH: Sec-CH-UA-Arch, Sec-CH-UA-Bitness, Sec-CH-UA-Full-Version, Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-UA-WoW64, Sec-CH-UA-Form-Factors, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version
+Cross-Origin-Opener-Policy: same-origin
+Content-Length: 1652
+Server: UploadServer
+Set-Cookie: NID=534=pkdhHrhdxvNrJG7VJSPNJQc88ji0ZstFu-3--dcQ1YWgiqAuOgOBqdfGPSKcX1q2HGm-ZsPTD1rTPT3mKt4lgXoaAmfhm0Au7-exCTipnQP9TmY-nkzh8yq7QWqyY5Dj1VD5MYEC6vnXQlQ8ef2mmQDgFSE4EMRP9__kQWNO8LU5GTo27dxHFTDLVeOzCpW51-XwiQ; expires=Mon, 01-Mar-2027 14:16:39 GMT; path=/; domain=.google.com; HttpOnly
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: sandbox allow-scripts
+

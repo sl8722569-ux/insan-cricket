@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 select-none">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>INSAN CRICKET 3D — Next-Gen Mobile Cricket</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Rajdhani (display/sport) + Chakra Petch (HUD numerals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ic: {
+              gold: '#f59e0b',
+              green: '#10b981',
+              darkgreen: '#064e3b',
+              blue: '#0284c7',
+              red: '#ef4444',
+              panel: 'rgba(15, 23, 42, 0.92)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Force Mobile Landscape Optimization.
+       html.orientation-locked means the native Screen Orientation API is holding
+       real landscape, so no visual rotation is needed. Otherwise, while the
+       device is physically in portrait, #gameRoot is rotated 90deg in CSS —
+       the standard cross-browser workaround since iOS Safari has no native
+       orientation-lock API at all. */
+    html:not(.orientation-locked) #gameRoot.force-landscape {
+      position: fixed;
+      top: 0;
+      left: 100%;
+      width: 100vh;
+      height: 100vw;
+      transform-origin: 0 0;
+      transform: rotate(90deg);
+      overflow: hidden;
+    }
+    canvas { touch-action: none; }
+
+    body, .font-display { font-family: 'Rajdhani', 'Segoe UI', sans-serif; }
+    .font-mono-num { font-family: 'Chakra Petch', Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.8); }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    /* Gold gradient wordmark */
+    .ic-gold-text {
+      background: linear-gradient(135deg, #fde68a 0%, #f59e0b 55%, #b45309 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    /* Ambient floodlight flicker on the logo badge ring */
+    @keyframes floodPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.35), 0 0 18px 2px rgba(245,158,11,0.15); }
+      50% { box-shadow: 0 0 0 3px rgba(245,158,11,0.12), 0 0 26px 6px rgba(245,158,11,0.28); }
+    }
+    .floodlit { animation: floodPulse 3.2s ease-in-out infinite; }
+
+    /* Live pulse dot */
+    @keyframes livePulse {
+      0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.65); }
+      70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+    .live-dot { animation: livePulse 1.8s infinite; }
+
+    /* Subtle top-scan sheen sweeping over the HUD, broadcast-graphics feel */
+    @keyframes scanSweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+    .scan-sheen { position: relative; overflow: hidden; }
+    .scan-sheen::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 40%;
+      background: linear-gradient(90deg, transparent, rgba(245,158,11,0.10), transparent);
+      transform: translateX(-120%); animation: scanSweep 5s ease-in-out infinite;
+    }
+
+    /* Action button glow + press ripple */
+    .glow-emerald { box-shadow: 0 0 0 1px rgba(16,185,129,0.4), 0 8px 24px -6px rgba(16,185,129,0.55); }
+    .glow-amber { box-shadow: 0 0 0 1px rgba(245,158,11,0.4), 0 8px 24px -6px rgba(245,158,11,0.55); }
+    .btn-press { transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease; }
+    .btn-press:active { transform: scale(0.94); }
+
+    /* Menu card lift */
+    .menu-card { transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s ease, box-shadow .25s ease; }
+    .menu-card:hover { transform: translateY(-4px); }
+
+    /* Milestone celebration sparkle ring */
+    @keyframes sparkleSpin { to { transform: rotate(360deg); } }
+    .sparkle-ring { animation: sparkleSpin 6s linear infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .floodlit, .live-dot, .scan-sheen::after, .sparkle-ring { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="h-full w-full bg-slate-950 overflow-hidden font-sans antialiased text-slate-100">
+
+  <!-- HUD & GAME PLAYCANVAS CONTAINER -->
+  <!-- gameRoot: auto-rotated into landscape via JS (native Screen Orientation
+       lock where supported, CSS transform fallback everywhere else) -->
+  <div id="gameRoot" class="relative w-full h-full flex flex-col justify-between overflow-hidden">
+    
+    <!-- 3D WebGL Canvas Layer -->
+    <div id="canvas3dContainer" class="absolute inset-0 z-0 bg-slate-950"></div>
+
+    <!-- MAIN GAME HUD / OVERLAYS -->
+    <!-- Top HUD Navigation / Scoreboard -->
+    <header id="topHud" class="scan-sheen relative z-10 flex items-center justify-between px-4 py-2 bg-gradient-to-b from-slate-950/95 to-transparent pointer-events-auto">
+      <div class="flex items-center space-x-3">
+        <!-- Logo Badge -->
+        <div onclick="openMainMenu()" class="floodlit flex items-center space-x-2 bg-slate-900/90 border border-amber-500/40 px-3 py-1 rounded-xl cursor-pointer hover:border-amber-400 transition btn-press">
+          <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+          <span class="font-display font-bold text-xs tracking-wider text-white">INSAN<span class="ic-gold-text font-extrabold">CRICKET</span></span>
+        </div>
+
+        <!-- Live Score Widget (During Match) -->
+        <div id="liveScoreWidget" class="hidden flex items-center space-x-3 bg-slate-900/80 border border-slate-700/80 px-3 py-1 rounded-xl text-xs backdrop-blur-sm">
+          <span class="flex items-center gap-1.5 text-red-400 font-bold uppercase text-[9px] tracking-widest">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>Live
+          </span>
+          <span class="text-slate-600">|</span>
+          <span id="hudBattingTeam" class="font-bold text-emerald-400">IND</span>
+          <span id="hudScoreRuns" class="font-bold text-white text-sm font-mono-num">142/3</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-slate-300">Overs: <strong id="hudOvers" class="text-amber-400 font-mono-num">14.2</strong></span>
+          <span class="text-slate-500">|</span>
+          <span class="text-slate-300">CRR: <strong id="hudCrr" class="text-white font-mono-num">9.95</strong></span>
+        </div>
+      </div>
+
+      <!-- Settings & Camera Controls -->
+      <div class="flex items-center space-x-2">
+        <button onclick="cycleMatchCamera()" id="hudCamBtn" class="btn-press hidden bg-slate-800/80 border border-slate-700 hover:bg-slate-700 hover:border-amber-500/60 text-xs px-2.5 py-1 rounded-lg text-slate-200">
+          <i class="fa-solid fa-video text-amber-400 mr-1"></i> <span id="camLabel">Broadcast</span>
+        </button>
+        <button onclick="pauseMatchMenu()" id="hudPauseBtn" class="btn-press hidden bg-slate-800/80 border border-slate-700 hover:bg-slate-700 hover:border-amber-500/60 text-xs px-2.5 py-1 rounded-lg text-slate-200">
+          <i class="fa-solid fa-pause"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- IN-MATCH CELEBRATION / MILESTONE OVERLAY BANNER -->
+    <div id="milestoneBanner" class="hidden absolute inset-0 z-20 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center pointer-events-auto">
+      <div class="relative w-24 h-24 mb-4">
+        <svg class="sparkle-ring absolute inset-0 w-full h-full text-amber-500/30" viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 8" stroke-linecap="round"/>
+        </svg>
+        <div class="absolute inset-2 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 p-1 shadow-2xl glow-amber animate-bounce">
+          <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-amber-400 text-3xl">
+            <i id="celebrationIcon" class="fa-solid fa-fire-flame-curved"></i>
+          </div>
+        </div>
+      </div>
+      <h3 id="celebrationTag" class="text-xs font-bold uppercase tracking-widest text-amber-400 mb-1">INNINGS MILESTONE REACHED</h3>
+      <h1 id="celebrationTitle" class="font-display text-4xl font-extrabold ic-gold-text tracking-wide mb-2">CENTURY! 100 RUNS</h1>
+      <p id="celebrationSubtext" class="text-sm text-slate-300 max-w-md mb-4">An exceptional performance under pressure. The crowd rises to celebrate!</p>
+      <button onclick="dismissCelebration()" class="btn-press glow-amber bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2 rounded-xl text-xs uppercase tracking-wider">
+        Continue Match
+      </button>
+    </div>
+
+    <!-- BATTING / BOWLING GAMEPLAY CONTROLS HUD -->
+    <div id="gameplayControlHUD" class="hidden absolute bottom-4 left-4 right-4 z-10 flex justify-between items-end pointer-events-none">
+      
+      <!-- Left Controls: Shot Direction / Bowl Line-Length -->
+      <div id="gameplayLeftPad" class="pointer-events-auto bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl shadow-2xl backdrop-blur-md flex flex-col items-center">
+        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-2" id="leftPadTitle">Shot Direction</span>
+        <div class="grid grid-cols-3 gap-1.5 w-32 h-32">
+          <button onclick="selectPadDirection('OFF')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">OFF</button>
+          <button onclick="selectPadDirection('STRAIGHT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">STRAIGHT</button>
+          <button onclick="selectPadDirection('LEG')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">LEG</button>
+          <button onclick="selectPadDirection('CUT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">CUT</button>
+          <div class="bg-amber-500/20 border border-amber-500/40 rounded-lg flex items-center justify-center text-amber-400 font-bold text-xs transition-colors duration-200" id="activeDirLabel">MID</div>
+          <button onclick="selectPadDirection('PULL')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">PULL</button>
+          <button onclick="selectPadDirection('COVER')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">COVER</button>
+          <button onclick="selectPadDirection('DEFENCE')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">DEF</button>
+          <button onclick="selectPadDirection('SWEEP')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">SWEEP</button>
+        </div>
+      </div>
+
+      <!-- Center Status / Stamina Bar -->
+      <div class="pointer-events-auto bg-slate-900/90 border border-slate-700/80 px-4 py-2 rounded-xl text-center shadow-xl space-y-1">
+        <div class="flex items-center justify-between text-[10px] text-slate-400">
+          <span>STAMINA</span>
+          <span id="staminaText" class="text-emerald-400 font-bold font-mono-num">92%</span>
+        </div>
+        <div class="w-36 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+          <div id="staminaBar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full w-[92%] transition-all duration-300"></div>
+        </div>
+        <div class="text-[10px] text-slate-400" id="batterStanceText">Right-Hand Batter • Aggressive</div>
+      </div>
+
+      <!-- Right Action Pad: Swing Shot / Bowl Delivery Trigger -->
+      <div id="gameplayRightPad" class="pointer-events-auto flex flex-col space-y-2">
+        <button onclick="triggerLoftedShot()" class="btn-press glow-amber bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold px-5 py-3 rounded-xl border border-amber-400 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> LOFT SHOT
+        </button>
+        <button onclick="triggerActionExecution()" class="btn-press glow-emerald bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-extrabold px-6 py-4 rounded-xl border border-emerald-400 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-baseball font-bold" id="actionBtnIcon"></i> <span id="actionBtnLabel">PLAY SHOT</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- PREMIUM MATCH FLOW OVERLAYS -->
+    <div id="lineupOverlay" class="hidden absolute inset-0 z-40 bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-4"><div><div class="text-[10px] text-amber-400 font-bold tracking-[0.25em]">MATCH PRESENTATION</div><h2 id="lineupTitle" class="text-2xl font-black">Playing XI</h2></div><div id="lineupFormat" class="text-xs text-slate-400"></div></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-4"><div class="flex justify-between mb-2"><h3 id="lineupUserName" class="font-bold text-emerald-400"></h3><span class="text-xs text-slate-500">XI</span></div><div id="userXI" class="grid grid-cols-2 gap-2 text-xs"></div></div>
+          <div class="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4"><div class="flex justify-between mb-2"><h3 id="lineupOppName" class="font-bold text-amber-400"></h3><span class="text-xs text-slate-500">XI</span></div><div id="oppXI" class="grid grid-cols-2 gap-2 text-xs"></div></div>
+        </div>
+        <button onclick="continueToToss()" class="mt-5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl">CONTINUE TO TOSS</button>
+      </div>
+    </div>
+    <div id="tossOverlay" class="hidden absolute inset-0 z-41 bg-slate-950/97 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="w-full max-w-xl text-center bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+        <div class="text-[10px] text-amber-400 font-bold tracking-[0.3em]">TOSS</div><h2 id="tossTitle" class="text-3xl font-black mt-1">Call the toss</h2><p id="tossSub" class="text-sm text-slate-400 mt-2">Choose heads or tails.</p>
+        <div id="tossCoin" class="mx-auto my-6 w-24 h-24 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-300 text-xl font-black">?</div>
+        <div id="tossButtons" class="grid grid-cols-2 gap-3"><button onclick="callToss('Heads')" class="bg-slate-800 border border-slate-700 hover:border-amber-400 py-3 rounded-xl font-bold">HEADS</button><button onclick="callToss('Tails')" class="bg-slate-800 border border-slate-700 hover:border-amber-400 py-3 rounded-xl font-bold">TAILS</button></div>
+        <div id="tossDecision" class="hidden grid grid-cols-2 gap-3 mt-3"><button onclick="chooseTossDecision('bat')" class="bg-emerald-600 py-3 rounded-xl font-black">BAT FIRST</button><button onclick="chooseTossDecision('bowl')" class="bg-sky-600 py-3 rounded-xl font-black">BOWL FIRST</button></div>
+      </div>
+    </div>
+    <div id="scorecardOverlay" class="hidden absolute inset-0 z-35 bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
+      <div class="max-w-5xl mx-auto"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-black">MATCH SCORECARD</h2><button onclick="closeScorecard()" class="text-slate-400">CLOSE</button></div><div id="fullScorecard"></div></div>
+    </div>
+    <div id="matchInfo" class="hidden absolute top-16 left-4 z-20 bg-slate-950/85 border border-slate-700 rounded-xl px-3 py-2 text-[10px] backdrop-blur-md"><span id="phaseText">1ST INNINGS</span> • <span id="battersText">A. Sharma 0* | Rohit 0*</span></div>
+    <div id="resultToast" class="hidden absolute bottom-28 left-1/2 -translate-x-1/2 z-25 bg-slate-950/95 border border-amber-500/50 rounded-xl px-5 py-3 text-center shadow-2xl"><div id="resultText" class="font-black text-lg"></div><div id="resultDetail" class="text-xs text-slate-400 mt-1"></div></div>
+
+    <!-- MAIN MENU OVERLAY PANEL -->
+    <div id="mainMenuOverlay" class="absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-md flex flex-col justify-between p-6 pointer-events-auto">
+      
+      <!-- Top Title Header -->
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="floodlit w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-400 p-0.5">
+            <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center text-amber-400 text-lg">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+          </div>
+          <div>
+            <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">3D Mobile v1.0</span>
+            </h1>
+            <p class="text-xs text-slate-400">Official Mobile Career & Simulation Engine</p>
+          </div>
+        </div>
+
+        <!-- Active Career Status Badge -->
+        <div id="careerPlayerBadge" class="hidden sm:flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-slate-400">Career:</span>
+          <span id="menuPlayerName" class="font-bold text-amber-400">A. Sharma (Town Level)</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-auto">
+        
+        <!-- Option 1: Career Mode -->
+        <div onclick="openCareerHub()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-amber-500/80 hover:shadow-[0_12px_32px_-8px_rgba(245,158,11,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition">
+            <i class="fa-solid fa-user-ninja"></i>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-bold text-white text-base group-hover:text-amber-400">Career Mode</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Town $\rightarrow$ District $\rightarrow$ State $\rightarrow$ Franchise $\rightarrow$ International.</p>
+          </div>
+        </div>
+
+        <!-- Option 2: Quick Match -->
+        <div onclick="openQuickMatchSetup()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-emerald-500/80 hover:shadow-[0_12px_32px_-8px_rgba(16,185,129,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-bold text-white text-base group-hover:text-emerald-400">Quick Match</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Full freedom. Choose teams, venue, weather & overs.</p>
+          </div>
+        </div>
+
+        <!-- Option 3: Player Creator -->
+        <div onclick="openPlayerCreator()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-blue-500/80 hover:shadow-[0_12px_32px_-8px_rgba(2,132,199,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl group-hover:scale-110 transition">
+            <i class="fa-solid fa-pen-ruler"></i>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-bold text-white text-base group-hover:text-blue-400">Player Creator</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Create 3D cricketer, stance, role & bowling action.</p>
+          </div>
+        </div>
+
+        <!-- Option 4: Franchise Auction -->
+        <div onclick="openFranchiseAuction()" class="menu-card bg-slate-900/80 border border-slate-800 hover:border-purple-500/80 hover:shadow-[0_12px_32px_-8px_rgba(168,85,247,0.35)] p-5 rounded-2xl cursor-pointer group shadow-xl flex flex-col justify-between">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl group-hover:scale-110 transition">
+            <i class="fa-solid fa-gavel"></i>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-bold text-white text-base group-hover:text-purple-400">Franchise Auction</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Bidding simulator for premier T20 franchise contracts.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Status & System Controls -->
+      <div class="flex justify-between items-center border-t border-slate-800 pt-3 text-xs text-slate-400">
+        <div class="flex space-x-4">
+          <span onclick="openStatisticsView()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-chart-line text-amber-400 mr-1"></i> Statistics</span>
+          <span onclick="openCustomTeamCreator()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-users text-emerald-400 mr-1"></i> Custom Teams</span>
+          <span onclick="openTournamentHub()" class="hover:text-white cursor-pointer"><i class="fa-solid fa-sitemap text-blue-400 mr-1"></i> Tournaments</span>
+        </div>
+        <span class="font-mono text-[11px]">3D Engine: WebGL Responsive</span>
+      </div>
+
+    </div>
+
+    <!-- MODAL 1: PLAYER CREATOR & PERSONALIZATION -->
+    <div id="creatorModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-gear text-amber-400"></i> Player Creation & 3D Stance System
+            </h2>
+            <p class="text-xs text-slate-400">Configure personal info, batting stance, bowling style, and appearance.</p>
+          </div>
+          <button onclick="closeModal('creatorModal')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+
+        <form onsubmit="saveCreatedPlayer(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <!-- Column 1: Personal & Geographic Info -->
+          <div class="space-y-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <h3 class="font-bold text-amber-400 uppercase text-[11px]">1. Personal Identity</h3>
+            
+            <div>
+              <label class="block text-slate-400 mb-1">Cricketer Name</label>
+              <input type="text" id="createName" required value="Arjun Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Age</label>
+                <input type="number" id="createAge" value="18" min="15" max="40" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Nationality</label>
+                <select id="createNation" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                  <option value="India">India</option>
+                  <option value="Australia">Australia</option>
+                  <option value="England">England</option>
+                  <option value="Pakistan">Pakistan</option>
+                  <option value="South Africa">South Africa</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">State / Province</label>
+                <input type="text" id="createState" value="Punjab" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">District</label>
+                <input type="text" id="createDistrict" value="Bathinda" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Town</label>
+                <input type="text" id="createTown" value="Mansa" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Role, Stance & Bowling Action -->
+          <div class="space-y-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <h3 class="font-bold text-amber-400 uppercase text-[11px]">2. Cricket Role & Style</h3>
+            
+            <div>
+              <label class="block text-slate-400 mb-1">Primary Role</label>
+              <select id="createRole" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                <option value="Batting All-Rounder">Batting All-Rounder</option>
+                <option value="Batter">Specialist Batter</option>
+                <option value="Bowler">Specialist Bowler</option>
+                <option value="Bowling All-Rounder">Bowling All-Rounder</option>
+                <option value="Wicketkeeper-Batter">Wicketkeeper-Batter</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Batting Hand</label>
+                <select id="createBatHand" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                  <option value="Right-handed">Right-handed</option>
+                  <option value="Left-handed">Left-handed</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Bowling Action</label>
+                <select id="createBowlStyle" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                  <option value="Right-arm fast">Right-arm Fast</option>
+                  <option value="Left-arm fast">Left-arm Fast</option>
+                  <option value="Right-arm off-spin">Right-arm Off-Spin</option>
+                  <option value="Right-arm leg-spin">Right-arm Leg-Spin</option>
+                  <option value="Left-arm orthodox">Left-arm Orthodox</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-press glow-amber w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl uppercase text-xs tracking-wider mt-2">
+              Save Cricketer Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 2: QUICK MATCH SETUP & VENUE SELECTION -->
+    <div id="quickMatchModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-emerald-400"></i> Quick Match Setup — Full Freedom
+            </h2>
+            <p class="text-xs text-slate-400">Select teams, format, venue, weather, and pitch conditions.</p>
+          </div>
+          <button onclick="closeModal('quickMatchModal')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <!-- Team Selection -->
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h3 class="font-bold text-emerald-400 uppercase">Teams</h3>
+            <div>
+              <label class="block text-slate-400 mb-1">User Team</label>
+              <select id="qmUserTeam" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                <option value="India">India</option>
+                <option value="Australia">Australia</option>
+                <option value="England">England</option>
+                <option value="Punjab Kings Franchise">Punjab Kings Franchise</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Opponent Team</label>
+              <select id="qmOppTeam" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+                <option value="Australia">Australia</option>
+                <option value="India">India</option>
+                <option value="England">England</option>
+                <option value="Mumbai Franchise">Mumbai Franchise</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Format & Conditions -->
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h3 class="font-bold text-emerald-400 uppercase">Match Settings</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">Format</label>
+                <select id="qmFormat" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+                  <option value="T20">T20 (20 Overs)</option>
+                  <option value="ODI">ODI (50 Overs)</option>
+                  <option value="TEST">TEST (5 Days)</option>
+                  <option value="LIST A">LIST A</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Pitch Condition</label>
+                <select id="qmPitch" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+                  <option value="Flat">Flat Batting Pitch</option>
+                  <option value="Green">Green Pace Pitch</option>
+                  <option value="Cracked">Cracked Dustbowl</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">Weather</label>
+                <select id="qmWeather" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+                  <option value="Sunny">Sunny (Clear)</option>
+                  <option value="Overcast">Overcast (Swing)</option>
+                  <option value="Rain">Rainy / Humid</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Lighting</label>
+                <select id="qmLighting" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-white">
+                  <option value="Day">Day Match</option>
+                  <option value="Night">Day / Night (Floodlights)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="startQuickMatchExecution()" class="btn-press glow-emerald w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase text-xs tracking-wider">
+          Start 3D Quick Match
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL 3: CAREER HUB & PATHWAY PROGRESSION -->
+    <div id="careerModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-ninja text-amber-400"></i> Career Pathway & Selection Hub
+            </h2>
+            <p class="text-xs text-slate-400">Track selections, form, captaincy rank, and contracts.</p>
+          </div>
+          <button onclick="closeModal('careerModal')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+
+        <!-- Career Pathway Ladder Graphic -->
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-bold text-amber-400 uppercase mb-3">Current Pathway Progression</h3>
+          <div class="flex items-center justify-between overflow-x-auto py-2 text-[10px] space-x-2">
+            <div class="bg-emerald-950 border border-emerald-500 text-emerald-400 px-3 py-1.5 rounded-lg font-bold">Town Cricket ✓</div>
+            <i class="fa-solid fa-arrow-right text-slate-600"></i>
+            <div class="bg-amber-950 border border-amber-500 text-amber-400 px-3 py-1.5 rounded-lg font-bold">District Level (Active)</div>
+            <i class="fa-solid fa-arrow-right text-slate-600"></i>
+            <div class="bg-slate-950 border border-slate-800 text-slate-500 px-3 py-1.5 rounded-lg">State Cricket</div>
+            <i class="fa-solid fa-arrow-right text-slate-600"></i>
+            <div class="bg-slate-950 border border-slate-800 text-slate-500 px-3 py-1.5 rounded-lg">U-19 / List A</div>
+            <i class="fa-solid fa-arrow-right text-slate-600"></i>
+            <div class="bg-slate-950 border border-slate-800 text-slate-500 px-3 py-1.5 rounded-lg">Franchise</div>
+            <i class="fa-solid fa-arrow-right text-slate-600"></i>
+            <div class="bg-slate-950 border border-slate-800 text-slate-500 px-3 py-1.5 rounded-lg">International</div>
+          </div>
+        </div>
+
+        <!-- Next Match Action -->
+        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div>
+            <h4 class="font-bold text-white text-sm">Next Match: District Championship Semifinal</h4>
+            <p class="text-xs text-slate-400">Bathinda District vs Mansa District (50 Overs)</p>
+          </div>
+          <button onclick="startCareerMatch()" class="btn-press glow-amber bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider">
+            Play Match
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT GAME ENGINE LOGIC -->
+  <script>
+  const TEAM_NAMES={IND:'INDIA',AUS:'AUSTRALIA',ENG:'ENGLAND',SA:'SOUTH AFRICA'};
+  const PLAYER_POOLS={
+    IND:['Arjun Sharma','Rohit Mehra','Aman Verma','Kabir Singh','Dev Malhotra','Riyan Kapoor','Yash Bedi','Kunal Gill','Harsh Rana','Vivek Saini','Nitin Raj'],
+    AUS:['Alex Turner','Ben Carter','Chris Wilson','Daniel Moore','Ethan King','Finn Brooks','George Hall','Harry Scott','Jack Reed','Liam Young','Noah Clark'],
+    ENG:['James Wood','Oliver King','Harry Stone','George Lane','Jack Ford','Henry Cole','William Fox','Charlie Hunt','Leo Ward','Sam West','Tom Gray'],
+    SA:['Liam Ross','Ethan Adams','Noah James','Caleb Smith','Ryan Bell','Aiden Brown','Mason Hill','Luke White','Kai Jones','Dylan Green','Owen Reed']
+  };
+  const GAME_STATE={player:{name:'Arjun Sharma',age:18,nationality:'India',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',bowlStyle:'Right-arm fast',level:'District Level',stamina:92,stats:{runs:0,wickets:0,matches:0,balls:0,fours:0,sixes:0}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,pending:false,history:[],inningsScores:[],tossWinner:null}};
+  let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,ballPath=null,batGroup=null,animUntil=0;
+  function isPhysicallyPortrait(){return window.matchMedia('(orientation: portrait)').matches;}
+  async function tryNativeLandscapeLock(){try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');document.documentElement.classList.add('orientation-locked');return true;}}catch(e){}return false;}
+  function updateOrientationMode(){const root=document.getElementById('gameRoot');const nativeLandscape=screen.orientation&&/landscape/.test(screen.orientation.type||'');if(nativeLandscape)document.documentElement.classList.add('orientation-locked');if(isPhysicallyPortrait()&&!document.documentElement.classList.contains('orientation-locked'))root.classList.add('force-landscape');else root.classList.remove('force-landscape');if(renderer)onWindowResize();}
+  function getViewportSize(){const root=document.getElementById('gameRoot');return root.classList.contains('force-landscape')?{width:window.innerHeight,height:window.innerWidth}:{width:window.innerWidth,height:window.innerHeight};}
+  function attachLandscapeGestureListener(){const f=async()=>{await tryNativeLandscapeLock();updateOrientationMode();};document.addEventListener('click',f,{once:true});document.addEventListener('touchend',f,{once:true});}
+  window.addEventListener('orientationchange',updateOrientationMode);if(screen.orientation)screen.orientation.addEventListener('change',updateOrientationMode);window.matchMedia('(orientation: portrait)').addEventListener('change',updateOrientationMode);
+  function makePlayer(name,role='Player'){const g=new THREE.Group();const skin=new THREE.MeshStandardMaterial({color:0x9a5b3a,roughness:.8}),shirt=new THREE.MeshStandardMaterial({color:0x1d4ed8,roughness:.7}),white=new THREE.MeshStandardMaterial({color:0xf8fafc,roughness:.75}),dark=new THREE.MeshStandardMaterial({color:0x111827,roughness:.7});const torso=new THREE.Mesh(new THREE.CylinderGeometry(.38,.34,.8,12),shirt);torso.position.y=1.25;g.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.28,18,14),skin);head.position.y=1.95;g.add(head);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.31,18,10,0,Math.PI*2,0,Math.PI/2),dark);helmet.position.y=2.08;g.add(helmet);for(const x of[-.18,.18]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.13,.15,.9,10),white);leg.position.set(x,.45,0);g.add(leg);const shoe=new THREE.Mesh(new THREE.BoxGeometry(.25,.12,.42),dark);shoe.position.set(x,.05,-.08);g.add(shoe);}for(const x of[-.5,.5]){const arm=new THREE.Mesh(new THREE.CylinderGeometry(.09,.11,.7,10),shirt);arm.position.set(x,1.25,0);arm.rotation.z=x>0?-.25:.25;g.add(arm);}if(role==='batter'){const bat=new THREE.Mesh(new THREE.BoxGeometry(.13,.9,.08),new THREE.MeshStandardMaterial({color:0xd6b370,roughness:.55}));bat.position.set(.48,.95,.05);bat.rotation.z=.45;g.add(bat);}g.userData.name=name;return g;}
+  function init3DEngine(){const c=document.getElementById('canvas3dContainer');c.innerHTML='';scene=new THREE.Scene();scene.background=new THREE.Color(0x020617);scene.fog=new THREE.Fog(0x020617,45,120);const z=getViewportSize();camera=new THREE.PerspectiveCamera(55,z.width/z.height,.1,1000);camera.position.set(0,5,18);camera.lookAt(0,1,0);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(z.width,z.height);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));c.appendChild(renderer.domElement);scene.add(new THREE.AmbientLight(0x9fb4d6,.7));const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(20,35,10);scene.add(sun);const field=new THREE.Mesh(new THREE.CylinderGeometry(80,80,.2,48),new THREE.MeshStandardMaterial({color:0x075e3d,roughness:.9}));field.position.y=-.1;scene.add(field);const pitch=new THREE.Mesh(new THREE.BoxGeometry(3.05,.1,20.12),new THREE.MeshStandardMaterial({color:0xb7791f,roughness:.8}));scene.add(pitch);pitchMesh=pitch;createWicketStumps(0,.5,9.5);createWicketStumps(0,.5,-9.5);ballMesh=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshStandardMaterial({color:0xdc2626,roughness:.35}));ballMesh.position.set(0,.5,-8.5);scene.add(ballMesh);batterMesh=makePlayer('Batter','batter');batterMesh.position.set(0,0,8.2);scene.add(batterMesh);bowlerMesh=makePlayer('Bowler','bowler');bowlerMesh.position.set(0,0,-7.5);bowlerMesh.rotation.y=Math.PI;scene.add(bowlerMesh);window.addEventListener('resize',onWindowResize);animate3DRender();}
+  function createWicketStumps(x,y,z){for(let i=-1;i<=1;i++){const s=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.75,8),new THREE.MeshStandardMaterial({color:0xfef08a}));s.position.set(x+i*.15,y,z);scene.add(s);}}
+  function onWindowResize(){if(!renderer)return;const z=getViewportSize();camera.aspect=z.width/z.height;camera.updateProjectionMatrix();renderer.setSize(z.width,z.height);}
+  function animate3DRender(){requestAnimationFrame(animate3DRender);const now=performance.now();if(ballPath&&now<animUntil){const t=1-(animUntil-now)/900;const p=ballPath(t);ballMesh.position.copy(p);batterMesh.rotation.z=Math.sin(t*Math.PI)*.9;}else if(ballPath){ballPath=null;ballMesh.position.set(0,.5,-8.5);batterMesh.rotation.z=0;}if(GAME_STATE.match.cameraMode==='Broadcast'){camera.position.x=Math.sin(now*.0003)*.7;camera.position.y=5.5;camera.lookAt(0,1,0);}else if(GAME_STATE.match.cameraMode==='CloseBatting'){camera.position.set(0,3.2,13);camera.lookAt(0,1.2,7);}else{camera.position.set(0,3.8,-14);camera.lookAt(0,1,-1);}renderer.render(scene,camera);}
+  function setText(id,v){const e=document.getElementById(id);if(e)e.innerText=v;}
+  function openMainMenu(){document.getElementById('mainMenuOverlay').classList.remove('hidden');document.getElementById('gameplayControlHUD').classList.add('hidden');document.getElementById('liveScoreWidget').classList.add('hidden');document.getElementById('hudCamBtn').classList.add('hidden');document.getElementById('hudPauseBtn').classList.add('hidden');document.getElementById('matchInfo').classList.add('hidden');GAME_STATE.match.active=false;}
+  function openPlayerCreator(){document.getElementById('creatorModal').classList.remove('hidden');}function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}function openCareerHub(){document.getElementById('careerModal').classList.remove('hidden');}function openFranchiseAuction(){alert('Franchise Auction module is staged for the next development pass.');}function openStatisticsView(){alert(`Career stats: ${GAME_STATE.player.stats.runs} runs, ${GAME_STATE.player.stats.wickets} wickets.`);}function openCustomTeamCreator(){alert('Custom Team Creator module is staged for the next development pass.');}function openTournamentHub(){alert('Tournament Hub module is staged for the next development pass.');}function closeModal(id){document.getElementById(id).classList.add('hidden');}
+  function saveCreatedPlayer(e){e.preventDefault();GAME_STATE.player.name=document.getElementById('createName').value||'Arjun Sharma';GAME_STATE.player.age=+document.getElementById('createAge').value||18;GAME_STATE.player.state=document.getElementById('createState').value||'Punjab';GAME_STATE.player.role=document.getElementById('createRole').value||'Batting All-Rounder';setText('menuPlayerName',`${GAME_STATE.player.name} (${GAME_STATE.player.level})`);document.getElementById('careerPlayerBadge').classList.remove('hidden');closeModal('creatorModal');}
+  function startQuickMatchExecution(){const u=document.getElementById('qmUserTeam').value,o=document.getElementById('qmOppTeam').value,f=document.getElementById('qmFormat').value;closeModal('quickMatchModal');startMatchSession(u,o,f,true);}
+  function startCareerMatch(){closeModal('careerModal');startMatchSession('IND','AUS','T20',false);}
+  function makeXI(team){return PLAYER_POOLS[team]||PLAYER_POOLS.IND;}
+  function startMatchSession(userTeam,oppTeam,format,isQuick){const limit=format==='T20'?20:format==='ODI'||format==='50 Overs'?50:format==='Test'?90:format==='List A'?50:20;Object.assign(GAME_STATE.match,{active:false,userTeam,oppTeam,format,oversLimit:limit,innings:1,runs:0,wickets:0,balls:0,target:null,battingTeam:userTeam,bowlingTeam:oppTeam,batters:makeXI(userTeam).map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false})),bowlers:makeXI(oppTeam).map(n=>({name:n,overs:0,runs:0,wickets:0,balls:0})),striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null});GAME_STATE.match.isQuick=!!isQuick;showLineup();}
+  function showLineup(){const m=GAME_STATE.match;setText('lineupUserName',TEAM_NAMES[m.userTeam]||m.userTeam);setText('lineupOppName',TEAM_NAMES[m.oppTeam]||m.oppTeam);setText('lineupFormat',m.format);document.getElementById('userXI').innerHTML=m.batters.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${i===0?'Opener':i===1?'Opener':i===10?'Bowler':'Player'}</div></div>`).join('');document.getElementById('oppXI').innerHTML=m.bowlers.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${i<4?'Bowler':'Player'}</div></div>`).join('');document.getElementById('lineupOverlay').classList.remove('hidden');}
+  function continueToToss(){document.getElementById('lineupOverlay').classList.add('hidden');document.getElementById('tossOverlay').classList.remove('hidden');setText('tossTitle','Call the toss');setText('tossSub','Your captain calls. The opposition captain flips the coin.');document.getElementById('tossButtons').classList.remove('hidden');document.getElementById('tossDecision').classList.add('hidden');}
+  function callToss(call){const m=GAME_STATE.match;const result=Math.random()<.5?'Heads':'Tails';setText('tossCoin',result);const userWins=call===result;m.tossWinner=userWins?m.userTeam:m.oppTeam;setTimeout(()=>{document.getElementById('tossButtons').classList.add('hidden');if(userWins){setText('tossTitle','Toss won!');setText('tossSub',`${TEAM_NAMES[m.userTeam]} captain: choose your innings.`);document.getElementById('tossDecision').classList.remove('hidden');}else{const cpuDecision=Math.random()<.5?'bat':'bowl';setText('tossTitle',`${TEAM_NAMES[m.oppTeam]} won the toss`);setText('tossSub',`${TEAM_NAMES[m.oppTeam]} chose to ${cpuDecision} first.`);setTimeout(()=>beginMatch(cpuDecision==='bowl'?'bowl':'bat'),900);}},650);}
+  function chooseTossDecision(decision){beginMatch(decision);}
+  function beginMatch(decision){const m=GAME_STATE.match;document.getElementById('tossOverlay').classList.add('hidden');m.active=true;m.innings=1;if(decision==='bat'){m.battingTeam=m.userTeam;m.bowlingTeam=m.oppTeam;}else{m.battingTeam=m.oppTeam;m.bowlingTeam=m.userTeam;}resetInningsPlayers();showGameplay();showToast(`${TEAM_NAMES[m.battingTeam]} will BAT first`,`Toss complete • ${m.format}`);}
+  function resetInningsPlayers(){const m=GAME_STATE.match;m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;m.batters=makeXI(m.battingTeam).map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false}));m.bowlers=makeXI(m.bowlingTeam).map(n=>({name:n,overs:0,runs:0,wickets:0,balls:0}));updateHUD();}
+  function showGameplay(){document.getElementById('mainMenuOverlay').classList.add('hidden');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');}
+  function modesForBatting(){return GAME_STATE.match.battingTeam===GAME_STATE.match.userTeam;}
+  function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');}
+  function showToast(title,detail=''){setText('resultText',title);setText('resultDetail',detail);const e=document.getElementById('resultToast');e.classList.remove('hidden');clearTimeout(showToast.t);showToast.t=setTimeout(()=>e.classList.add('hidden'),1100);}
+  function selectPadDirection(dir){GAME_STATE.match.targetDir=dir;setText('activeDirLabel',dir);}
+  function triggerLoftedShot(){GAME_STATE.match.isLofted=!GAME_STATE.match.isLofted;showToast(GAME_STATE.match.isLofted?'LOFTED ON':'LOFTED OFF','Shot mode changed');}
+  function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active||m.pending)return;if(m.battingTeam===m.userTeam)playUserShot();else bowlUserDelivery();}
+  function playUserShot(){const m=GAME_STATE.match,s=m.batters[m.striker];m.pending=true;const roll=Math.random();let r=roll<.07?6:roll<.16?4:roll<.42?2:roll<.67?1:roll<.95?0:Math.random()<.5?1:0;const wicket=roll>=.95&&Math.random()<.45;animateDelivery(true,r,wicket);setTimeout(()=>{applyDelivery(r,wicket)},850);}
+  function bowlUserDelivery(){const m=GAME_STATE.match;m.pending=true;const r=Math.random()<.08?6:Math.random()<.2?4:Math.random()<.48?1:Math.random()<.63?2:0;const wicket=Math.random()<.08;animateDelivery(false,r,wicket);setTimeout(()=>{applyDelivery(r,wicket)},850);}
+  function animateDelivery(batting,r,wicket){const start=new THREE.Vector3(0,.6,batting?-8.5:8.5),end=new THREE.Vector3(0,.65,batting?8.0:-8.0);ballMesh.position.copy(start);ballPath=t=>{const p=start.clone().lerp(end,t);p.y+=Math.sin(Math.PI*t)*(2.4+(r>=4?1.5:0));p.x+=Math.sin(t*18)*.12;return p;};animUntil=performance.now()+900;if(batting){camera.position.set(0,3.1,13);camera.lookAt(0,1,7);}else{camera.position.set(0,4,-14);camera.lookAt(0,1,0);}}
+  function applyDelivery(r,wicket){const m=GAME_STATE.match,s=m.batters[m.striker],b=m.bowlers[m.currentBowler];m.pending=false;m.balls++;s.balls++;b.balls++;b.runs+=r;if(r===4)s.fours++;if(r===6)s.sixes++;if(wicket){s.out=true;m.wickets++;b.wickets++;showToast('WICKET!',`${s.name} is out`);if(m.wickets>=10){endInnings();return;}m.striker=Math.min(m.wickets+1,10);if(m.striker===m.nonStriker)m.striker=Math.min(m.striker+1,10);}else{s.runs+=r;m.runs+=r;if(r%2===1)[m.striker,m.nonStriker]=[m.nonStriker,m.striker];}if(m.balls%6===0)[m.striker,m.nonStriker]=[m.nonStriker,m.striker];if(b.balls%6===0)b.overs++;if(m.innings===2&&m.runs>=m.target){endMatch(`${TEAM_NAMES[m.battingTeam]} WIN`);return;}if(m.balls>=m.oversLimit*6){endInnings();return;}GAME_STATE.player.stamina=Math.max(20,GAME_STATE.player.stamina-(m.battingTeam===m.userTeam?(m.isLofted?1.8:.7):.4));updateHUD();if(r===4||r===6)showToast(r===6?'SIX!':'FOUR!',`${s.name} • ${m.targetDir}`);else if(wicket===false)showToast(r===0?'DOT BALL':`${r} RUN${r>1?'S':''}`,'Next delivery');}
+  function endInnings(){const m=GAME_STATE.match;m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});if(m.innings===1){m.target=m.runs+1;m.innings=2;[m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];m.active=true;resetInningsPlayers();showGameplay();showToast('INNINGS BREAK',`${TEAM_NAMES[m.battingTeam]} need ${m.target} to win`);}else{endMatch(m.runs===m.target-1?'MATCH TIED':`${TEAM_NAMES[m.inningsScores[0].team]} WIN`);}}
+  function endMatch(result){const m=GAME_STATE.match;if(m.active&&m.balls>0){m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});}m.active=false;document.getElementById('gameplayControlHUD').classList.add('hidden');document.getElementById('liveScoreWidget').classList.add('hidden');document.getElementById('hudCamBtn').classList.add('hidden');document.getElementById('hudPauseBtn').classList.add('hidden');setTimeout(()=>{showToast(result,'Match complete');openScorecard();},250);}
+  function openScorecard(){document.getElementById('scorecardOverlay').classList.remove('hidden');renderScorecard();}function closeScorecard(){document.getElementById('scorecardOverlay').classList.add('hidden');}
+  function renderScorecard(){const m=GAME_STATE.match;let html='';for(const inn of m.inningsScores){html+=`<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4"><div class="flex justify-between"><h3 class="font-black text-lg">${TEAM_NAMES[inn.team]||inn.team}</h3><b>${inn.runs}/${inn.wickets} (${Math.floor(inn.balls/6)}.${inn.balls%6})</b></div><h4 class="text-xs text-amber-400 uppercase mt-4 mb-2">Batting</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Batter</span><span>R</span><span>B</span><span>4s</span><span>6s</span></div>${inn.batters.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}${p.out?'':'*'}</span><span>${p.runs}</span><span>${p.balls}</span><span>${p.fours}</span><span>${p.sixes}</span></div>`).join('')}<h4 class="text-xs text-sky-400 uppercase mt-4 mb-2">Bowling</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Bowler</span><span>O</span><span>R</span><span>W</span><span>Dots</span></div>${inn.bowlers.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}</span><span>${p.overs}.${p.balls%6}</span><span>${p.runs}</span><span>${p.wickets}</span><span>—</span></div>`).join('')}</div>`;}document.getElementById('fullScorecard').innerHTML=html||'<div class="text-slate-400">Scorecard will appear after the first completed innings.</div>';}
+  function cycleMatchCamera(){const modes=['Broadcast','CloseBatting','BehindBowler'];const i=modes.indexOf(GAME_STATE.match.cameraMode);GAME_STATE.match.cameraMode=modes[(i+1)%modes.length];setText('camLabel',GAME_STATE.match.cameraMode);}
+  function triggerMilestoneCelebration(title,subtext){setText('celebrationTitle',title);setText('celebrationSubtext',subtext);document.getElementById('milestoneBanner').classList.remove('hidden');}function dismissCelebration(){document.getElementById('milestoneBanner').classList.add('hidden');}
+  window.onload=()=>{updateOrientationMode();attachLandscapeGestureListener();init3DEngine();};
+  </script>
+</body>
+</html>
