@@ -296,7 +296,7 @@
     </div>
 
     <!-- PREMIUM MATCH FLOW OVERLAYS -->
-    <div id="lineupOverlay" class="hidden absolute inset-0 z-40 bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
+    <div id="lineupOverlay" class="hidden absolute inset-0 z-[45] bg-slate-950/96 backdrop-blur-md p-5 overflow-auto pointer-events-auto">
       <div class="max-w-5xl mx-auto">
         <div class="flex justify-between items-center mb-4"><div><div class="text-[10px] text-amber-400 font-bold tracking-[0.25em]">MATCH PRESENTATION</div><h2 id="lineupTitle" class="text-2xl font-black">Playing XI</h2></div><div id="lineupFormat" class="text-xs text-slate-400"></div></div>
         <div class="grid grid-cols-2 gap-4">
@@ -306,10 +306,13 @@
         <button onclick="continueToToss()" class="mt-5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl">CONTINUE TO TOSS</button>
       </div>
     </div>
-    <div id="tossOverlay" class="hidden absolute inset-0 z-41 bg-slate-950/97 backdrop-blur-md flex items-center justify-center p-5">
+    <div id="tossOverlay" class="hidden absolute inset-0 z-[46] bg-slate-950/97 backdrop-blur-md flex items-center justify-center p-5 pointer-events-auto">
       <div class="w-full max-w-xl text-center bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl">
-        <div class="text-[10px] text-amber-400 font-bold tracking-[0.3em]">TOSS</div><h2 id="tossTitle" class="text-3xl font-black mt-1">Call the toss</h2><p id="tossSub" class="text-sm text-slate-400 mt-2">Choose heads or tails.</p>
-        <div id="tossCoin" class="mx-auto my-6 w-24 h-24 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-300 text-xl font-black">?</div>
+        <div class="text-[10px] text-amber-400 font-bold tracking-[0.3em]">TOSS</div>
+        <div class="flex justify-between text-xs mt-3 mb-1"><span id="tossCapUser" class="text-emerald-400 font-bold">Your captain</span><span id="tossCapOpp" class="text-amber-400 font-bold">Opp. captain</span></div>
+        <h2 id="tossTitle" class="text-3xl font-black mt-1">Call the toss</h2>
+        <p id="tossSub" class="text-sm text-slate-400 mt-2">The opposition captain flips. You call Heads or Tails.</p>
+        <div id="tossCoin" class="mx-auto my-6 w-24 h-24 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-300 text-xl font-black transition-transform duration-700">?</div>
         <div id="tossButtons" class="grid grid-cols-2 gap-3"><button onclick="callToss('Heads')" class="bg-slate-800 border border-slate-700 hover:border-amber-400 py-3 rounded-xl font-bold">HEADS</button><button onclick="callToss('Tails')" class="bg-slate-800 border border-slate-700 hover:border-amber-400 py-3 rounded-xl font-bold">TAILS</button></div>
         <div id="tossDecision" class="hidden grid grid-cols-2 gap-3 mt-3"><button onclick="chooseTossDecision('bat')" class="bg-emerald-600 py-3 rounded-xl font-black">BAT FIRST</button><button onclick="chooseTossDecision('bowl')" class="bg-sky-600 py-3 rounded-xl font-black">BOWL FIRST</button></div>
       </div>
@@ -332,7 +335,7 @@
       </div>
     </div>
 
-    <div id="mainMenuOverlay" class="cinema-menu absolute inset-0 z-30 flex flex-col justify-between p-6 pointer-events-auto">
+    <div id="mainMenuOverlay" class="cinema-menu absolute inset-0 z-[30] flex flex-col p-4 sm:p-6 pointer-events-auto overflow-hidden">
       
       <!-- Top Title Header -->
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -344,49 +347,61 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.6</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.7</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-auto">
-        <div onclick="enterCareer()" class="menu-card bg-slate-900/70 border border-amber-500/30 hover:border-amber-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl"><i class="fa-solid fa-user-ninja"></i></div>
-          <h3 class="font-bold text-white text-base mt-3 group-hover:text-amber-400" data-i18n="MENU_CAREER">Career</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_CAREER_SUB">Create a cricketer, then play the ladder.</p>
+      <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-3 pr-1">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div id="continueMatchCard" onclick="continueSavedMatch()" class="hidden menu-card bg-emerald-950/80 border border-emerald-400/50 hover:border-emerald-300 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-xl"><i class="fa-solid fa-play"></i></div>
+          <h3 class="font-bold text-white text-base mt-3">Continue Match</h3>
+          <p class="text-[11px] text-slate-400 mt-1" id="continueMatchMeta">Resume the saved innings.</p>
         </div>
         <div onclick="enterQuickPlay()" class="menu-card bg-slate-900/70 border border-emerald-500/30 hover:border-emerald-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl"><i class="fa-solid fa-bolt"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_QUICK_PLAY">Quick Play</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_QUICK_SUB">Teams, venue, weather — no career lock.</p>
+          <h3 class="font-bold text-white text-base mt-3">Quick Play</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Teams, venue, XI, toss — then play.</p>
         </div>
-        <div onclick="enterTraining()" class="menu-card bg-slate-900/70 border border-sky-500/30 hover:border-sky-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
-          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl"><i class="fa-solid fa-dumbbell"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_TRAINING">Training</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_TRAIN_SUB">Batting, bowling, keeping, fielding.</p>
+        <div onclick="enterCareer()" class="menu-card bg-slate-900/70 border border-amber-500/30 hover:border-amber-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl"><i class="fa-solid fa-user-ninja"></i></div>
+          <h3 class="font-bold text-white text-base mt-3">Career</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Create a cricketer, then play the ladder.</p>
         </div>
         <div onclick="enterTournaments()" class="menu-card bg-slate-900/70 border border-blue-500/30 hover:border-blue-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl"><i class="fa-solid fa-sitemap"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_TOURNAMENTS">Tournaments</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_TOURN_SUB">Career-locked competitions.</p>
+          <h3 class="font-bold text-white text-base mt-3">Tournament</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Career-locked competitions.</p>
+        </div>
+        <div onclick="openFranchiseAuction()" class="menu-card bg-slate-900/70 border border-purple-500/30 hover:border-purple-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl"><i class="fa-solid fa-gavel"></i></div>
+          <h3 class="font-bold text-white text-base mt-3">Franchise</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Sagar Premier auction.</p>
+        </div>
+        <div onclick="enterTraining()" class="menu-card bg-slate-900/70 border border-sky-500/30 hover:border-sky-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl"><i class="fa-solid fa-dumbbell"></i></div>
+          <h3 class="font-bold text-white text-base mt-3">Practice</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Batting, bowling, keeping, fielding.</p>
+        </div>
+        <div onclick="enterMultiplayer()" class="menu-card bg-slate-900/70 border border-rose-500/30 hover:border-rose-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl"><i class="fa-solid fa-globe"></i></div>
+          <h3 class="font-bold text-white text-base mt-3">Multiplayer</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Online rooms — architected, not live yet.</p>
         </div>
         <div onclick="enterCustomTeams()" class="menu-card bg-slate-900/70 border border-teal-500/30 hover:border-teal-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 text-xl"><i class="fa-solid fa-users"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_CUSTOM_TEAMS">Custom Teams</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_CUSTOM_SUB">Import JSON squads. Never eval.</p>
-        </div>
-        <div onclick="enterStatistics()" class="menu-card bg-slate-900/70 border border-amber-500/20 hover:border-amber-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl"><i class="fa-solid fa-chart-line"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_STATISTICS">Statistics</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_STATS_SUB">Runs, wickets, catches from play.</p>
+          <h3 class="font-bold text-white text-base mt-3">Custom</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Import JSON squads. Never eval.</p>
         </div>
         <div onclick="enterSettings()" class="menu-card bg-slate-900/70 border border-slate-600 hover:border-slate-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-200 text-xl"><i class="fa-solid fa-gear"></i></div>
-          <h3 class="font-bold text-white text-base mt-3" data-i18n="MENU_SETTINGS">Settings</h3>
-          <p class="text-[11px] text-slate-400 mt-1" data-i18n="MENU_SET_SUB">Graphics, language, audio, controls.</p>
+          <h3 class="font-bold text-white text-base mt-3">Settings</h3>
+          <p class="text-[11px] text-slate-400 mt-1">Graphics, language, audio, controls.</p>
         </div>
+      </div>
       </div>
 
       <div class="flex justify-between items-center border-t border-slate-800/80 pt-3 text-xs text-slate-400">
@@ -668,8 +683,18 @@
           </div>
         </div>
 
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div><label class="block text-slate-400 mb-1">Venue</label>
+            <select id="qmVenue" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option>Riverbend</option><option>Sagar Oval</option><option>Highland Park</option></select></div>
+          <div><label class="block text-slate-400 mb-1">Captain (your XI #)</label>
+            <select id="qmCaptain" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="0">1 — you</option><option value="1">2</option></select></div>
+          <div><label class="block text-slate-400 mb-1">Vice-captain</label>
+            <select id="qmVice" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="1">2</option><option value="2">3</option></select></div>
+          <div><label class="block text-slate-400 mb-1">Wicketkeeper</label>
+            <select id="qmKeeper" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="5">6</option><option value="4">5</option></select></div>
+        </div>
         <button onclick="startQuickMatchExecution()" class="btn-press glow-emerald w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase text-xs tracking-wider">
-          Start 3D Quick Match
+          Continue to Playing XI
         </button>
       </div>
     </div>
@@ -1352,7 +1377,16 @@
     renderer.render(scene,camera);
   }
   function setText(id,v){const e=document.getElementById(id);if(e)e.innerText=v;}
-  function openMainMenu(){ceremonyActive=false;if(confettiGroup)confettiGroup.visible=false;if(ballMesh)ballMesh.visible=true;document.getElementById('milestoneBanner').classList.add('hidden');document.getElementById('mainMenuOverlay').classList.remove('hidden');document.getElementById('gameplayControlHUD').classList.add('hidden');document.getElementById('liveScoreWidget').classList.add('hidden');document.getElementById('hudCamBtn').classList.add('hidden');document.getElementById('hudPauseBtn').classList.add('hidden');document.getElementById('matchInfo').classList.add('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.add('hidden');GAME_STATE.match.active=false;}
+  function hideEl(id){const e=document.getElementById(id);if(e)e.classList.add('hidden');}
+  function showEl(id){const e=document.getElementById(id);if(e)e.classList.remove('hidden');}
+  function hideMatchHud(){['gameplayControlHUD','liveScoreWidget','hudCamBtn','hudPauseBtn','matchInfo','liveBatterBowler','broadcastStrip','milestoneBanner'].forEach(hideEl);}
+  function hideFlowOverlays(){['lineupOverlay','tossOverlay','scorecardOverlay','quickMatchModal','careerModal','creatorModal','loadingOverlay'].forEach(hideEl);}
+  function leaveMenusForMatch(){hideEl('mainMenuOverlay');hideFlowOverlays();hideEl('loadingOverlay');}
+  function snapshotMatch(){try{localStorage.setItem('insan-cricket-match',JSON.stringify({v:3,match:GAME_STATE.match,t:Date.now()}));}catch(e){}}
+  function hasSavedMatch(){try{const d=JSON.parse(localStorage.getItem('insan-cricket-match')||'null');return !!(d&&d.match&&(d.match.active||d.match.paused)&&d.match.batters&&d.match.batters.length);}catch(e){return false;}}
+  function refreshContinueCard(){const card=document.getElementById('continueMatchCard');if(!card)return;if(!hasSavedMatch()){card.classList.add('hidden');return;}card.classList.remove('hidden');try{const d=JSON.parse(localStorage.getItem('insan-cricket-match'));const m=d.match;setText('continueMatchMeta',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' '+m.runs+'/'+m.wickets+' · '+Math.floor(m.balls/6)+'.'+(m.balls%6)+' ov');}catch(e){}}
+  function openMainMenu(){ceremonyActive=false;if(confettiGroup)confettiGroup.visible=false;if(ballMesh)ballMesh.visible=true;hideMatchHud();hideFlowOverlays();showEl('mainMenuOverlay');if(GAME_STATE.match&&GAME_STATE.match.active){GAME_STATE.match.paused=true;GAME_STATE.match.active=false;snapshotMatch();}refreshContinueCard();}
+  function enterMultiplayer(){uiClick();showToast('MULTIPLAYER','Architecture only — no live rooms yet. Use Quick Play.');}
   function openPlayerCreator(){document.getElementById('creatorModal').classList.remove('hidden');fillLocations();const p=GAME_STATE.player;const set=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};set('createName',p.name);set('createNick',p.nick);set('createAge',p.age);set('createNation',p.nationality);set('createState',p.state);set('createDistrict',p.district);set('createTown',p.town);set('createRole',p.role);set('createBatHand',p.batHand);set('createBowlStyle',p.bowlStyle);set('createBowlAction',p.bowlAction);set('createBatStyle',p.batStyle);if(p.look){if(document.getElementById('createSkin'))document.getElementById('createSkin').value='0x'+(p.look.skin>>>0).toString(16);set('createHair',p.look.hair);if(document.getElementById('createHairCol'))document.getElementById('createHairCol').value='0x'+(p.look.hairCol>>>0).toString(16);if(document.getElementById('createEyes'))document.getElementById('createEyes').value='0x'+(p.look.eyes>>>0).toString(16);set('createHeight',p.look.height);set('createBuild',p.look.build);}syncBowlActions();}
   function syncBowlActions(){const st=(document.getElementById('createBowlStyle')||{}).value||'';const pace=/fast|medium/i.test(st);const sel=document.getElementById('createBowlAction');if(!sel)return;const paceActs=[['short-run','Short run-up'],['medium-run','Medium run-up'],['long-run','Long run-up'],['high-arm','High-arm'],['side-on','Side-on'],['front-on','Front-on']];const spinActs=[['finger-spin','Finger spin'],['wrist-spin','Wrist spin'],['medium-run','Gather / pivot']];const acts=pace?paceActs:spinActs;const cur=sel.value;sel.innerHTML=acts.map(a=>'<option value="'+a[0]+'">'+a[1]+'</option>').join('');if(acts.some(a=>a[0]===cur))sel.value=cur;}
   function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}
@@ -1379,17 +1413,86 @@
   const SAGAR_TEAMS=['Sagar Lions','Coastal Titans','Highlanders','River Kings'];
   function runAuction(skip){const log=document.getElementById('auctionLog');const value=80+Math.round(GAME_STATE.player.stats.runs/10)+GAME_STATE.player.attrs.power;const bids=SAGAR_TEAMS.map(t=>({t,v:value+Math.floor(Math.random()*40)}));bids.sort((a,b)=>b.v-a.v);const win=bids[0];function finish(){GAME_STATE.player.contract={team:win.t,value:win.v};log.innerText=`SOLD\nPLAYER: ${GAME_STATE.player.name}\nTEAM: ${win.t}\nCONTRACT: ${win.v} IC`;saveCareerSlot();}if(skip){finish();return;}log.innerText='Opening bid...';let i=0;const id=setInterval(()=>{i++;log.innerText=bids.slice(0,i).map(b=>b.t+': '+b.v).join('\n');if(i>=bids.length){clearInterval(id);setTimeout(finish,400);}},500);}
   function teamCode(name){const m={India:'IND',Australia:'AUS',England:'ENG','South Africa':'SA'};return m[name]||name;}
-  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;closeModal('quickMatchModal');showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>{applyVenueLook();startMatchSession(u,o,f,true);});}
-  function startCareerMatch(){if(!GAME_STATE.player.created){openPlayerCreator();return;}closeModal('careerModal');showLoading(['LOAD_STADIUM','LOAD_PLAYERS','LOAD_COND'],()=>{applyVenueLook();startMatchSession('IND','AUS','T20',false);});}
+  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;const cap=+(document.getElementById('qmCaptain')||{value:0}).value||0;const vice=+(document.getElementById('qmVice')||{value:1}).value||1;const keeper=+(document.getElementById('qmKeeper')||{value:5}).value||5;const venue=(document.getElementById('qmVenue')||{}).value||'Riverbend';closeModal('quickMatchModal');hideEl('mainMenuOverlay');showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>{applyVenueLook();startMatchSession(u,o,f,true,{cap,vice,keeper,venue});});}
+  function startCareerMatch(){if(!GAME_STATE.player.created){openPlayerCreator();return;}closeModal('careerModal');hideEl('mainMenuOverlay');showLoading(['LOAD_STADIUM','LOAD_PLAYERS','LOAD_COND'],()=>{applyVenueLook();startMatchSession('IND','AUS','T20',false,{cap:0,vice:1,keeper:5,venue:'Riverbend'});});}
   function makeXI(team){let names=(PLAYER_POOLS[team]||PLAYER_POOLS.IND).slice();if(team==='IND'||team===GAME_STATE.match.userTeam)names[0]=GAME_STATE.player.name;return names;}
-  function startMatchSession(userTeam,oppTeam,format,isQuick){const limit=format==='T20'?20:format==='ODI'||format==='50 Overs'||format==='LIST A'?50:format==='TEST'?90:20;Object.assign(GAME_STATE.match,{active:false,userTeam,oppTeam,format,oversLimit:limit,innings:1,runs:0,wickets:0,balls:0,target:null,battingTeam:userTeam,bowlingTeam:oppTeam,batters:makeXI(userTeam).map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:i===0,keeper:i===5})),bowlers:makeXI(oppTeam).map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:i===0,keeper:i===5})),striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null});GAME_STATE.match.isQuick=!!isQuick;refreshOnFieldPlayers();showLineup();}
-  function showLineup(){const m=GAME_STATE.match;setText('lineupUserName',TEAM_NAMES[m.userTeam]||m.userTeam);setText('lineupOppName',TEAM_NAMES[m.oppTeam]||m.oppTeam);setText('lineupFormat',m.format+' • '+(m.pitchType||'Flat')+' • '+(m.weather||'Sunny'));document.getElementById('userXI').innerHTML=m.batters.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${p.keeper?'WK · ':''}${i<2?'Opener':i>7?'Bowler':'Batter'} · ${GAME_STATE.player.batHand}</div></div>`).join('');document.getElementById('oppXI').innerHTML=m.bowlers.map((p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${i<4?'Pace/spin':'Player'}</div></div>`).join('');document.getElementById('lineupOverlay').classList.remove('hidden');}
-  function continueToToss(){document.getElementById('lineupOverlay').classList.add('hidden');document.getElementById('tossOverlay').classList.remove('hidden');setText('tossTitle','Call the toss');setText('tossSub','Your captain calls. The opposition captain flips the coin.');document.getElementById('tossButtons').classList.remove('hidden');document.getElementById('tossDecision').classList.add('hidden');}
-  function callToss(call){const m=GAME_STATE.match;const result=Math.random()<.5?'Heads':'Tails';setText('tossCoin',result);const userWins=call===result;m.tossWinner=userWins?m.userTeam:m.oppTeam;setTimeout(()=>{document.getElementById('tossButtons').classList.add('hidden');if(userWins){setText('tossTitle','Toss won!');setText('tossSub',`${TEAM_NAMES[m.userTeam]} captain: choose your innings.`);document.getElementById('tossDecision').classList.remove('hidden');}else{const cpuDecision=Math.random()<.5?'bat':'bowl';setText('tossTitle',`${TEAM_NAMES[m.oppTeam]} won the toss`);setText('tossSub',`${TEAM_NAMES[m.oppTeam]} chose to ${cpuDecision} first.`);setTimeout(()=>beginMatch(cpuDecision==='bowl'?'bowl':'bat'),900);}},650);}
+  function xiRole(i,p){if(p.keeper)return 'WK';if(p.captain)return 'Batter';if(i<2)return 'Opener';if(i<6)return 'Batter';if(i<8)return 'All-rounder';return 'Bowler';}
+  function startMatchSession(userTeam,oppTeam,format,isQuick,opts){
+    opts=opts||{};
+    const cap=opts.cap||0, vice=opts.vice==null?1:opts.vice, keeper=opts.keeper==null?5:opts.keeper;
+    const limit=format==='T20'?20:format==='ODI'||format==='50 Overs'||format==='LIST A'?50:format==='TEST'?90:20;
+    const userNames=makeXI(userTeam), oppNames=makeXI(oppTeam);
+    GAME_STATE.match=Object.assign({},GAME_STATE.match,{
+      active:false,paused:false,userTeam,oppTeam,format,oversLimit:limit,innings:1,runs:0,wickets:0,balls:0,target:null,
+      battingTeam:userTeam,bowlingTeam:oppTeam,striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null,
+      venue:opts.venue||'Riverbend',isQuick:!!isQuick,userCap:cap,userVice:vice,userKeeper:keeper,
+      batters:userNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:i===cap,vice:i===vice,keeper:i===keeper,role:xiRole(i,{captain:i===cap,keeper:i===keeper})})),
+      bowlers:oppNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:i===0,vice:i===1,keeper:i===5,role:xiRole(i,{captain:i===0,keeper:i===5})}))
+    });
+    refreshOnFieldPlayers(); showLineup();
+  }
+  function showLineup(){
+    leaveMenusForMatch();
+    const m=GAME_STATE.match;
+    setText('lineupUserName',TEAM_NAMES[m.userTeam]||m.userTeam);
+    setText('lineupOppName',TEAM_NAMES[m.oppTeam]||m.oppTeam);
+    setText('lineupFormat',(m.format||'')+' • '+(m.venue||'Riverbend')+' • '+(m.pitchType||'Flat')+' • '+(m.weather||'Sunny'));
+    const row=(p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${p.vice?'VC · ':''}${p.keeper?'WK · ':''}${p.role||''}</div></div>`;
+    document.getElementById('userXI').innerHTML=m.batters.map(row).join('');
+    document.getElementById('oppXI').innerHTML=m.bowlers.map(row).join('');
+    showEl('lineupOverlay');
+  }
+  function continueToToss(){
+    hideEl('lineupOverlay'); hideEl('mainMenuOverlay'); hideEl('loadingOverlay');
+    const m=GAME_STATE.match;
+    const uc=(m.batters.find(p=>p.captain)||m.batters[0]||{}).name||'Captain';
+    const oc=(m.bowlers.find(p=>p.captain)||m.bowlers[0]||{}).name||'Captain';
+    setText('tossCapUser',uc+' (you call)'); setText('tossCapOpp',oc+' (flips)');
+    setText('tossTitle','Call the toss'); setText('tossSub',uc+' calls. '+oc+' flips the coin.');
+    setText('tossCoin','?');
+    const coin=document.getElementById('tossCoin'); if(coin){coin.style.transform='rotateY(0deg)';}
+    showEl('tossButtons'); hideEl('tossDecision'); showEl('tossOverlay');
+  }
+  function callToss(call){
+    const m=GAME_STATE.match; const coin=document.getElementById('tossCoin');
+    hideEl('tossButtons');
+    if(coin) coin.style.transform='rotateY(1080deg) scale(1.15)';
+    setText('tossSub','Coin in the air…');
+    setTimeout(()=>{
+      const result=Math.random()<.5?'Heads':'Tails'; setText('tossCoin',result);
+      const userWins=call===result; m.tossWinner=userWins?m.userTeam:m.oppTeam;
+      if(userWins){ setText('tossTitle',((m.batters.find(p=>p.captain)||{}).name||'Captain')+' won'); setText('tossSub','Your captain chooses innings.'); showEl('tossDecision'); }
+      else { const cpuDecision=Math.random()<.5?'bat':'bowl'; setText('tossTitle',((m.bowlers.find(p=>p.captain)||{}).name||'Opp')+' won'); setText('tossSub','Chose to '+cpuDecision+' first.'); setTimeout(()=>beginMatch(cpuDecision==='bowl'?'bowl':'bat'),1100); }
+    },900);
+  }
   function chooseTossDecision(decision){beginMatch(decision);}
-  function beginMatch(decision){const m=GAME_STATE.match;document.getElementById('tossOverlay').classList.add('hidden');m.active=true;m.innings=1;if(decision==='bat'){m.battingTeam=m.userTeam;m.bowlingTeam=m.oppTeam;}else{m.battingTeam=m.oppTeam;m.bowlingTeam=m.userTeam;}resetInningsPlayers();showGameplay();showToast(`${TEAM_NAMES[m.battingTeam]} will BAT first`,`Toss complete • ${m.format}`); icComment('TOSS_BAT');}
-  function resetInningsPlayers(){const m=GAME_STATE.match;m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;m.batters=makeXI(m.battingTeam).map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false}));m.bowlers=makeXI(m.bowlingTeam).map(n=>({name:n,overs:0,runs:0,wickets:0,balls:0}));if(scene)refreshOnFieldPlayers();updateHUD();}
-  function showGameplay(){document.getElementById('mainMenuOverlay').classList.add('hidden');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');updateHUD();}
+  function beginMatch(decision){
+    const m=GAME_STATE.match; hideEl('tossOverlay'); hideEl('lineupOverlay'); hideEl('mainMenuOverlay');
+    m.active=true; m.paused=false; m.innings=1;
+    if(decision==='bat'){m.battingTeam=m.userTeam;m.bowlingTeam=m.oppTeam;}else{m.battingTeam=m.oppTeam;m.bowlingTeam=m.userTeam;}
+    resetInningsPlayers(); showGameplay(); snapshotMatch();
+    showToast((TEAM_NAMES[m.battingTeam]||m.battingTeam)+' will BAT first','Toss complete • '+(m.format||'')); icComment('TOSS_BAT');
+  }
+  function resetInningsPlayers(){
+    const m=GAME_STATE.match;
+    const batNames=makeXI(m.battingTeam); const bowlNames=makeXI(m.bowlingTeam);
+    const userBatting=m.battingTeam===m.userTeam;
+    const cap=m.userCap||0, vice=m.userVice==null?1:m.userVice, keeper=m.userKeeper==null?5:m.userKeeper;
+    m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;
+    m.batters=batNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:userBatting?i===cap:i===0,vice:userBatting?i===vice:i===1,keeper:userBatting?i===keeper:i===5,role:xiRole(i,{captain:userBatting?i===cap:i===0,keeper:userBatting?i===keeper:i===5})}));
+    m.bowlers=bowlNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:!userBatting?i===cap:i===0,vice:!userBatting?i===vice:i===1,keeper:!userBatting?i===keeper:i===5,role:xiRole(i,{captain:!userBatting?i===cap:i===0,keeper:!userBatting?i===keeper:i===5})}));
+    if(scene)refreshOnFieldPlayers(); updateHUD();
+  }
+  function continueSavedMatch(){
+    try{
+      const d=JSON.parse(localStorage.getItem('insan-cricket-match')||'null');
+      if(!d||!d.match||!d.match.batters){showToast('NO MATCH','Start Quick Play');return;}
+      GAME_STATE.match=Object.assign(GAME_STATE.match,d.match); GAME_STATE.match.active=true; GAME_STATE.match.paused=false;
+      hideEl('mainMenuOverlay'); hideFlowOverlays(); refreshOnFieldPlayers(); showGameplay(); updateHUD();
+      showToast('MATCH RESUMED',(TEAM_NAMES[GAME_STATE.match.battingTeam]||'')+' '+GAME_STATE.match.runs+'/'+GAME_STATE.match.wickets);
+    }catch(e){showToast('LOAD FAILED','Start a new match');}
+  }
+  function showGameplay(){hideEl('mainMenuOverlay');hideEl('lineupOverlay');hideEl('tossOverlay');hideEl('loadingOverlay');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');updateHUD();}
   function modesForBatting(){return GAME_STATE.match.battingTeam===GAME_STATE.match.userTeam;}
   function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);setText('bcTeams',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' vs '+(TEAM_NAMES[m.bowlingTeam]||m.bowlingTeam));setText('bcScore',m.runs+'/'+m.wickets);setText('bcOvers',ov+' ov');setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker],b=m.bowlers[m.currentBowler];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');const sr=s&&s.balls?((s.runs/s.balls)*100).toFixed(0):'—';const econ=b&&b.balls?((b.runs/(b.balls/6))||0).toFixed(1):'—';setText('hudBatterLine',s?`${s.name} ${s.runs}(${s.balls}) 4s ${s.fours} 6s ${s.sixes} SR ${sr}`:'Batter —');setText('hudBowlerLine',b?`${b.name} ${b.overs}.${b.balls%6} ov · ${b.runs}/${b.wickets} · Econ ${econ}`:'Bowler —');}
   function showToast(title,detail=''){setText('resultText',title);setText('resultDetail',detail);const e=document.getElementById('resultToast');e.classList.remove('hidden');clearTimeout(showToast.t);showToast.t=setTimeout(()=>e.classList.add('hidden'),1100);}
@@ -1527,6 +1630,7 @@
     if(m.innings===2&&m.runs>=m.target){endMatch(`${TEAM_NAMES[m.battingTeam]} WIN`);return;}
     if(m.balls>=m.oversLimit*6){endInnings();return;}
     GAME_STATE.player.stamina=Math.max(20,GAME_STATE.player.stamina-(m.battingTeam===m.userTeam?(m.power==='MAXIMUM'?2.2:m.isLofted?1.8:.7):.4));
+    if(m.active) snapshotMatch();
     updateHUD();
     if(!wicket){
       if(r===6){ showToast('SIX!',`${s.name} • ${m.targetDir} • ${timing||''}`); batCrack(); crowdCheer(1400); icComment('SIX'); }
@@ -1535,11 +1639,11 @@
       else { showToast(r===0?'DOT BALL':`${r} RUN${r>1?'S':''}`,timing||'Next delivery'); if(r>0) batCrack(); }
     }
   }
-  function endInnings(){const m=GAME_STATE.match;m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});if(m.innings===1){m.target=m.runs+1;m.innings=2;[m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];m.active=true;resetInningsPlayers();showGameplay();showToast('INNINGS BREAK',`${TEAM_NAMES[m.battingTeam]} need ${m.target} to win`);}else{endMatch(m.runs===m.target-1?'MATCH TIED':`${TEAM_NAMES[m.inningsScores[0].team]} WIN`);}}
+  function endInnings(){const m=GAME_STATE.match;m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});if(m.innings===1){m.target=m.runs+1;m.innings=2;[m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];m.active=true;resetInningsPlayers();showGameplay();snapshotMatch();showToast('INNINGS BREAK',`${TEAM_NAMES[m.battingTeam]} need ${m.target} to win`);}else{endMatch(m.runs===m.target-1?'MATCH TIED':`${TEAM_NAMES[m.inningsScores[0].team]} WIN`);}}
   function endMatch(result){
     const m=GAME_STATE.match;
     if(m.active&&m.balls>0){m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});}
-    m.active=false; GAME_STATE.player.stats.matches++; GAME_STATE.player.stats.captainMatches++;
+    m.active=false; m.paused=false; try{localStorage.removeItem('insan-cricket-match');}catch(e){} GAME_STATE.player.stats.matches++; GAME_STATE.player.stats.captainMatches++;
     const userLabel=TEAM_NAMES[m.userTeam]||m.userTeam;
     const won=/\bWIN\b/.test(result)&&result.indexOf(userLabel)>=0;
     if(won) GAME_STATE.player.stats.captainWins++;
@@ -1586,7 +1690,7 @@
   function openScorecard(){document.getElementById('scorecardOverlay').classList.remove('hidden');renderScorecard();}function closeScorecard(){document.getElementById('scorecardOverlay').classList.add('hidden');}
   function renderScorecard(){const m=GAME_STATE.match;let html='';for(const inn of m.inningsScores){html+=`<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4"><div class="flex justify-between"><h3 class="font-black text-lg">${TEAM_NAMES[inn.team]||inn.team}</h3><b>${inn.runs}/${inn.wickets} (${Math.floor(inn.balls/6)}.${inn.balls%6})</b></div><h4 class="text-xs text-amber-400 uppercase mt-4 mb-2">Batting</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Batter</span><span>R</span><span>B</span><span>4s</span><span>6s</span></div>${inn.batters.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}${p.out?'':'*'}</span><span>${p.runs}</span><span>${p.balls}</span><span>${p.fours}</span><span>${p.sixes}</span></div>`).join('')}<h4 class="text-xs text-sky-400 uppercase mt-4 mb-2">Bowling</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Bowler</span><span>O</span><span>R</span><span>W</span><span>Dots</span></div>${inn.bowlers.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}</span><span>${p.overs}.${p.balls%6}</span><span>${p.runs}</span><span>${p.wickets}</span><span>—</span></div>`).join('')}</div>`;}document.getElementById('fullScorecard').innerHTML=html||'<div class="text-slate-400">Scorecard will appear after the first completed innings.</div>';}
   function cycleMatchCamera(){const modes=['Broadcast','Batting','Bowling','Fielding','Follow','Wicket','Celebration','Trophy'];const i=Math.max(0,modes.indexOf(GAME_STATE.match.cameraMode));GAME_STATE.match.cameraMode=modes[(i+1)%modes.length];setText('camLabel',GAME_STATE.match.cameraMode);}
-  function pauseMatchMenu(){openMainMenu();showToast('PAUSED','Match closed to menu — resume from Career/Quick Match');}
+  function pauseMatchMenu(){openMainMenu();showToast('PAUSED','Continue Match on the main menu restores this innings');}
   function triggerMilestoneCelebration(title,subtext,kind){
     setText('celebrationTitle',title); setText('celebrationSubtext',subtext);
     setText('celebrationTag', kind==='win'?'MATCH COMPLETE':kind==='wicket'?'BOWLING MILESTONE':kind==='catch'?'FIELDING HIGHLIGHT':'INNINGS MILESTONE REACHED');
@@ -1615,7 +1719,19 @@
       if(!GAME_STATE.settings.gfx) GAME_STATE.settings.gfx=recommendGfx();
       init3DEngine(); applyGraphics(); applyUiChrome();
       document.getElementById('loadingOverlay').classList.add('hidden');
+      refreshContinueCard();
       if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./sw.js'); }catch(swErr){} }
+      const demo=(location.search||'').match(/[?&]demo=([a-z]+)/); const dmode=demo&&demo[1];
+      if(dmode){
+        setTimeout(function(){
+          GAME_STATE.player.created=true;
+          startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'});
+          if(dmode==='xi'){ showLineup(); }
+          else if(dmode==='toss'){ continueToToss(); }
+          else if(dmode==='bowl'){ beginMatch('bowl'); GAME_STATE.match.cameraMode='Bowling'; setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 500); }
+          else { beginMatch('bat'); GAME_STATE.match.cameraMode='Broadcast'; setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 600); }
+        }, 800);
+      }
     }catch(e){ showLoadFail(); }
   };
   </script>
