@@ -10,6 +10,8 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
+v2.1 (Part 5): Continue Match restores the exact innings (v4 snapshot). Shot-map analytics (zones, dots, boundaries, dismissal vs bowling). Franchise desk: value, 2-year contracts, transfer, bonuses, strategy. Online modes labeled PLANNED — no fake rooms. Google save is honest (no OAuth client). In-game QA harness `web/tests.html` → `?demo=qa`. Proof in `proof/` part5.
+
 v2.0 (Part 4): Formats T20–Test including custom 30/60/90 Test overs. Difficulty BEGINNER→LEGEND changes timing windows and tactics, not cheat stats. Batting aim cursor with assistance levels. Shot map wagon wheel feeds bowling plans. Career opponents generated from the player's town/district/state/nation (not a forced Mansa XI vs Rampura XI picker). Test follow-on, declaration, 80-over new ball, sessions, ball wear. Walkout + intro. INSAN Shield group table / NRR / knockout / Super Over. Proof in `proof/` part4.
 
 v1.9 (Part 3 career): Town start as PLAYER — not captain. Trials can pass/fail/partial. Selection, dropping, mail, INSAN Sports bulletin, living world NPCs, fitness/workload, adaptive bowling/batting/captain AI from scouted deliveries, career records and Hall of Fame. Proof in `proof/` part3.
