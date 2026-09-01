@@ -148,6 +148,43 @@
     #aimWheel { background: radial-gradient(circle, rgba(15,23,42,.2) 0%, rgba(2,6,23,.75) 70%); }
     #timingSweet { left: 42%; right: 42%; }
 
+    #swipeStage {
+      position: absolute; inset: 0; z-index: 8;
+      pointer-events: auto; touch-action: none; background: transparent;
+    }
+    #shotCircleWrap {
+      position: absolute; z-index: 12; pointer-events: none;
+      opacity: 0; transform: scale(0.86);
+      transition: opacity .14s ease, transform .14s ease;
+    }
+    #shotCircleWrap.on { opacity: 1; transform: scale(1); pointer-events: auto; }
+    #shotCircleWrap.out { opacity: 0; transform: scale(0.8); pointer-events: none; }
+    #shotCircleWrap.pos-right { right: 20%; bottom: 26%; left: auto; }
+    #shotCircleWrap.pos-left { left: 16%; bottom: 26%; right: auto; }
+    #shotCircleWrap.pos-center { left: 50%; bottom: 24%; right: auto; }
+    .shot-circle {
+      position: relative; width: 100%; height: 100%; border-radius: 50%;
+      background: radial-gradient(circle at 48% 40%, rgba(30,41,59,.45) 0%, rgba(2,6,23,.88) 58%, rgba(2,6,23,.94) 100%);
+      border: 1px solid rgba(245,158,11,.42);
+      box-shadow: 0 10px 28px -10px rgba(0,0,0,.7), inset 0 0 0 1px rgba(248,250,252,.07);
+    }
+    .shot-wedge {
+      position: absolute; width: 22%; height: 22%; margin: -11% 0 0 -11%;
+      border-radius: 50%; font-size: 8px; font-weight: 800; letter-spacing: .03em;
+      color: #e2e8f0; background: rgba(15,23,42,.9); border: 1px solid rgba(148,163,184,.38);
+      line-height: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+      padding: 0; z-index: 2;
+    }
+    .shot-wedge.on { background: #f59e0b; color: #020617; border-color: #fde68a; box-shadow: 0 0 10px rgba(245,158,11,.45); }
+    #shotCircleCore {
+      position: absolute; left: 50%; top: 50%; width: 34%; height: 34%; margin: -17% 0 0 -17%;
+      border-radius: 50%; border: 0; z-index: 3;
+      background: radial-gradient(circle at 32% 30%, #fde68a, #f59e0b 55%, #b45309);
+      color: #020617; font-weight: 900; font-size: 9px; letter-spacing: .04em;
+      box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    }
+    html.reduce-motion #shotCircleWrap { transition: none !important; }
+
     @keyframes spinSlow { to { transform: rotate(360deg); } }
     .ic-spinner { animation: spinSlow 1.1s linear infinite; }
     #loadingOverlay { background: radial-gradient(ellipse at 50% 40%, rgba(15,23,42,.35), rgba(2,6,23,.92)); }
@@ -172,6 +209,13 @@
     
     <!-- 3D WebGL Canvas Layer -->
     <div id="canvas3dContainer" class="absolute inset-0 z-0 bg-slate-950"></div>
+    <div id="swipeStage"></div>
+    <div id="shotCircleWrap" class="hidden pos-right" aria-hidden="true">
+      <div class="shot-circle">
+        <div id="shotCircleWedges"></div>
+        <button type="button" id="shotCircleCore" onclick="confirmCircleShot(event)">DEF</button>
+      </div>
+    </div>
     <div id="aimCursor" class="hidden" style="left:50%;top:48%"></div>
     <div id="walkoutOverlay" class="hidden absolute inset-0 z-25 flex flex-col items-center justify-end pb-16 pointer-events-none">
       <div class="ic-broadcast rounded-xl px-6 py-3 text-center">
@@ -264,8 +308,8 @@
       
       <!-- Left Controls: Shot Direction / Bowl Line-Length -->
       <div id="gameplayLeftPad" class="pointer-events-auto bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl shadow-2xl backdrop-blur-md flex flex-col items-center">
-        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-2" id="leftPadTitle">Shot Direction</span>
-        <div id="shotPad">
+        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-2" id="leftPadTitle">Runs / Aim</span>
+        <div id="shotPad" class="hidden">
         <div class="grid grid-cols-3 gap-1.5 w-36">
           <button onclick="selectShot('COVER')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">COVER</button>
           <button onclick="selectShot('STRAIGHT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">DRIVE</button>
@@ -398,7 +442,7 @@
         <div id="tossDecision" class="hidden grid grid-cols-2 gap-3 mt-3"><button onclick="chooseTossDecision('bat')" class="bg-emerald-600 py-3 rounded-xl font-black">BAT FIRST</button><button onclick="chooseTossDecision('bowl')" class="bg-sky-600 py-3 rounded-xl font-black">BOWL FIRST</button></div>
       </div>
     </div>
-    <div id="scorecardOverlay" class="hidden absolute inset-0 z-35 bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
+    <div id="scorecardOverlay" class="hidden absolute inset-0 z-[47] bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
       <div class="max-w-5xl mx-auto"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-black">MATCH SCORECARD</h2><button onclick="closeScorecard()" class="text-slate-400">CLOSE</button></div><div id="fullScorecard"></div></div>
     </div>
     <div id="shotMapOverlay" class="hidden absolute inset-0 z-[36] bg-slate-950/94 backdrop-blur-md p-5 overflow-auto pointer-events-auto">
@@ -437,7 +481,7 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.2</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.3</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
@@ -940,6 +984,18 @@
           </div>
           <label class="flex items-center gap-2 text-slate-300"><input type="checkbox" id="setCursorVis" checked> Show batting cursor</label>
           <label>Cursor sensitivity <input id="setCursorSens" type="range" min="40" max="160" value="100" class="w-full"></label>
+          <label class="block text-slate-400">Shot assistance (circle + swipe)</label>
+          <select id="setShotAssist" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white">
+            <option value="full">Full</option><option value="partial" selected>Partial</option><option value="minimal">Minimal</option><option value="none">None</option>
+          </select>
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="block text-slate-400">Circle size</label>
+              <select id="setCircleSize" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></div>
+            <div><label class="block text-slate-400">Circle position</label>
+              <select id="setCirclePos" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="left">Left</option><option value="center">Center</option><option value="right" selected>Right</option></select></div>
+          </div>
+          <label>Swipe sensitivity <input id="setSwipeSens" type="range" min="40" max="160" value="100" class="w-full"></label>
+          <label>Swipe distance sensitivity <input id="setSwipeDist" type="range" min="40" max="160" value="100" class="w-full"></label>
           <label class="block text-slate-400">Camera shake</label>
           <select id="setShake" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"><option value="on">On</option><option value="off">Off</option></select>
         </div>
@@ -1093,7 +1149,7 @@
     SA:['Liam Ross','Ethan Adams','Noah James','Caleb Smith','Ryan Bell','Aiden Brown','Mason Hill','Luke White','Kai Jones','Dylan Green','Owen Reed']
   };
   const LOCATIONS={India:{admin:['Town','District','State','Nation'],states:['Punjab','Tamil Nadu','Maharashtra','Karnataka'],districts:{Punjab:['Bathinda','Amritsar','Ludhiana'],'Tamil Nadu':['Chennai','Madurai'],Maharashtra:['Mumbai','Pune'],Karnataka:['Bengaluru','Mysuru']},towns:{Bathinda:['Mansa','Rampura','Balianwali','Talwandi Sabo','Sangat'],Amritsar:['Ajnala','Majitha'],Ludhiana:['Raikot','Khanna'],Chennai:['Mylapore','Tondiarpet'],Madurai:['Thiruparankundram'],Mumbai:['Dadar','Andheri'],Pune:['Kothrud'],Bengaluru:['Malleshwaram'],Mysuru:['Nazarbad']}},Australia:{admin:['Suburb','City','State','Nation'],states:['Victoria','New South Wales'],districts:{Victoria:['Melbourne','Geelong'],'New South Wales':['Sydney','Newcastle']},towns:{Melbourne:['Footscray','Williamstown','Brunswick'],Geelong:['Belmont'],Sydney:['Parramatta','Bankstown'],Newcastle:['Hamilton']}},England:{admin:['Town','Borough','County','Nation'],states:['Yorkshire','Surrey'],districts:{Yorkshire:['Leeds','Bradford'],Surrey:['Guildford','Woking']},towns:{Leeds:['Headingley ward','Armley'],Bradford:['Manningham'],Guildford:['Stoke'],Woking:['Knaphill']}},Pakistan:{admin:['Town','District','Province','Nation'],states:['Punjab','Sindh'],districts:{Punjab:['Lahore','Rawalpindi'],Sindh:['Karachi']},towns:{Lahore:['Model Town','Iqbal Town'],Rawalpindi:['Saddar'],Karachi:['Clifton']}},'South Africa':{admin:['Suburb','City','Province','Nation'],states:['Gauteng','Western Cape'],districts:{Gauteng:['Johannesburg','Pretoria'],'Western Cape':['Cape Town']},towns:{Johannesburg:['Soweto','Sandton'],Pretoria:['Centurion'],'Cape Town':['Newlands']}},'New Zealand':{admin:['Suburb','City','Region','Nation'],states:['Auckland','Canterbury'],districts:{Auckland:['Auckland City'],Canterbury:['Christchurch']},towns:{'Auckland City':['Eden','Takapuna'],Christchurch:['Addington']}},'West Indies':{admin:['Town','Parish','Island','Region'],states:['Barbados','Jamaica','Trinidad'],districts:{Barbados:['Bridgetown'],Jamaica:['Kingston'],Trinidad:['Port of Spain']},towns:{Bridgetown:['Fontabelle','Hastings'],Kingston:['Sabina'],'Port of Spain':['St Clair']}},Bangladesh:{admin:['Town','District','Division','Nation'],states:['Dhaka','Chattogram'],districts:{Dhaka:['Dhaka'],Chattogram:['Chattogram']},towns:{Dhaka:['Mirpur','Dhanmondi'],Chattogram:['Agrabad']}},'Sri Lanka':{admin:['Town','District','Province','Nation'],states:['Western','Central'],districts:{Western:['Colombo'],Central:['Kandy']},towns:{Colombo:['Kollupitiya','Moratuwa'],Kandy:['Katugastota']}}};
-  const GAME_STATE={player:{created:false,name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',country:'India',birthplace:'Mansa',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'Town Cricket',leadership:'PLAYER',reputation:28,stamina:92,fitness:80,form:50,fatigue:0,workload:0,injuryRisk:8,injured:0,recent:[],mail:[],news:[],trophies:[],memories:[],scout:{lengths:{},vars:{},shots:{}},look:{skin:0xc47a4a,hair:'short',hairCol:0x1c1917,eyes:0x1e1b16,height:1,build:1},attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50,leadership:30},stats:{runs:0,wickets:0,matches:0,balls:0,bowlBalls:0,bowlRuns:0,fours:0,sixes:0,fifties:0,hundreds:0,oneFifties:0,twoHundreds:0,twoFifties:0,tripleHundreds:0,fiveFors:0,sixFors:0,sevenFors:0,eightFors:0,nineFors:0,tenFors:0,hatTricks:0,catches:0,stumpings:0,partnerships:0,captainWins:0,captainMatches:0,trophies:0},contract:null,retired:false,hof:null},world:{day:1,players:[],bulletin:[]},settings:{control:'team',autoPause:true,difficulty:'PROFESSIONAL',cursorAssist:'partial',cursorStyle:'diamond',cursorSize:'medium',cursorVisible:true,cursorSens:1,lang:'en',gfx:'HIGH',gfxMode:'quality',fps:60,uiScale:'medium',hiContrast:false,reduceMotion:false,haptics:true,shake:true,audio:{masterOn:true,master:.8,music:.5,crowd:.7,bat:.8,menu:.4,fxOn:true,commentary:true,commentaryVol:.85}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
+  const GAME_STATE={player:{created:false,name:'Arjun Sharma',nick:'AJ',age:18,nationality:'India',country:'India',birthplace:'Mansa',state:'Punjab',district:'Bathinda',town:'Mansa',role:'Batting All-Rounder',batHand:'Right-handed',batStyle:'Balanced',bowlStyle:'Right-arm fast',bowlAction:'medium-run',level:'Town Cricket',leadership:'PLAYER',reputation:28,stamina:92,fitness:80,form:50,fatigue:0,workload:0,injuryRisk:8,injured:0,recent:[],mail:[],news:[],trophies:[],memories:[],scout:{lengths:{},vars:{},shots:{}},look:{skin:0xc47a4a,hair:'short',hairCol:0x1c1917,eyes:0x1e1b16,height:1,build:1},attrs:{timing:52,power:48,defence:50,accuracy:46,pace:55,catching:50,composure:50,leadership:30},stats:{runs:0,wickets:0,matches:0,balls:0,bowlBalls:0,bowlRuns:0,fours:0,sixes:0,fifties:0,hundreds:0,oneFifties:0,twoHundreds:0,twoFifties:0,tripleHundreds:0,fiveFors:0,sixFors:0,sevenFors:0,eightFors:0,nineFors:0,tenFors:0,hatTricks:0,catches:0,stumpings:0,partnerships:0,captainWins:0,captainMatches:0,trophies:0},contract:null,retired:false,hof:null},world:{day:1,players:[],bulletin:[]},settings:{control:'team',autoPause:true,difficulty:'PROFESSIONAL',cursorAssist:'partial',cursorStyle:'diamond',cursorSize:'medium',cursorVisible:true,cursorSens:1,shotAssist:'partial',circleSize:'medium',circlePos:'right',swipeSens:1,swipeDist:1,lang:'en',gfx:'HIGH',gfxMode:'quality',fps:60,uiScale:'medium',hiContrast:false,reduceMotion:false,haptics:true,shake:true,audio:{masterOn:true,master:.8,music:.5,crowd:.7,bat:.8,menu:.4,fxOn:true,commentary:true,commentaryVol:.85}},match:{active:false,userTeam:'IND',oppTeam:'AUS',format:'T20',oversLimit:20,innings:1,battingTeam:'IND',bowlingTeam:'AUS',runs:0,wickets:0,balls:0,target:null,batters:[],bowlers:[],striker:0,nonStriker:1,currentBowler:0,cameraMode:'Broadcast',targetDir:'STRAIGHT',isLofted:false,power:'NORMAL',pending:false,history:[],inningsScores:[],tossWinner:null,variation:'stock'}};
   const I18N={
     en:{MENU_CAREER:'Career',MENU_QUICK_PLAY:'Quick Play',MENU_TRAINING:'Training',MENU_TOURNAMENTS:'Tournaments',MENU_CUSTOM_TEAMS:'Custom Teams',MENU_STATISTICS:'Statistics',MENU_SETTINGS:'Settings',MENU_TAG:'INSAN Sports · original 3D career · Riverbend Stadium',MENU_CAREER_SUB:'Create a cricketer, then play the ladder.',MENU_QUICK_SUB:'Teams, venue, weather — no career lock.',MENU_TRAIN_SUB:'Batting, bowling, keeping, fielding.',MENU_TOURN_SUB:'Career-locked competitions.',MENU_CUSTOM_SUB:'Import JSON squads. Never eval.',MENU_STATS_SUB:'Runs, wickets, catches from play.',MENU_SET_SUB:'Graphics, language, audio, controls.',LOAD_PITCH:'Preparing the pitch...',LOAD_STADIUM:'Loading stadium...',LOAD_TEAMS:'Preparing teams...',LOAD_CAREER:'Loading career...',LOAD_COND:'Setting match conditions...',LOAD_PLAYERS:'Preparing players...',LOAD_FAIL:'Unable to load this content.',RETRY:'RETRY',BACK:'BACK',CREATE_TITLE:'Create your cricketer',CREATE_SUB:'Career first-time setup. Saved locally. 3D look applies in matches.',MATCH_TOSS:'Toss',MATCH_BATTING:'Batting',MATCH_BOWLING:'Bowling'},
     hi:{MENU_CAREER:'कैरियर',MENU_QUICK_PLAY:'क्विक प्ले',MENU_TRAINING:'प्रशिक्षण',MENU_TOURNAMENTS:'टूर्नामेंट',MENU_CUSTOM_TEAMS:'कस्टम टीमें',MENU_STATISTICS:'आँकड़े',MENU_SETTINGS:'सेटिंग्स',LOAD_PITCH:'पिच तैयार हो रही है...',LOAD_STADIUM:'स्टेडियम लोड हो रहा है...',LOAD_TEAMS:'टीमें तैयार हो रही हैं...',LOAD_CAREER:'कैरियर लोड हो रहा है...',LOAD_FAIL:'यह सामग्री लोड नहीं हो सकी।',RETRY:'फिर कोशिश',BACK:'वापस'},
@@ -1172,7 +1228,7 @@
   }
   if(typeof speechSynthesis!=='undefined') speechSynthesis.addEventListener('voiceschanged',function(){});
   const FIELD_SETS={attacking:[[4.2,0,7.2],[3.6,0,3.1],[5.4,0,-0.6],[-4.8,0,6.4],[7.2,0,1.2],[-7.4,0,-1.6],[11,0,-9],[-2.4,0,9.1]],normal:[[8,0,2],[6,0,-2],[-7,0,1],[10,0,-8],[-10,0,-6],[14,0,8],[-12,0,6],[0,0,-16]],defensive:[[15,0,8],[-14,0,6],[12,0,-10],[-12,0,-8],[18,0,1],[-17,0,2],[0,0,-18],[9,0,4]]};
-  const SHOTS={DEFENCE:{name:'Defence',dir:'DEFENCE',loft:false,pwr:0.4,side:0},STRAIGHT:{name:'Straight drive',dir:'STRAIGHT',loft:false,pwr:0.75,side:0},COVER:{name:'Cover drive',dir:'COVER',loft:false,pwr:0.8,side:1},ONDRIVE:{name:'On drive',dir:'LEG',loft:false,pwr:0.78,side:-1},FLICK:{name:'Flick',dir:'LEG',loft:false,pwr:0.7,side:-1},GLANCE:{name:'Leg glance',dir:'LEG',loft:false,pwr:0.45,side:-1},CUT:{name:'Cut',dir:'CUT',loft:false,pwr:0.72,side:1},LATECUT:{name:'Late cut',dir:'CUT',loft:false,pwr:0.55,side:1},PULL:{name:'Pull',dir:'PULL',loft:false,pwr:0.9,side:-1,short:true},HOOK:{name:'Hook',dir:'PULL',loft:true,pwr:1.0,side:-1,short:true},SWEEP:{name:'Sweep',dir:'SWEEP',loft:false,pwr:0.65,side:-1},REVERSE:{name:'Reverse sweep',dir:'OFF',loft:false,pwr:0.7,side:1},PADDLE:{name:'Paddle',dir:'LEG',loft:false,pwr:0.5,side:-1},RAMP:{name:'Ramp',dir:'OFF',loft:true,pwr:0.85,side:1},SCOOP:{name:'Scoop',dir:'LEG',loft:true,pwr:0.8,side:-1},LOFT:{name:'Loft',dir:'STRAIGHT',loft:true,pwr:1.05,side:0},INSIDEOUT:{name:'Inside-out',dir:'COVER',loft:true,pwr:0.95,side:1},POWER:{name:'Power hit',dir:'STRAIGHT',loft:true,pwr:1.2,side:0}};
+  const SHOTS={DEFENCE:{name:'Defence',dir:'DEFENCE',loft:false,pwr:0.4,side:0},STRAIGHT:{name:'Straight drive',dir:'STRAIGHT',loft:false,pwr:0.75,side:0},COVER:{name:'Cover drive',dir:'COVER',loft:false,pwr:0.8,side:1},ONDRIVE:{name:'On drive',dir:'LEG',loft:false,pwr:0.78,side:-1},FLICK:{name:'Flick',dir:'LEG',loft:false,pwr:0.7,side:-1},GLANCE:{name:'Leg glance',dir:'LEG',loft:false,pwr:0.45,side:-1},CUT:{name:'Cut',dir:'CUT',loft:false,pwr:0.72,side:1},LATECUT:{name:'Late cut',dir:'CUT',loft:false,pwr:0.55,side:1},PULL:{name:'Pull',dir:'PULL',loft:false,pwr:0.9,side:-1,short:true},HOOK:{name:'Hook',dir:'PULL',loft:true,pwr:1.0,side:-1,short:true},SWEEP:{name:'Sweep',dir:'SWEEP',loft:false,pwr:0.65,side:-1},REVERSE:{name:'Reverse sweep',dir:'OFF',loft:false,pwr:0.7,side:1},PADDLE:{name:'Paddle',dir:'LEG',loft:false,pwr:0.5,side:-1},RAMP:{name:'Ramp',dir:'OFF',loft:true,pwr:0.85,side:1},SCOOP:{name:'Scoop',dir:'LEG',loft:true,pwr:0.8,side:-1},LOFT:{name:'Loft',dir:'STRAIGHT',loft:true,pwr:1.05,side:0},INSIDEOUT:{name:'Inside-out',dir:'COVER',loft:true,pwr:0.95,side:1},POWER:{name:'Power hit',dir:'STRAIGHT',loft:true,pwr:1.2,side:0},LEAVE:{name:'Leave',dir:'DEFENCE',loft:false,pwr:0,side:0,leave:true}};
   const PACE_VARS=['yorker','bouncer','short','slower','cutter','off-cutter','leg-cutter','inswinger','outswinger','cross-seam'];
   const SPIN_LEG=['leg-break','googly','top-spinner','slider','flipper'];
   const SPIN_OFF=['stock','arm-ball','flight','pace-change'];
@@ -1711,7 +1767,7 @@
   function setText(id,v){const e=document.getElementById(id);if(e)e.innerText=v;}
   function hideEl(id){const e=document.getElementById(id);if(e)e.classList.add('hidden');}
   function showEl(id){const e=document.getElementById(id);if(e)e.classList.remove('hidden');}
-  function hideMatchHud(){['gameplayControlHUD','liveScoreWidget','hudCamBtn','hudPauseBtn','matchInfo','liveBatterBowler','broadcastStrip','milestoneBanner','walkoutOverlay','introCard','sessionBanner','aimCursor'].forEach(hideEl);}
+  function hideMatchHud(){['gameplayControlHUD','liveScoreWidget','hudCamBtn','hudPauseBtn','matchInfo','liveBatterBowler','broadcastStrip','milestoneBanner','walkoutOverlay','introCard','sessionBanner','aimCursor','shotCircleWrap'].forEach(hideEl); hideShotCircle(true);}
   function hideFlowOverlays(){['lineupOverlay','tossOverlay','scorecardOverlay','quickMatchModal','careerModal','creatorModal','loadingOverlay','mailModal','hofModal','shotMapOverlay','walkoutOverlay','introCard','onlineModal','qaOverlay'].forEach(hideEl);}
   function leaveMenusForMatch(){hideEl('mainMenuOverlay');hideFlowOverlays();hideEl('loadingOverlay');}
   function snapshotMatch(){try{const m=GAME_STATE.match; localStorage.setItem('insan-cricket-match',JSON.stringify({v:4,match:m,names:{user:TEAM_NAMES[m.userTeam],opp:TEAM_NAMES[m.oppTeam],bat:TEAM_NAMES[m.battingTeam],bowl:TEAM_NAMES[m.bowlingTeam]},t:Date.now()}));}catch(e){}}
@@ -1751,7 +1807,7 @@
     if(msg.t==='start' && icRole==='guest'){ applyOnlineLobbyStart(msg); }
     if(msg.t==='input' && icHost){
       const m=GAME_STATE.match;
-      if(msg.kind==='shot'){ m.shotType=msg.shotType||m.shotType; m.power=msg.power||m.power; m.aimX=msg.aimX; m.aimY=msg.aimY; m.isLofted=!!msg.loft; if(msg.shotT!=null) m.shotT=msg.shotT; if(msg.go||!m.pending) startUserDelivery(true); }
+      if(msg.kind==='shot'){ m.shotType=msg.shotType||m.shotType; m.power=msg.power||m.power; m.aimX=msg.aimX; m.aimY=msg.aimY; m.isLofted=!!msg.loft; if(msg.swipe) m.swipe=msg.swipe; if(msg.shotT!=null) m.shotT=msg.shotT; if(msg.go||!m.pending) startUserDelivery(true); }
       if(msg.kind==='bowl'){ m.variation=msg.variation; m.bowlLine=msg.line; m.bowlLength=msg.length; if(m.battingTeam===m.userTeam){ if(!m.pending) startUserDelivery(true); } else if(!m.pending) bowlUserDelivery(); }
       if(msg.kind==='toss') callToss(msg.call);
     }
@@ -1980,11 +2036,11 @@
     m.superOver=true; m.oversLimit=1; m.balls=0; m.runs=0; m.wickets=0; m.target=null; m.innings=1; m.active=true; resetInningsPlayers(); showGameplay();
   }
   function openTrainingHub(){document.getElementById('trainingModal').classList.remove('hidden');const groups=[['Batting',[['Defence','defence'],['Timing','timing'],['Power hitting','power']]],['Bowling',[['Line & length','accuracy'],['Pace nets','pace']]],['Wicketkeeping',[['Composure','composure']]],['Fielding',[['Catching','catching']]]];document.getElementById('trainingGrid').innerHTML=groups.map(g=>`<div class="col-span-2 md:col-span-4 text-[10px] uppercase text-amber-400 mt-2">${g[0]}</div>`+g[1].map(d=>`<button onclick="doDrill('${d[1]}')" class="bg-slate-800 border border-slate-700 py-3 rounded-xl font-bold">${d[0]}</button>`).join('')).join('');}
-  function openSettingsHub(){document.getElementById('settingsModal').classList.remove('hidden');const s=GAME_STATE.settings;document.getElementById('setControl').value=s.control;document.getElementById('setAutoPause').checked=s.autoPause;document.getElementById('setDiff').value=s.difficulty; if(document.getElementById('setCursorAssist'))document.getElementById('setCursorAssist').value=s.cursorAssist||'partial'; if(document.getElementById('setCursorStyle'))document.getElementById('setCursorStyle').value=s.cursorStyle||'diamond'; if(document.getElementById('setCursorSize'))document.getElementById('setCursorSize').value=s.cursorSize||'medium'; if(document.getElementById('setCursorVis'))document.getElementById('setCursorVis').checked=s.cursorVisible!==false; if(document.getElementById('setCursorSens'))document.getElementById('setCursorSens').value=String(Math.round((s.cursorSens||1)*100));if(document.getElementById('setGfx'))document.getElementById('setGfx').value=s.gfx||'HIGH';if(document.getElementById('setGfxMode'))document.getElementById('setGfxMode').value=s.gfxMode||'quality';if(document.getElementById('setFps'))document.getElementById('setFps').value=String(s.fps||60);if(document.getElementById('setLang'))document.getElementById('setLang').value=s.lang||'en';if(document.getElementById('setUiScale'))document.getElementById('setUiScale').value=s.uiScale||'medium';if(document.getElementById('setHiContrast'))document.getElementById('setHiContrast').checked=!!s.hiContrast;if(document.getElementById('setReduceMotion'))document.getElementById('setReduceMotion').checked=!!s.reduceMotion;if(document.getElementById('setHaptics'))document.getElementById('setHaptics').checked=s.haptics!==false;if(document.getElementById('setShake'))document.getElementById('setShake').value=s.shake===false?'off':'on';if(document.getElementById('gfxRecommend'))document.getElementById('gfxRecommend').innerText=recommendGfx();const a=s.audio||{};if(document.getElementById('audMaster'))document.getElementById('audMaster').value=Math.round((a.master||.8)*100);if(document.getElementById('audMusic'))document.getElementById('audMusic').value=Math.round((a.music||.5)*100);if(document.getElementById('audCrowd'))document.getElementById('audCrowd').value=Math.round((a.crowd||.7)*100);if(document.getElementById('audBat'))document.getElementById('audBat').value=Math.round((a.bat||.8)*100);if(document.getElementById('audMenu'))document.getElementById('audMenu').value=Math.round((a.menu||.4)*100);if(document.getElementById('audMasterOn'))document.getElementById('audMasterOn').checked=a.masterOn!==false;if(document.getElementById('audFxOn'))document.getElementById('audFxOn').checked=a.fxOn!==false;if(document.getElementById('audCommOn'))document.getElementById('audCommOn').checked=a.commentary!==false;if(document.getElementById('audComm'))document.getElementById('audComm').value=Math.round((a.commentaryVol!=null?a.commentaryVol:.85)*100);showSetTab('game');}
+  function openSettingsHub(){document.getElementById('settingsModal').classList.remove('hidden');const s=GAME_STATE.settings;document.getElementById('setControl').value=s.control;document.getElementById('setAutoPause').checked=s.autoPause;document.getElementById('setDiff').value=s.difficulty; if(document.getElementById('setCursorAssist'))document.getElementById('setCursorAssist').value=s.cursorAssist||'partial'; if(document.getElementById('setCursorStyle'))document.getElementById('setCursorStyle').value=s.cursorStyle||'diamond'; if(document.getElementById('setCursorSize'))document.getElementById('setCursorSize').value=s.cursorSize||'medium'; if(document.getElementById('setCursorVis'))document.getElementById('setCursorVis').checked=s.cursorVisible!==false; if(document.getElementById('setCursorSens'))document.getElementById('setCursorSens').value=String(Math.round((s.cursorSens||1)*100)); if(document.getElementById('setShotAssist'))document.getElementById('setShotAssist').value=s.shotAssist||'partial'; if(document.getElementById('setCircleSize'))document.getElementById('setCircleSize').value=s.circleSize||'medium'; if(document.getElementById('setCirclePos'))document.getElementById('setCirclePos').value=s.circlePos||'right'; if(document.getElementById('setSwipeSens'))document.getElementById('setSwipeSens').value=String(Math.round((s.swipeSens||1)*100)); if(document.getElementById('setSwipeDist'))document.getElementById('setSwipeDist').value=String(Math.round((s.swipeDist||1)*100));if(document.getElementById('setGfx'))document.getElementById('setGfx').value=s.gfx||'HIGH';if(document.getElementById('setGfxMode'))document.getElementById('setGfxMode').value=s.gfxMode||'quality';if(document.getElementById('setFps'))document.getElementById('setFps').value=String(s.fps||60);if(document.getElementById('setLang'))document.getElementById('setLang').value=s.lang||'en';if(document.getElementById('setUiScale'))document.getElementById('setUiScale').value=s.uiScale||'medium';if(document.getElementById('setHiContrast'))document.getElementById('setHiContrast').checked=!!s.hiContrast;if(document.getElementById('setReduceMotion'))document.getElementById('setReduceMotion').checked=!!s.reduceMotion;if(document.getElementById('setHaptics'))document.getElementById('setHaptics').checked=s.haptics!==false;if(document.getElementById('setShake'))document.getElementById('setShake').value=s.shake===false?'off':'on';if(document.getElementById('gfxRecommend'))document.getElementById('gfxRecommend').innerText=recommendGfx();const a=s.audio||{};if(document.getElementById('audMaster'))document.getElementById('audMaster').value=Math.round((a.master||.8)*100);if(document.getElementById('audMusic'))document.getElementById('audMusic').value=Math.round((a.music||.5)*100);if(document.getElementById('audCrowd'))document.getElementById('audCrowd').value=Math.round((a.crowd||.7)*100);if(document.getElementById('audBat'))document.getElementById('audBat').value=Math.round((a.bat||.8)*100);if(document.getElementById('audMenu'))document.getElementById('audMenu').value=Math.round((a.menu||.4)*100);if(document.getElementById('audMasterOn'))document.getElementById('audMasterOn').checked=a.masterOn!==false;if(document.getElementById('audFxOn'))document.getElementById('audFxOn').checked=a.fxOn!==false;if(document.getElementById('audCommOn'))document.getElementById('audCommOn').checked=a.commentary!==false;if(document.getElementById('audComm'))document.getElementById('audComm').value=Math.round((a.commentaryVol!=null?a.commentaryVol:.85)*100);showSetTab('game');}
   function closeModal(id){document.getElementById(id).classList.add('hidden');}
   function fillLocations(){const n=document.getElementById('createNation').value;const L=LOCATIONS[n];if(!L)return;const st=document.getElementById('createState');st.value=L.states[0];const ds=L.districts[L.states[0]]||['—'];document.getElementById('createDistrict').value=ds[0];const tw=(L.towns[ds[0]]||['—'])[0];document.getElementById('createTown').value=tw; if(document.getElementById('createCountry'))document.getElementById('createCountry').value=n; if(document.getElementById('createBirth'))document.getElementById('createBirth').value=tw;}
   function saveCreatedPlayer(e){e.preventDefault();const p=GAME_STATE.player; const first=!p.created; p.name=document.getElementById('createName').value||'Arjun Sharma';p.nick=document.getElementById('createNick').value||'';p.age=+document.getElementById('createAge').value||18;p.nationality=document.getElementById('createNation').value;p.country=(document.getElementById('createCountry')||{}).value||p.nationality;p.birthplace=(document.getElementById('createBirth')||{}).value||document.getElementById('createTown').value;p.state=document.getElementById('createState').value;p.district=document.getElementById('createDistrict').value;p.town=document.getElementById('createTown').value;p.role=document.getElementById('createRole').value;p.batHand=document.getElementById('createBatHand').value;p.bowlStyle=document.getElementById('createBowlStyle').value;p.bowlAction=(document.getElementById('createBowlAction')||{}).value||'medium-run';p.batStyle=(document.getElementById('createBatStyle')||{}).value||'Balanced';p.look={skin:Number((document.getElementById('createSkin')||{}).value)||0xc47a4a,hair:(document.getElementById('createHair')||{}).value||'short',hairCol:Number((document.getElementById('createHairCol')||{}).value)||0x1c1917,eyes:Number((document.getElementById('createEyes')||{}).value)||0x1e1b16,height:+((document.getElementById('createHeight')||{}).value||1),build:+((document.getElementById('createBuild')||{}).value||1)};p.created=true; if(first){ p.level='Town Cricket'; p.leadership='PLAYER'; p.reputation=28; p.contract=null; p.retired=false; p.pendingTrial=null; sendMail('team','Welcome to '+(p.town||'town')+' XI', p.name+' is a squad player. Not captain. Not an international. Leadership and trials are earned.',null); publishNews(p.name+' joins town cricket at '+(p.town||'home')+'.'); ensureWorld(); } p.competition=LEVEL_COMP[p.level]||p.level; setText('batterStanceText',`${p.batHand} • ${p.batStyle}`);if(typeof refreshOnFieldPlayers==='function'&&scene)refreshOnFieldPlayers();saveCareerSlot();closeModal('creatorModal');openCareerHub();}
-  function applySettings(){const s=GAME_STATE.settings;s.control=document.getElementById('setControl').value;s.autoPause=document.getElementById('setAutoPause').checked;s.difficulty=document.getElementById('setDiff').value; if(document.getElementById('setCursorAssist'))s.cursorAssist=document.getElementById('setCursorAssist').value; if(document.getElementById('setCursorStyle'))s.cursorStyle=document.getElementById('setCursorStyle').value; if(document.getElementById('setCursorSize'))s.cursorSize=document.getElementById('setCursorSize').value; if(document.getElementById('setCursorVis'))s.cursorVisible=document.getElementById('setCursorVis').checked; if(document.getElementById('setCursorSens'))s.cursorSens=(+document.getElementById('setCursorSens').value||100)/100;if(document.getElementById('setGfx'))s.gfx=document.getElementById('setGfx').value;if(document.getElementById('setGfxMode'))s.gfxMode=document.getElementById('setGfxMode').value;if(document.getElementById('setFps'))s.fps=+document.getElementById('setFps').value||60;if(document.getElementById('setLang'))s.lang=document.getElementById('setLang').value||'en';if(document.getElementById('setUiScale'))s.uiScale=document.getElementById('setUiScale').value;if(document.getElementById('setHiContrast'))s.hiContrast=document.getElementById('setHiContrast').checked;if(document.getElementById('setReduceMotion'))s.reduceMotion=document.getElementById('setReduceMotion').checked;if(document.getElementById('setHaptics'))s.haptics=document.getElementById('setHaptics').checked;if(document.getElementById('setShake'))s.shake=document.getElementById('setShake').value!=='off';s.audio={masterOn:document.getElementById('audMasterOn')?document.getElementById('audMasterOn').checked:true,master:(+(document.getElementById('audMaster')||{value:80}).value)/100,music:(+(document.getElementById('audMusic')||{value:50}).value)/100,crowd:(+(document.getElementById('audCrowd')||{value:70}).value)/100,bat:(+(document.getElementById('audBat')||{value:80}).value)/100,menu:(+(document.getElementById('audMenu')||{value:40}).value)/100,fxOn:document.getElementById('audFxOn')?document.getElementById('audFxOn').checked:true,commentary:document.getElementById('audCommOn')?document.getElementById('audCommOn').checked:true,commentaryVol:(+(document.getElementById('audComm')||{value:85}).value)/100};applyGraphics();saveCareerSlot();closeModal('settingsModal');}
+  function applySettings(){const s=GAME_STATE.settings;s.control=document.getElementById('setControl').value;s.autoPause=document.getElementById('setAutoPause').checked;s.difficulty=document.getElementById('setDiff').value; if(document.getElementById('setCursorAssist'))s.cursorAssist=document.getElementById('setCursorAssist').value; if(document.getElementById('setCursorStyle'))s.cursorStyle=document.getElementById('setCursorStyle').value; if(document.getElementById('setCursorSize'))s.cursorSize=document.getElementById('setCursorSize').value; if(document.getElementById('setCursorVis'))s.cursorVisible=document.getElementById('setCursorVis').checked; if(document.getElementById('setCursorSens'))s.cursorSens=(+document.getElementById('setCursorSens').value||100)/100; if(document.getElementById('setShotAssist'))s.shotAssist=document.getElementById('setShotAssist').value; if(document.getElementById('setCircleSize'))s.circleSize=document.getElementById('setCircleSize').value; if(document.getElementById('setCirclePos'))s.circlePos=document.getElementById('setCirclePos').value; if(document.getElementById('setSwipeSens'))s.swipeSens=(+document.getElementById('setSwipeSens').value||100)/100; if(document.getElementById('setSwipeDist'))s.swipeDist=(+document.getElementById('setSwipeDist').value||100)/100;if(document.getElementById('setGfx'))s.gfx=document.getElementById('setGfx').value;if(document.getElementById('setGfxMode'))s.gfxMode=document.getElementById('setGfxMode').value;if(document.getElementById('setFps'))s.fps=+document.getElementById('setFps').value||60;if(document.getElementById('setLang'))s.lang=document.getElementById('setLang').value||'en';if(document.getElementById('setUiScale'))s.uiScale=document.getElementById('setUiScale').value;if(document.getElementById('setHiContrast'))s.hiContrast=document.getElementById('setHiContrast').checked;if(document.getElementById('setReduceMotion'))s.reduceMotion=document.getElementById('setReduceMotion').checked;if(document.getElementById('setHaptics'))s.haptics=document.getElementById('setHaptics').checked;if(document.getElementById('setShake'))s.shake=document.getElementById('setShake').value!=='off';s.audio={masterOn:document.getElementById('audMasterOn')?document.getElementById('audMasterOn').checked:true,master:(+(document.getElementById('audMaster')||{value:80}).value)/100,music:(+(document.getElementById('audMusic')||{value:50}).value)/100,crowd:(+(document.getElementById('audCrowd')||{value:70}).value)/100,bat:(+(document.getElementById('audBat')||{value:80}).value)/100,menu:(+(document.getElementById('audMenu')||{value:40}).value)/100,fxOn:document.getElementById('audFxOn')?document.getElementById('audFxOn').checked:true,commentary:document.getElementById('audCommOn')?document.getElementById('audCommOn').checked:true,commentaryVol:(+(document.getElementById('audComm')||{value:85}).value)/100};applyGraphics();saveCareerSlot();closeModal('settingsModal');}
   function saveCareerSlot(){try{localStorage.setItem('insan-cricket-career',JSON.stringify({player:GAME_STATE.player,settings:GAME_STATE.settings,world:GAME_STATE.world,tournament:GAME_STATE.tournament,v:4}));showToast('CAREER SAVED','Slot 1 · '+(GAME_STATE.player.town||'')+', '+(GAME_STATE.player.district||''));}catch(e){}}
   function loadCareerSlot(){try{const raw=localStorage.getItem('insan-cricket-career');if(!raw)return;const d=JSON.parse(raw);if(d.player){Object.assign(GAME_STATE.player,d.player);if(d.player.name)GAME_STATE.player.created=true; GAME_STATE.player.leadership=GAME_STATE.player.leadership||'PLAYER';}if(d.settings)Object.assign(GAME_STATE.settings,d.settings, {audio:Object.assign({},GAME_STATE.settings.audio||{},(d.settings&&d.settings.audio)||{})}); if(d.world) GAME_STATE.world=d.world; if(d.tournament) GAME_STATE.tournament=d.tournament; applyUiChrome();}catch(e){}}
   function doDrill(attr){const p=GAME_STATE.player;if(p.stamina<8){document.getElementById('trainingResult').innerText='Too tired. Rest first.';return;}p.stamina=Math.max(20,p.stamina-8);p.attrs[attr]=Math.min(99,(p.attrs[attr]||50)+1.5);p.fitness=Math.min(99,(p.fitness||80)+1.2);p.workload=(p.workload||0)+3;p.fatigue=Math.min(90,(p.fatigue||0)+4);document.getElementById('trainingResult').innerText=`${attr} now ${p.attrs[attr].toFixed(0)}. Fitness ${Math.round(p.fitness)}. Stamina ${Math.round(p.stamina)}%.`;saveCareerSlot();}
@@ -2119,19 +2175,193 @@
       showToast('MATCH RESUMED',(TEAM_NAMES[GAME_STATE.match.battingTeam]||GAME_STATE.match.battingTeam)+' '+GAME_STATE.match.runs+'/'+GAME_STATE.match.wickets+' · '+Math.floor(GAME_STATE.match.balls/6)+'.'+(GAME_STATE.match.balls%6)+' · '+s.name+' '+s.runs+'* vs '+b.name);
     }catch(e){showToast('LOAD FAILED','Start a new match');}
   }
-  function showGameplay(){hideEl('mainMenuOverlay');hideEl('lineupOverlay');hideEl('tossOverlay');hideEl('loadingOverlay');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');updateHUD(); bindAimInput(); showAim(true); const sw=document.getElementById('timingSweet'); if(sw){ const w=Math.max(8,diffCfg().timing*220); sw.style.left=(50-w/2)+'%'; sw.style.right=(50-w/2)+'%'; }}
+  function showGameplay(){hideEl('mainMenuOverlay');hideEl('lineupOverlay');hideEl('tossOverlay');hideEl('loadingOverlay');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Runs / Aim':'Line / Length');updateHUD(); bindAimInput(); bindBatSwipe(); showAim(true); const sw=document.getElementById('timingSweet'); if(sw){ const w=Math.max(8,diffCfg().timing*220); sw.style.left=(50-w/2)+'%'; sw.style.right=(50-w/2)+'%'; } if(modesForBatting()){ GAME_STATE.match.shotCommitted=false; showShotCircle(); } else hideShotCircle(true);}
   function modesForBatting(){return GAME_STATE.match.battingTeam===GAME_STATE.match.userTeam;}
-  function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);const chase=document.getElementById('hudChase');if(chase){if(m.innings===2&&m.target){chase.classList.remove('hidden');const left=Math.max(0,m.target-m.runs);const ballsLeft=Math.max(1,m.oversLimit*6-m.balls);const rrr=(left/(ballsLeft/6)).toFixed(2);chase.innerText='Need '+left+' · RRR '+rrr;}else chase.classList.add('hidden');}setText('bcTeams',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' vs '+(TEAM_NAMES[m.bowlingTeam]||m.bowlingTeam));setText('bcScore',m.runs+'/'+m.wickets);setText('bcOvers',ov+' ov');setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker],b=m.bowlers[m.currentBowler];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');const sr=s&&s.balls?((s.runs/s.balls)*100).toFixed(0):'—';const econ=b&&b.balls?((b.runs/(b.balls/6))||0).toFixed(1):'—';setText('hudBatterLine',s?`${s.name} ${s.runs}(${s.balls}) 4s ${s.fours} 6s ${s.sixes} SR ${sr}`:'Batter —');setText('hudBowlerLine',b?`${b.name} ${b.overs}.${b.balls%6} ov · ${b.runs}/${b.wickets} · M ${b.maidens||0} · Econ ${econ}`:'Bowler —');refreshBowlVarPad();}
+  function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);const chase=document.getElementById('hudChase');if(chase){if(m.innings===2&&m.target){chase.classList.remove('hidden');const left=Math.max(0,m.target-m.runs);const ballsLeft=Math.max(1,m.oversLimit*6-m.balls);const rrr=(left/(ballsLeft/6)).toFixed(2);chase.innerText='Need '+left+' · RRR '+rrr;}else chase.classList.add('hidden');}setText('bcTeams',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' vs '+(TEAM_NAMES[m.bowlingTeam]||m.bowlingTeam));setText('bcScore',m.runs+'/'+m.wickets);setText('bcOvers',ov+' ov');setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker],b=m.bowlers[m.currentBowler];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Runs / Aim':'Line / Length');const sr=s&&s.balls?((s.runs/s.balls)*100).toFixed(0):'—';const econ=b&&b.balls?((b.runs/(b.balls/6))||0).toFixed(1):'—';setText('hudBatterLine',s?`${s.name} ${s.runs}(${s.balls}) 4s ${s.fours} 6s ${s.sixes} SR ${sr}`:'Batter —');setText('hudBowlerLine',b?`${b.name} ${b.overs}.${b.balls%6} ov · ${b.runs}/${b.wickets} · M ${b.maidens||0} · Econ ${econ}`:'Bowler —');refreshBowlVarPad();}
   function showToast(title,detail=''){setText('resultText',title);setText('resultDetail',detail);const e=document.getElementById('resultToast');e.classList.remove('hidden');clearTimeout(showToast.t);showToast.t=setTimeout(()=>e.classList.add('hidden'),1100);}
   function selectPadDirection(dir){GAME_STATE.match.targetDir=dir;setText('activeDirLabel',dir);}
-  function selectShot(key){const sh=SHOTS[key]||SHOTS.STRAIGHT; GAME_STATE.match.shotType=key; GAME_STATE.match.targetDir=sh.dir; GAME_STATE.match.isLofted=!!sh.loft; setText('activeDirLabel',sh.name.split(' ')[0].slice(0,8).toUpperCase()); showToast(sh.name, sh.loft?'In the air — risk of catch':'Along the ground'); uiClick();}
+  function selectShot(key){const sh=SHOTS[key]||SHOTS.STRAIGHT; GAME_STATE.match.shotType=key; GAME_STATE.match.targetDir=sh.dir; GAME_STATE.match.isLofted=!!sh.loft; setText('activeDirLabel',sh.name.split(' ')[0].slice(0,8).toUpperCase()); highlightShotCircle(key); const core=document.getElementById('shotCircleCore'); if(core) core.textContent=SHOT_SHORT[key]||key.slice(0,4); showToast(sh.name, sh.leave?'Leave — judgement, not a guaranteed safe':(sh.loft?'In the air — risk of catch':'Along the ground')); uiClick();}
+  const SHOT_SHORT={DEFENCE:'DEF',STRAIGHT:'DRV',COVER:'CVR',ONDRIVE:'ON',FLICK:'FLK',GLANCE:'GLN',CUT:'CUT',LATECUT:'LATE',PULL:'PLL',HOOK:'HK',SWEEP:'SWP',REVERSE:'REV',PADDLE:'PAD',RAMP:'RMP',SCOOP:'SCP',LOFT:'LFT',INSIDEOUT:'IN',POWER:'PWR',LEAVE:'LEAVE'};
+  const SHOT_RING={STRAIGHT:0,LOFT:12,POWER:22,COVER:42,INSIDEOUT:58,CUT:78,RAMP:95,LATECUT:110,REVERSE:125,LEAVE:155,DEFENCE:180,SWEEP:215,PADDLE:230,SCOOP:248,FLICK:280,GLANCE:292,ONDRIVE:318,PULL:330,HOOK:345};
+  function shotAssistAmt(){const a=GAME_STATE.settings.shotAssist||GAME_STATE.settings.cursorAssist||'partial'; return a==='full'?0.82:a==='partial'?0.45:a==='minimal'?0.18:0;}
+  function contextShots(){
+    const m=GAME_STATE.match,p=GAME_STATE.player,len=m.bowlLength||'good',line=m.bowlLine||'middle',v=m.variation||'';
+    const spin=currentBowlIsSpin(); const skill=((p.attrs&&p.attrs.timing)||50)+((p.attrs&&p.attrs.power)||50);
+    const wk=m.wickets||0; const ballsLeft=Math.max(1,(m.oversLimit||20)*6-(m.balls||0));
+    const rrr=(m.innings===2&&m.target)?((m.target-m.runs)/(ballsLeft/6)):0;
+    const short=len==='short'||len==='bouncer'||v==='bouncer'||v==='short';
+    const full=len==='full'; const york=len==='yorker'||v==='yorker'; const wide=line==='wide-off'||line==='wide-leg';
+    let shots=[];
+    if(short){
+      if(line==='off'||line==='wide-off') shots=['CUT','PULL','RAMP','DEFENCE','LEAVE'];
+      else if(line==='leg'||line==='wide-leg') shots=['PULL','HOOK','GLANCE','DEFENCE','LEAVE'];
+      else shots=['PULL','HOOK','DEFENCE','LEAVE'];
+      if(skill>120 && shots.indexOf('RAMP')<0) shots.push('RAMP');
+    } else if(york){
+      if(line==='off'||line==='wide-off') shots=['DEFENCE','COVER','STRAIGHT'];
+      else if(line==='leg'||line==='wide-leg') shots=['DEFENCE','FLICK','GLANCE'];
+      else shots=['DEFENCE','FLICK','STRAIGHT'];
+    } else if(full){
+      if(line==='leg'||line==='wide-leg') shots=['FLICK','ONDRIVE','GLANCE','DEFENCE'];
+      else if(line==='off'||line==='wide-off') shots=['COVER','STRAIGHT','INSIDEOUT','DEFENCE'];
+      else shots=['STRAIGHT','COVER','FLICK','DEFENCE','LOFT'];
+    } else {
+      shots=['DEFENCE','STRAIGHT','COVER','FLICK'];
+      if(line==='off'||line==='wide-off') shots.push('CUT');
+      if(line==='leg'||line==='wide-leg'){ shots.push('GLANCE'); shots.push('ONDRIVE'); }
+    }
+    if(spin){
+      if(!short && shots.indexOf('SWEEP')<0) shots.push('SWEEP');
+      if(skill>115 && !short && shots.indexOf('REVERSE')<0) shots.push('REVERSE');
+      if((full||len==='good') && shots.indexOf('LOFT')<0) shots.push('LOFT');
+      if(shots.indexOf('FLICK')<0) shots.push('FLICK');
+      if(shots.indexOf('DEFENCE')<0) shots.unshift('DEFENCE');
+    }
+    if(wide){ if(shots.indexOf('LEAVE')<0) shots.push('LEAVE'); if(line==='wide-off' && shots.indexOf('CUT')<0) shots.push('CUT'); }
+    if(rrr>10 && wk<7){ if(shots.indexOf('LOFT')<0) shots.push('LOFT'); if(shots.indexOf('POWER')<0) shots.push('POWER'); }
+    if(wk>=7) shots=['DEFENCE'].concat(shots.filter(s=>s!=='POWER'&&s!=='HOOK'&&s!=='SCOOP'));
+    const seen={},out=[]; shots.forEach(s=>{ if(SHOTS[s]&&!seen[s]){ seen[s]=1; out.push(s);} });
+    if(out.indexOf('DEFENCE')<0) out.unshift('DEFENCE');
+    return out.slice(0,8);
+  }
+  function battingCircleAllowed(){
+    const m=GAME_STATE.match;
+    if(!m||!m.active||m.paused) return false;
+    if(!modesForBatting()) return false;
+    if(GAME_STATE.settings.control==='spectate') return false;
+    const hud=document.getElementById('gameplayControlHUD'); if(!hud||hud.classList.contains('hidden')) return false;
+    const menu=document.getElementById('mainMenuOverlay'); if(menu&&!menu.classList.contains('hidden')) return false;
+    const mile=document.getElementById('milestoneBanner'); if(mile&&!mile.classList.contains('hidden')) return false;
+    const card=document.getElementById('scorecardOverlay'); if(card&&!card.classList.contains('hidden')) return false;
+    const map=document.getElementById('shotMapOverlay'); if(map&&!map.classList.contains('hidden')) return false;
+    if(m.shotCommitted && m.pending) return false;
+    if(actionKind && /catch|drop|four|six|ground|celebrate|trophy|keeperCatch|stumped|runout|bowled|lbw|walkout/.test(actionKind)) return false;
+    return true;
+  }
+  function layoutShotCircle(){
+    const w=document.getElementById('shotCircleWrap'); if(!w)return;
+    const s=GAME_STATE.settings; const size=s.circleSize==='small'?148:s.circleSize==='large'?204:176;
+    w.style.width=size+'px'; w.style.height=size+'px';
+    w.classList.remove('pos-left','pos-right','pos-center');
+    const pos=s.circlePos||'right'; w.classList.add('pos-'+pos);
+    w.style.marginLeft=pos==='center'?(-size/2)+'px':'';
+  }
+  function refreshShotCircle(){
+    const host=document.getElementById('shotCircleWedges'); if(!host)return;
+    const list=contextShots(); const cur=GAME_STATE.match.shotType||'DEFENCE';
+    if(list.indexOf(cur)<0) GAME_STATE.match.shotType=list[0];
+    const pick=GAME_STATE.match.shotType||list[0];
+    const ordered=list.slice().sort(function(a,b){ return (SHOT_RING[a]||0)-(SHOT_RING[b]||0); });
+    const n=Math.max(1,ordered.length); const base=SHOT_RING[ordered[0]]||0;
+    host.innerHTML=ordered.map(function(k,i){
+      const deg=base + i*(360/n); const rad=deg*Math.PI/180;
+      const x=50+Math.sin(rad)*34; const y=50-Math.cos(rad)*34;
+      const on=k===pick?' on':'';
+      return '<button type="button" class="shot-wedge'+on+'" data-shot="'+k+'" style="left:'+x+'%;top:'+y+'%" onclick="selectShotFromCircle(\''+k+'\',event)">'+ (SHOT_SHORT[k]||k.slice(0,4))+'</button>';
+    }).join('');
+    const core=document.getElementById('shotCircleCore'); if(core) core.textContent=SHOT_SHORT[pick]||pick.slice(0,4);
+  }
+  function highlightShotCircle(key){
+    document.querySelectorAll('.shot-wedge').forEach(b=>b.classList.toggle('on', b.getAttribute('data-shot')===key));
+    const core=document.getElementById('shotCircleCore'); if(core) core.textContent=SHOT_SHORT[key]||(key||'').slice(0,4);
+  }
+  function selectShotFromCircle(key,ev){ if(ev){ ev.stopPropagation(); ev.preventDefault(); } if(GAME_STATE.match.shotCommitted) return; selectShot(key); if(GAME_STATE.settings.haptics&&navigator.vibrate) navigator.vibrate(6); }
+  function confirmCircleShot(ev){ if(ev){ ev.stopPropagation(); ev.preventDefault(); } selectShotFromCircle(GAME_STATE.match.shotType||'DEFENCE',ev); }
+  function showShotCircle(){
+    const w=document.getElementById('shotCircleWrap'); if(!w)return;
+    if(!battingCircleAllowed()){ hideShotCircle(true); return; }
+    layoutShotCircle(); refreshShotCircle();
+    w.classList.remove('hidden','out'); void w.offsetWidth; w.classList.add('on');
+    w.setAttribute('aria-hidden','false');
+  }
+  function hideShotCircle(now){
+    const w=document.getElementById('shotCircleWrap'); if(!w)return;
+    w.classList.remove('on'); w.setAttribute('aria-hidden','true');
+    if(now||GAME_STATE.settings.reduceMotion){ w.classList.add('hidden'); w.classList.remove('out'); return; }
+    w.classList.add('out');
+    clearTimeout(hideShotCircle.t);
+    hideShotCircle.t=setTimeout(function(){ if(w && !w.classList.contains('on')) w.classList.add('hidden'); }, 160);
+  }
+  function scheduleShotCircle(){
+    clearTimeout(scheduleShotCircle.t);
+    function tryShow(){
+      const m=GAME_STATE.match;
+      if(!m||!m.active) return;
+      const animing=animUntil && performance.now()<animUntil;
+      if(m.pending||ceremonyActive||animing||(actionKind&&/catch|drop|four|six|ground|celebrate|trophy|keeperCatch|stumped|runout|bowled|lbw/.test(actionKind))){ scheduleShotCircle.t=setTimeout(tryShow, 400); return; }
+      m.shotCommitted=false; m.swipe=null;
+      if(battingCircleAllowed()) showShotCircle();
+    }
+    scheduleShotCircle.t=setTimeout(tryShow, 650);
+  }
+  function swipeCfg(){ const s=GAME_STATE.settings; const sens=s.swipeSens||1; const distMul=s.swipeDist||1; return {minDist:Math.max(22, 40/distMul), minSpeed:Math.max(0.12, 0.32/sens), maxTime:480}; }
+  function nearestShotForAngle(ang,list){
+    list=list||contextShots(); if(!list.length) return 'DEFENCE';
+    const deg=((ang*180/Math.PI)+360)%360; let best=list[0], bd=999;
+    list.forEach(function(k){ const d=Math.abs((( (SHOT_RING[k]||0) -deg+540)%360)-180); if(d<bd){ bd=d; best=k; } });
+    return best;
+  }
+  function swipeAlignScore(key,sw){
+    if(!sw||!sw.ok) return 0.5;
+    const want=((SHOT_RING[key]||0)*Math.PI/180);
+    let d=Math.abs(sw.ang-want); while(d>Math.PI) d=Math.abs(d-Math.PI*2); if(d>Math.PI) d=Math.PI*2-d;
+    return Math.max(0, 1-d/(Math.PI*0.9));
+  }
+  function commitInvisibleSwipe(dx,dy,dist,speed,dt){
+    const m=GAME_STATE.match;
+    if(!m.active||!modesForBatting()||m.shotCommitted) return;
+    if(GAME_STATE.settings.control==='spectate') return;
+    const ang=Math.atan2(dx, -dy);
+    m.swipe={dx,dy,dist,speed,dt,ang,ok:true,t:performance.now(),dir:ang};
+    const sa=shotAssistAmt();
+    if(sa>=0.4){ const near=nearestShotForAngle(ang, contextShots()); if(near && (!m.shotType || sa>=0.7)) selectShot(near); }
+    if(GAME_STATE.settings.haptics&&navigator.vibrate) navigator.vibrate(10);
+    if(icOnline&&icRole==='guest'){
+      if(!m.pending){ sendOnline({t:'input',kind:'shot',go:true,shotType:m.shotType,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted,swipe:m.swipe}); return; }
+      if(m.shotT==null){ const now=performance.now(); m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); sendOnline({t:'input',kind:'shot',shotType:m.shotType,shotT:m.shotT,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted,swipe:m.swipe}); m.shotCommitted=true; hideShotCircle(); showToast(timingLabel(m.shotT),'Sent to host'); }
+      return;
+    }
+    if(!m.pending){ startUserDelivery(true); return; }
+    if(m.shotT==null){ const now=performance.now(); m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); m.shotCommitted=true; hideShotCircle(); showToast(timingLabel(m.shotT),'Swipe locked'); }
+  }
+  function swipeIgnoreTarget(t){
+    if(!t||!t.closest) return false;
+    return !!t.closest('#shotCircleWrap,#gameplayControlHUD,#topHud,#liveBatterBowler,#matchInfo,#broadcastStrip,#milestoneBanner,#resultToast,#lineupOverlay,#tossOverlay,#scorecardOverlay,#shotMapOverlay,#mainMenuOverlay,button,a,input,select,#aimWheel,#aimCursor');
+  }
+  function bindBatSwipe(){
+    if(bindBatSwipe.on) return; bindBatSwipe.on=true;
+    const stage=document.getElementById('swipeStage'); if(!stage) return;
+    let tr=null;
+    function pt(ev){ const e=ev.touches?ev.touches[0]:(ev.changedTouches?ev.changedTouches[0]:ev); return {x:e.clientX,y:e.clientY,t:performance.now()}; }
+    stage.addEventListener('pointerdown',function(ev){ if(swipeIgnoreTarget(ev.target)) { tr=null; return; } if(!battingCircleAllowed()) { tr=null; return; } const p=pt(ev); tr={x:p.x,y:p.y,t:p.t,maxd:0,cursor:false}; try{ stage.setPointerCapture(ev.pointerId); }catch(err){} });
+    stage.addEventListener('pointermove',function(ev){
+      if(!tr) return; const p=pt(ev); const dx=p.x-tr.x, dy=p.y-tr.y, d=Math.hypot(dx,dy); tr.maxd=Math.max(tr.maxd,d);
+      const dt=Math.max(1,p.t-tr.t), speed=d/dt, cfg=swipeCfg();
+      if(d>8 && speed<cfg.minSpeed*0.55){
+        tr.cursor=true;
+        const root=document.getElementById('gameRoot'); if(!root)return;
+        const r=root.getBoundingClientRect();
+        GAME_STATE.match.aimX=Math.max(-1,Math.min(1, ((p.x-r.left)/r.width)*2-1 ));
+        GAME_STATE.match.aimY=Math.max(-1,Math.min(1, -(((p.y-r.top)/r.height)*2-1) ));
+        updateAimCursor(0,0);
+      }
+      if(ev.cancelable && d>12) ev.preventDefault();
+    }, {passive:false});
+    function end(ev){
+      if(!tr) return; const p=pt(ev); const dx=p.x-tr.x, dy=p.y-tr.y, dist=Math.hypot(dx,dy); const dt=Math.max(1,p.t-tr.t); const speed=dist/dt; const cfg=swipeCfg(); const was=tr; tr=null;
+      const isSwipe=dist>=cfg.minDist && speed>=cfg.minSpeed && dt<=cfg.maxTime+200;
+      if(isSwipe) commitInvisibleSwipe(dx,dy,dist,speed,dt);
+    }
+    stage.addEventListener('pointerup',end); stage.addEventListener('pointercancel',function(){ tr=null; });
+    stage.addEventListener('touchend',end,{passive:true});
+  }
   function setPower(p){GAME_STATE.match.power=p;showToast('POWER '+p,'Perfect timing is not an automatic six');}
   function triggerLoftedShot(){selectShot(GAME_STATE.match.isLofted?'STRAIGHT':'LOFT');}
   function selectBowlVar(v){const legal=varsForStyle(currentBowlStyle()); if(legal.indexOf(v)<0){showToast('ILLEGAL VAR',currentBowlStyle());return;} GAME_STATE.match.variation=v;showToast('VARIATION',v);uiClick();}
   function selectLine(line){GAME_STATE.match.bowlLine=line; setText('activeDirLabel',String(line).toUpperCase()); showToast('LINE',line); uiClick();}
   function selectLength(len){GAME_STATE.match.bowlLength=len; const legal=varsForStyle(currentBowlStyle()); if((len==='yorker'||len==='bouncer'||len==='short')&&legal.indexOf(len)>=0) GAME_STATE.match.variation=len; showToast('LENGTH',len); uiClick();}
   function callRun(kind){const m=GAME_STATE.match; m.runCall=kind; if(kind==='yes'){m.wantedRuns=Math.max(1,m.wantedRuns||1); showToast('YES','Calling the single');} else if(kind==='wait'){m.wantedRuns=0; showToast('WAIT','Stay in the crease');} else if(kind==='2'){m.wantedRuns=2; showToast('TWO','Turning for two');} else if(kind==='3'){m.wantedRuns=3; showToast('THREE','Looking for three');} else if(kind==='dive'){showToast('DIVE','Stretching for the crease');} uiClick();}
-  function refreshBowlVarPad(){const pad=document.getElementById('bowlVarPad'); const shot=document.getElementById('shotPad'); const line=document.getElementById('bowlLinePad'); const batting=modesForBatting(); if(shot) shot.classList.toggle('hidden', !batting); if(line) line.classList.toggle('hidden', batting); if(!pad)return; pad.classList.toggle('hidden', batting); if(batting)return; const vars=varsForStyle(currentBowlStyle()); pad.innerHTML=vars.slice(0,9).map(v=>`<button onclick="selectBowlVar('${v}')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">${v.split('-')[0].slice(0,7)}</button>`).join('');}
+  function refreshBowlVarPad(){const pad=document.getElementById('bowlVarPad'); const shot=document.getElementById('shotPad'); const line=document.getElementById('bowlLinePad'); const batting=modesForBatting(); if(shot) shot.classList.add('hidden'); if(line) line.classList.toggle('hidden', batting); if(!pad)return; pad.classList.toggle('hidden', batting); if(batting)return; const vars=varsForStyle(currentBowlStyle()); pad.innerHTML=vars.slice(0,9).map(v=>`<button onclick="selectBowlVar('${v}')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">${v.split('-')[0].slice(0,7)}</button>`).join('');}
   function assistAmt(){const a=GAME_STATE.settings.cursorAssist||'partial'; return a==='full'?0.82:a==='partial'?0.45:a==='minimal'?0.18:0;}
   function shotAimHint(key){const sh=SHOTS[key]||SHOTS.STRAIGHT; return {x:(sh.side||0)*0.55, y:sh.loft?-0.45:0.25};}
   function applyAimToShot(m,sh){
@@ -2160,21 +2390,21 @@
   }
   function bindAimInput(){
     if(bindAimInput.on) return; bindAimInput.on=true;
-    const stage=document.getElementById('canvas3dContainer'); const wheel=document.getElementById('aimWheel');
+    const wheel=document.getElementById('aimWheel');
     function move(ev,el){ const r=el.getBoundingClientRect(); const cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left; const cy=(ev.touches?ev.touches[0].clientY:ev.clientY)-r.top; const nx=(cx/r.width)*2-1; const ny=-((cy/r.height)*2-1); GAME_STATE.match.aimX=Math.max(-1,Math.min(1,nx)); GAME_STATE.match.aimY=Math.max(-1,Math.min(1,ny)); updateAimCursor(0,0); if(ev.cancelable)ev.preventDefault(); }
-    if(stage){ stage.addEventListener('mousemove',e=>move(e,stage)); stage.addEventListener('touchmove',e=>move(e,stage),{passive:false}); }
-    if(wheel){ wheel.addEventListener('mousemove',e=>move(e,wheel)); wheel.addEventListener('touchmove',e=>move(e,wheel),{passive:false}); }
+    if(wheel){ wheel.addEventListener('mousemove',e=>move(e,wheel)); wheel.addEventListener('touchmove',e=>move(e,wheel),{passive:false}); wheel.addEventListener('pointerdown',e=>move(e,wheel)); }
   }
   function showAim(on){ const c=document.getElementById('aimCursor'); if(!c)return; if(on&&GAME_STATE.settings.cursorVisible!==false&&modesForBatting()) c.classList.remove('hidden'); else c.classList.add('hidden'); updateAimCursor(0,0); }
   function recordShotMap(r,wicket,kind,timing){
     const m=GAME_STATE.match; m.shotMap=m.shotMap||[];
     const dir=m.targetDir||'STRAIGHT'; const x=dir==='LEG'||dir==='PULL'||dir==='SWEEP'?-1:dir==='OFF'||dir==='CUT'||dir==='COVER'?1:0;
     const bat=(m.batters&&m.batters[m.striker])||{}; const bowl=(m.bowlers&&m.bowlers[m.currentBowler])||{};
-    m.shotMap.push({ball:m.balls+1,batter:bat.name,bowler:bowl.name,x:(m.aimX||x*0.4), y:(m.aimY||0), ox:0, oz:-8, ex:x*(r===6?0.9:r===4?0.75:0.35), ez:r>=4?-0.2:0.3, runs:r, wicket:!!wicket, shot:m.shotType, timing, kind, aerial:!!m.isLofted, dir, length:m.bowlLength, variation:m.variation, power:m.power, assist:GAME_STATE.settings.cursorAssist, boundary:r>=4, result:wicket?'wicket':(r>=4?'boundary':r?'runs':'dot')});
+    const sw=m.swipe||{};
+    m.shotMap.push({ball:m.balls+1,batter:bat.name,bowler:bowl.name,x:(m.aimX||x*0.4), y:(m.aimY||0), ox:0, oz:-8, ex:x*(r===6?0.9:r===4?0.75:0.35), ez:r>=4?-0.2:0.3, runs:r, wicket:!!wicket, shot:m.shotType, timing, kind, aerial:!!m.isLofted, dir, length:m.bowlLength, line:m.bowlLine, variation:m.variation, power:m.power, assist:GAME_STATE.settings.cursorAssist, shotAssist:GAME_STATE.settings.shotAssist, boundary:r>=4, result:wicket?'wicket':(r>=4?'boundary':r?'runs':'dot'), swipeAng:sw.ok?sw.ang:null, swipeDist:sw.ok?sw.dist:null, swipeSpeed:sw.ok?sw.speed:null, swipeAlign:m.swipeAlign, intentDir:dir, actualDir:dir, ballPos:{line:m.bowlLine,length:m.bowlLength,variation:m.variation}, cursor:{x:m.aimX||0,y:m.aimY||0}, contact:m.contactKind||null});
     m.cursorLog=m.cursorLog||[]; m.cursorLog.push({x:m.aimX||0,y:m.aimY||0,shot:m.shotType,timing,r,wicket}); m.cursorLog=m.cursorLog.slice(-80);
   }
-  function openShotMap(){ showEl('shotMapOverlay'); drawShotMap(); }
-  function closeShotMap(){ hideEl('shotMapOverlay'); }
+  function openShotMap(){ hideShotCircle(true); showEl('shotMapOverlay'); drawShotMap(); }
+  function closeShotMap(){ hideEl('shotMapOverlay'); if(GAME_STATE.match&&GAME_STATE.match.active&&modesForBatting()) scheduleShotCircle(); }
   function drawShotMap(){
     const c=document.getElementById('shotMapCanvas'); if(!c)return; const g=c.getContext('2d'); const w=c.width,h=c.height,cx=w/2,cy=h/2;
     g.fillStyle='#064e3b'; g.beginPath(); g.arc(cx,cy,w*0.46,0,Math.PI*2); g.fill();
@@ -2225,6 +2455,15 @@
   function resolveShot(){
     const m=GAME_STATE.match,p=GAME_STATE.player,D=diffCfg();
     const t=m.shotT==null?0.5:m.shotT; const label=timingLabel(t);
+    if(m.shotType==='LEAVE'){
+      const line=m.bowlLine||'middle', len=m.bowlLength||'good', v=m.variation||'';
+      const on=line==='middle'||line==='off'||line==='leg';
+      const dang=on && len!=='short' && len!=='bouncer' && v!=='bouncer' && v!=='wide';
+      let wicket=false,r=0; m.dismiss=null;
+      if(dang && Math.random()<0.28){ wicket=true; m.dismiss=Math.random()<0.55?'bowled':'lbw'; }
+      m.lastTiming='LEAVE'; m.lastQuality=dang?0.32:0.82; m.lastShot='Leave'; m.contactKind=wicket?'miss':'leave'; m.running=0;
+      return {r,wicket,label:'LEAVE',quality:m.lastQuality};
+    }
     const sh=SHOTS[m.shotType]||SHOTS.STRAIGHT;
     const powerMul=({DEFENSIVE:0.4,SOFT:0.55,NORMAL:0.75,STRONG:0.9,POWER:1.0,MAXIMUM:1.15}[m.power]||0.75)*(sh.pwr||0.75);
     const stam=p.stamina/100; const form=((p.form||50)-50)/400; const fit=((p.fitness||80)-70)/500;
@@ -2232,6 +2471,20 @@
     const win=Math.max(0.04,D.timing); const contact=1-Math.min(1,Math.abs(t-0.5)/win);
     applyAimToShot(m,sh);
     let quality=contact*0.48+skill*0.2+stam*0.08+form+fit-((p.fatigue||0)/500)-(p.injured?0.12:0)-(D.err||0)*0.15;
+    const sw=m.swipe; const sa=shotAssistAmt();
+    if(sw&&sw.ok){
+      const align=swipeAlignScore(m.shotType,sw);
+      m.swipeAlign=align;
+      quality+=(align-0.5)*0.16*(1-sa*0.35);
+      if(align<0.32) quality-=0.12;
+      else if(align>0.78) quality+=0.04;
+      const spd=Math.min(1,(sw.speed||0)/1.6);
+      if(m.power==='DEFENSIVE'&&spd>0.75) quality-=0.04;
+      if(m.power==='MAXIMUM'&&spd<0.22) quality-=0.05;
+    } else {
+      m.swipeAlign=0.5;
+      if(sa<0.4) quality-=0.035;
+    }
     const pt=m.pitchType||'Flat'; if(pt==='Green'||pt==='Damp')quality-=0.04; if(pt==='Flat')quality+=0.03; if(pt==='Bouncy'||pt==='Hard')quality-=0.02; if(pt==='Slow')quality-=0.03; if(pt==='Dusty'||pt==='Cracked')quality-=(currentBowlIsSpin()?-0.04:0.03);
     if(m.weather==='Overcast'||m.weather==='Humidity')quality-=0.03; if(m.weather==='Fog')quality-=0.05; if(m.weather==='Wind')quality-=0.02;
     if((m.ballCond==='old'||m.ballAge>50)&&currentBowlIsSpin()) quality-=0.03;
@@ -2246,6 +2499,7 @@
     if(v==='yorker'&&m.shotType==='DEFENCE') quality+=0.05;
     if(/googly|slider|arm-ball/.test(v)&&m.shotType==='SWEEP') quality-=0.08;
     if(v==='outswinger'&&(m.shotType==='CUT'||m.shotType==='LATECUT')) { m.edgeChance=0.22; quality-=0.04; } else m.edgeChance=0.06;
+    if(sw&&sw.ok&&(m.swipeAlign||0)<0.32) m.edgeChance=Math.max(m.edgeChance||0, 0.2);
     if(m.bowlLine==='off'&&/LEG|PULL|SWEEP|GLANCE|FLICK|ONDRIVE/i.test(m.shotType||'')) quality-=0.1;
     if(m.bowlLine==='leg'&&/COVER|CUT|INSIDEOUT|REVERSE/i.test(m.shotType||'')) quality-=0.1;
     if(m.bowlLength==='yorker'&&sh.short) quality-=0.18;
@@ -2276,11 +2530,16 @@
     if(!wicket&&currentBowlIsSpin()&&m.power==='MAXIMUM'&&quality<0.35&&Math.random()<0.12){wicket=true;r=0;m.dismiss='stumped';}
     if(!wicket&&(m.runCall==='yes'||m.wantedRuns>=2)&&r>=1&&r<=2&&Math.random()<0.08){wicket=true;r=0;m.dismiss='runout';}
     if(wicket&&!m.dismiss){if(loft||Math.random()<0.4)m.dismiss=Math.random()<0.3?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}
+    if(quality<0.12) m.contactKind='miss';
+    else if(m.dismiss==='keeperCatch'||((m.edgeChance||0)>0.15 && quality<0.42)) m.contactKind='edge';
+    else if(quality<0.3) m.contactKind='mishit';
+    else if(m.shotType==='DEFENCE'||m.power==='DEFENSIVE') m.contactKind='defence';
+    else m.contactKind='bat';
     m.lastTiming=label; m.lastQuality=quality; m.lastShot=(sh.name||m.shotType||''); m.running=r>=1&&r<=3?r:0; return {r,wicket,label,quality};
   }
   function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active)return;if(GAME_STATE.settings.control==='spectate'){simulateNextBall();return;}
-    if(icOnline&&icRole==='guest'){ if(modesForBatting()){ if(!m.pending){ sendOnline({t:'input',kind:'shot',go:true,shotType:m.shotType,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted}); return;} if(m.shotT==null){ const now=performance.now(); m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); sendOnline({t:'input',kind:'shot',shotType:m.shotType,shotT:m.shotT,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted}); showToast(timingLabel(m.shotT),'Sent to host'); } return; } sendOnline({t:'input',kind:'bowl',variation:m.variation,line:m.bowlLine,length:m.bowlLength}); return; }
-    if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900));showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
+    if(icOnline&&icRole==='guest'){ if(modesForBatting()){ if(!m.pending){ sendOnline({t:'input',kind:'shot',go:true,shotType:m.shotType,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted,swipe:m.swipe||null}); return;} if(m.shotT==null){ const now=performance.now(); m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); sendOnline({t:'input',kind:'shot',shotType:m.shotType,shotT:m.shotT,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted,swipe:m.swipe||null}); m.shotCommitted=true; hideShotCircle(); showToast(timingLabel(m.shotT),'Sent to host'); } return; } sendOnline({t:'input',kind:'bowl',variation:m.variation,line:m.bowlLine,length:m.bowlLength}); return; }
+    if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); m.shotCommitted=true; hideShotCircle(); showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
   function scoutBucket(map,key){ map[key]=map[key]||{runs:0,balls:0,out:0,sr:0}; return map[key]; }
   function recordScout(r,wicket){
     const p=GAME_STATE.player,m=GAME_STATE.match; p.scout=p.scout||{lengths:{},vars:{},shots:{}};
@@ -2323,7 +2582,7 @@
     else if(overRuns<=3 && m.wickets<8){ setFieldSet('attacking'); showToast('CAPTAIN AI','Attacking field after a tight over.'); }
     const bowler=m.bowlers[m.currentBowler]; if(bowler && bowler.balls>=24) { changeBowler(); showToast('CAPTAIN AI','Workload — new bowler.'); }
   }
-  function startUserDelivery(batting){const m=GAME_STATE.match;if(m.pending)return;m.pending=true;m.shotT=null; aiBowlPlan(); const vars=varsForStyle(currentBowlStyle()); if(!m.variation||vars.indexOf(m.variation)<0) m.variation=vars[Math.floor(Math.random()*vars.length)]; const preview=resolveShot();animateDelivery(batting,preview.r,preview.wicket);m.animUntil=animUntil;setTimeout(()=>{if(m.shotT==null)m.shotT=0.92;const res=resolveShot();afterBallPitch(res.r,res.wicket,res.label);},1100);}
+  function startUserDelivery(batting){const m=GAME_STATE.match;if(m.pending)return;m.pending=true;m.shotT=null;m.shotCommitted=false; aiBowlPlan(); const vars=varsForStyle(currentBowlStyle()); if(!m.variation||vars.indexOf(m.variation)<0) m.variation=vars[Math.floor(Math.random()*vars.length)]; if(batting&&modesForBatting()) showShotCircle(); const preview=resolveShot();animateDelivery(batting,preview.r,preview.wicket);m.animUntil=animUntil;setTimeout(()=>{if(m.shotT==null)m.shotT=0.92; m.shotCommitted=true; hideShotCircle(); const res=resolveShot();afterBallPitch(res.r,res.wicket,res.label);},1100);}
   function playUserShot(){startUserDelivery(true);}
   function bowlUserDelivery(){const m=GAME_STATE.match;m.pending=true; aiBatterPlan(); aiCaptainTick(); const vars=varsForStyle(currentBowlStyle());if(!m.variation||vars.indexOf(m.variation)<0)m.variation=vars[Math.floor(Math.random()*vars.length)]; let wicketChance=/yorker|googly|flipper/.test(m.variation)?0.16:0.08; if(m.bowlLength==='yorker')wicketChance+=0.04; if(m.bowlLine==='off'&&/outswing/.test(m.variation||''))wicketChance+=0.03; if(m.cpuShot==='DEFENCE') wicketChance*=0.7; const wicket=Math.random()<wicketChance; let r=0; if(!wicket){ const roll=Math.random(); if(m.cpuShot==='DEFENCE') r=roll<.7?0:1; else if(m.cpuShot==='POWER'||m.cpuShot==='LOFT') r=roll<.12?6:roll<.32?4:roll<.55?1:roll<.7?2:0; else r=roll<.06?6:roll<.22?4:roll<.5?1:roll<.68?2:0; } if(wicket)m.dismiss=/yorker/.test(m.variation)?'bowled':Math.random()<0.4?'catch':Math.random()<0.5?'bowled':'lbw';else m.dismiss=null; m.running=r>=1&&r<=3?r:0; animateDelivery(false,r,wicket);setTimeout(()=>{afterBallPitch(r,wicket,m.variation);},1100);}
   function simulateNextBall(){const m=GAME_STATE.match;if(!m.active||m.pending)return;m.pending=true;const r=Math.random()<.06?6:Math.random()<.18?4:Math.random()<.5?1:Math.random()<.65?2:0;const wicket=Math.random()<0.07;if(wicket)m.dismiss=Math.random()<0.5?'catch':'bowled';else m.dismiss=null;animateDelivery(modesForBatting(),r,wicket);setTimeout(()=>afterBallPitch(r,wicket,'SIM'),1100);}
@@ -2396,7 +2655,7 @@
     if(kind==='dot') return new THREE.Vector3(0.1, 0.3, 9.8);
     return new THREE.Vector3(x*7, 0.32, 2.4);
   }
-  function afterBallPitch(r,wicket,timing){startFieldingPlay(playKind(r,wicket),r,wicket,timing);}
+  function afterBallPitch(r,wicket,timing){ GAME_STATE.match.shotCommitted=true; hideShotCircle(); startFieldingPlay(playKind(r,wicket),r,wicket,timing);}
   function startFieldingPlay(kind,r,wicket,timing){
     const start=ballMesh?ballMesh.position.clone():new THREE.Vector3(0,.8,8);
     const end=shotTarget(kind,r);
@@ -2486,6 +2745,7 @@
     GAME_STATE.player.injuryRisk=Math.min(40,4+(GAME_STATE.player.fatigue||0)/4+(GAME_STATE.player.workload||0)/8);
     if(m.active) snapshotMatch();
     updateHUD();
+    if(m.active && modesForBatting()) scheduleShotCircle();
     if(!wicket){
       if(r===6){ showToast('SIX!',`${s.name} • ${m.targetDir} • ${timing||''}`); batCrack(); crowdCheer(1400); icComment('SIX'); }
       else if(r===4){ showToast('FOUR!',`${s.name} • ${m.targetDir} • ${timing||''}`); batCrack(); crowdCheer(900); icComment('FOUR'); }
@@ -2600,7 +2860,7 @@
       openScorecard();
     },4800);
   }
-  function openScorecard(){document.getElementById('scorecardOverlay').classList.remove('hidden');renderScorecard();}function closeScorecard(){document.getElementById('scorecardOverlay').classList.add('hidden');}
+  function openScorecard(){hideShotCircle(true);document.getElementById('scorecardOverlay').classList.remove('hidden');renderScorecard();}function closeScorecard(){document.getElementById('scorecardOverlay').classList.add('hidden'); if(GAME_STATE.match&&GAME_STATE.match.active&&modesForBatting()) scheduleShotCircle();}
   function renderScorecard(){
     const m=GAME_STATE.match; let html='';
     const inns=(m.inningsScores||[]).slice();
@@ -2662,8 +2922,8 @@
       GAME_STATE.settings.difficulty='BEGINNER'; ok('beginner wider window', diffCfg().timing>=0.18, String(diffCfg().timing));
       GAME_STATE.settings.difficulty='LEGEND'; ok('legend tighter window', diffCfg().timing<=0.04, String(diffCfg().timing));
       ok('legend not stat-cheat', diffCfg().ai<=1 && !diffCfg().autoWicket);
-      GAME_STATE.player.bowlStyle='Off-spin'; ok('spin has no yorker', varsForStyle().indexOf('yorker')<0, varsForStyle().join(','));
-      GAME_STATE.player.bowlStyle='Right-arm fast'; ok('pace has yorker', varsForStyle().indexOf('yorker')>=0);
+      GAME_STATE.player.bowlStyle='Off-spin'; ok('spin has no yorker', varsForStyle('Off-spin').indexOf('yorker')<0, varsForStyle('Off-spin').join(','));
+      GAME_STATE.player.bowlStyle='Right-arm fast'; ok('pace has yorker', varsForStyle('Right-arm fast').indexOf('yorker')>=0);
       startMatchSession('IND','AUS','T20',true,{cap:1,vice:2,keeper:5,venue:'Riverbend',userSlot:0});
       beginMatch('bat');
       GAME_STATE.match.pending=false; GAME_STATE.match.shotType='COVER'; applyDelivery(4,false,'PERFECT','four');
@@ -2686,6 +2946,23 @@
       const rs=resolveShot(); ok('cursor+perfect-flag not auto six on very early', rs.label==='VERY EARLY' && rs.r!==6, rs.label+' '+rs.r);
       ok('names present', !!(GAME_STATE.match.batters[0]&&GAME_STATE.match.batters[0].name));
       ok('no stick-figure flag', typeof makePlayer==='function');
+      ok('leave shot exists', !!SHOTS.LEAVE);
+      ok('circle wrap exists', !!document.getElementById('shotCircleWrap'));
+      GAME_STATE.match.bowlLength='short'; GAME_STATE.match.bowlLine='middle'; GAME_STATE.match.variation='bouncer';
+      ok('short context has pull', contextShots().indexOf('PULL')>=0, contextShots().join(','));
+      GAME_STATE.match.bowlLength='full'; GAME_STATE.match.bowlLine='off'; GAME_STATE.match.variation='stock';
+      ok('full off has cover/straight', contextShots().indexOf('COVER')>=0||contextShots().indexOf('STRAIGHT')>=0, contextShots().join(','));
+      GAME_STATE.player.bowlStyle='Off-spin'; GAME_STATE.match.bowlLength='good'; GAME_STATE.match.bowlLine='middle'; GAME_STATE.match.variation='stock';
+      const spinSh=contextShots(); ok('spin context can sweep', spinSh.indexOf('SWEEP')>=0||spinSh.indexOf('DEFENCE')>=0, spinSh.join(','));
+      GAME_STATE.player.bowlStyle='Right-arm fast';
+      GAME_STATE.match.swipe={ok:true,ang:Math.PI/2,dist:80,speed:0.8,dx:80,dy:0,dt:100};
+      const al=swipeAlignScore('COVER', GAME_STATE.match.swipe);
+      ok('cover swipe to off aligns', al>0.35, String(al));
+      const wrong=swipeAlignScore('PULL', GAME_STATE.match.swipe);
+      ok('pull vs off-swipe weaker', wrong<al, wrong+' vs '+al);
+      showShotCircle(); ok('circle can show', document.getElementById('shotCircleWrap').classList.contains('on')||!document.getElementById('shotCircleWrap').classList.contains('hidden'));
+      hideShotCircle(true); ok('circle hides', document.getElementById('shotCircleWrap').classList.contains('hidden'));
+      const sm=(GAME_STATE.match.shotMap||[])[0]; ok('shot map stores extras', !sm || sm.ballPos || sm.intentDir!=null, sm?JSON.stringify({shot:sm.shot,intent:sm.intentDir}):'empty');
     }catch(err){ ok('QA threw', false, String(err&&err.message||err)); }
     GAME_STATE.player=bak.player; GAME_STATE.match=bak.match; GAME_STATE.settings=bak.settings; GAME_STATE.world=bak.world;
     const pass=out.filter(x=>x.pass).length;
@@ -2706,7 +2983,7 @@
       const demo=(location.search||'').match(/[?&]demo=([a-z]+)/); const dmode=demo&&demo[1];
       if(dmode){
         setTimeout(function(){
-          GAME_STATE.player.created=true; GAME_STATE.settings.autoPause=false;
+          GAME_STATE.player.created=true; GAME_STATE.settings.autoPause=false; GAME_STATE.settings.reduceMotion=true;
           if(dmode==='career'||dmode==='mail'||dmode==='hof'){ seedCareerDemo(dmode); }
           else if(dmode==='qa'){ setTimeout(function(){ try{ runInsanQa(); }catch(e){} }, 200); }
           else if(dmode==='map'){ startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'}); beginMatch('bat'); seedDemoInnings(); openShotMap(); }
@@ -2717,11 +2994,13 @@
           else if(dmode==='toss'){ continueToToss(); }
           else if(dmode==='bowl'){ beginMatch('bowl'); GAME_STATE.match.cameraMode='Bowling'; selectLine('off'); selectLength('good'); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 500); }
           else if(dmode==='cursor'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; GAME_STATE.settings.cursorVisible=true; GAME_STATE.settings.cursorAssist='partial'; selectShot('COVER'); setPower('NORMAL'); GAME_STATE.match.aimX=0.55; GAME_STATE.match.aimY=-0.2; showGameplay(); showAim(true); updateAimCursor(0,0); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 400); }
+          else if(dmode==='circle'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; GAME_STATE.settings.cursorVisible=true; GAME_STATE.match.bowlLength='full'; GAME_STATE.match.bowlLine='off'; GAME_STATE.match.variation='stock'; selectShot('COVER'); setPower('NORMAL'); GAME_STATE.match.aimX=0.52; GAME_STATE.match.aimY=-0.18; showGameplay(); showAim(true); updateAimCursor(0,0); showShotCircle(); }
+          else if(dmode==='swipe'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; GAME_STATE.match.bowlLength='full'; GAME_STATE.match.bowlLine='off'; selectShot('COVER'); setPower('NORMAL'); GAME_STATE.match.aimX=0.5; GAME_STATE.match.aimY=-0.2; GAME_STATE.match.swipe={ok:true,ang:0.7,dist:90,speed:0.7,dx:70,dy:-40,dt:120}; showGameplay(); showShotCircle(); setTimeout(function(){ try{ startUserDelivery(true); }catch(e){} }, 350); setTimeout(function(){ try{ GAME_STATE.match.shotT=0.5; GAME_STATE.match.shotCommitted=true; hideShotCircle(); }catch(e){} }, 900); }
           else if(dmode==='card'){ beginMatch('bat'); seedDemoInnings(); openScorecard(); }
           else if(dmode==='field'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Fielding'; GAME_STATE.match.shotType='COVER'; setTimeout(function(){ try{ GAME_STATE.match.dismiss='catch'; afterBallPitch(0,true,'MISTIMED'); }catch(e){} }, 400); }
           else { beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; [[4,false,'PERFECT','four'],[1,false,'GOOD','ground'],[0,false,'LATE','dot']].forEach(function(row){ GAME_STATE.match.pending=false; GAME_STATE.match.dismiss=null; applyDelivery(row[0],row[1],row[2],row[3]); }); selectShot('COVER'); setPower('NORMAL'); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 400); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 850); }
           }
-        }, 800);
+        }, 80);
       }
     }catch(e){ showLoadFail(); }
   };

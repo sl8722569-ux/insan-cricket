@@ -10,6 +10,8 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
+v2.3: Mobile batting — small circular shot selector (per delivery, hides after contact) plus **invisible swipe** (direction / distance / speed / timing). Context-sensitive options from length, line, pace vs spin. Existing cursor, timing, power and shot-map stay. Selector size/position, swipe sensitivity and shot assist are in Settings.
+
 v2.2: High-poly procedural players (dense spheres/cylinders, PBR skin, 5 fingers, facial features) scaled by GFX preset. Live **P2P multiplayer** via PeerJS public broker — create/join a room code; host runs the match engine. Not a photoreal WCC3 mesh pipeline and not an INSAN-hosted dedicated game server (GitHub Pages is static). See `server/README.md`.
 
 v2.1 (Part 5): Continue Match restores the exact innings (v4 snapshot). Shot-map analytics (zones, dots, boundaries, dismissal vs bowling). Franchise desk: value, 2-year contracts, transfer, bonuses, strategy. Google save is honest (no OAuth client). In-game QA harness `web/tests.html` → `?demo=qa`. Proof in `proof/` part5.
