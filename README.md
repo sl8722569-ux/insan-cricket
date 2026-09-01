@@ -10,7 +10,9 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
-v2.1 (Part 5): Continue Match restores the exact innings (v4 snapshot). Shot-map analytics (zones, dots, boundaries, dismissal vs bowling). Franchise desk: value, 2-year contracts, transfer, bonuses, strategy. Online modes labeled PLANNED — no fake rooms. Google save is honest (no OAuth client). In-game QA harness `web/tests.html` → `?demo=qa`. Proof in `proof/` part5.
+v2.2: High-poly procedural players (dense spheres/cylinders, PBR skin, 5 fingers, facial features) scaled by GFX preset. Live **P2P multiplayer** via PeerJS public broker — create/join a room code; host runs the match engine. Not a photoreal WCC3 mesh pipeline and not an INSAN-hosted dedicated game server (GitHub Pages is static). See `server/README.md`.
+
+v2.1 (Part 5): Continue Match restores the exact innings (v4 snapshot). Shot-map analytics (zones, dots, boundaries, dismissal vs bowling). Franchise desk: value, 2-year contracts, transfer, bonuses, strategy. Google save is honest (no OAuth client). In-game QA harness `web/tests.html` → `?demo=qa`. Proof in `proof/` part5.
 
 v2.0 (Part 4): Formats T20–Test including custom 30/60/90 Test overs. Difficulty BEGINNER→LEGEND changes timing windows and tactics, not cheat stats. Batting aim cursor with assistance levels. Shot map wagon wheel feeds bowling plans. Career opponents generated from the player's town/district/state/nation (not a forced Mansa XI vs Rampura XI picker). Test follow-on, declaration, 80-over new ball, sessions, ball wear. Walkout + intro. INSAN Shield group table / NRR / knockout / Super Over. Proof in `proof/` part4.
 

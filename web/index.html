@@ -17,6 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Three.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -436,7 +437,7 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.1</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.2</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
@@ -478,7 +479,7 @@
         <div onclick="enterMultiplayer()" class="menu-card bg-slate-900/70 border border-rose-500/30 hover:border-rose-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl"><i class="fa-solid fa-globe"></i></div>
           <h3 class="font-bold text-white text-base mt-3">Multiplayer</h3>
-          <p class="text-[11px] text-slate-400 mt-1">PLANNED — no live ranked rooms.</p>
+          <p class="text-[11px] text-slate-400 mt-1">Live P2P rooms — create or join a code.</p>
         </div>
         <div onclick="enterCustomTeams()" class="menu-card bg-slate-900/70 border border-teal-500/30 hover:border-teal-400 p-5 rounded-2xl cursor-pointer group shadow-xl">
           <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 text-xl"><i class="fa-solid fa-users"></i></div>
@@ -1027,16 +1028,27 @@
     </div>
     <div id="onlineModal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-md p-6 overflow-y-auto pointer-events-auto">
       <div class="max-w-lg mx-auto space-y-3 text-sm">
-        <div class="flex justify-between"><h2 class="text-xl font-black">Online</h2><button onclick="closeModal('onlineModal')" class="text-slate-400">Close</button></div>
-        <p class="text-amber-300 text-xs">Honest status: no live servers in this build. These modes are architected, not playable.</p>
-        <div class="space-y-2 text-xs">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><b>Ranked</b> — PLANNED. ELO / rooms not hosted.</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><b>Casual</b> — PLANNED. Use Quick Play offline.</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><b>Private rooms</b> — PLANNED. No join codes yet.</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><b>Friends</b> — PLANNED. No friend graph.</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3"><b>Co-op</b> — PLANNED. Same device spectate exists.</div>
+        <div class="flex justify-between"><h2 class="text-xl font-black">Live Online</h2><button onclick="closeModal('onlineModal')" class="text-slate-400">Close</button></div>
+        <p class="text-emerald-300 text-xs">P2P rooms via PeerJS public broker. Two browsers, one code. Host runs the match engine; guest plays the other side. No INSAN-hosted game server on GitHub Pages.</p>
+        <div id="onlineStatus" class="text-xs text-amber-300">Disconnected</div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="hostOnlineRoom('casual')" class="bg-emerald-600 py-3 rounded-xl font-bold">Create casual room</button>
+          <button onclick="hostOnlineRoom('ranked')" class="bg-sky-700 py-3 rounded-xl font-bold">Create ranked room</button>
         </div>
-        <button onclick="closeModal('onlineModal');enterQuickPlay();" class="w-full bg-emerald-600 py-3 rounded-xl font-bold">Play locally (Quick Play)</button>
+        <div class="flex gap-2">
+          <input id="onlineJoinCode" placeholder="Room code" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 uppercase" maxlength="12" />
+          <button onclick="joinOnlineRoom()" class="bg-amber-500 text-slate-950 font-black px-4 rounded-xl">JOIN</button>
+        </div>
+        <div id="onlineRoomBox" class="hidden bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs space-y-2">
+          <div>Room <b id="onlineRoomCode">—</b> · <span id="onlineModeLabel">casual</span></div>
+          <div id="onlinePeers">Waiting for opponent…</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="startOnlineMatch()" class="bg-amber-500 text-slate-950 font-black py-2 rounded-xl">START MATCH</button>
+            <button onclick="disconnectOnline()" class="bg-slate-800 py-2 rounded-xl">Leave</button>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-500">Friends: share the code. Ranked: local rating only (no global ladder without our own lobby). Co-op same-device: Spectate in Settings.</p>
+        <div class="text-[10px] text-slate-400">Your rating: <span id="onlineElo">1000</span></div>
       </div>
     </div>
     <div id="qaOverlay" class="hidden absolute inset-0 z-[48] bg-slate-950/96 p-5 overflow-auto pointer-events-auto">
@@ -1196,9 +1208,11 @@
   function rebuildCrowd(n){
     if(!scene||!crowdGroup)return;
     scene.remove(crowdGroup); crowdGroup=new THREE.Group();
-    const geo=new THREE.BoxGeometry(.38,.62,.38); const cols=[0xf59e0b,0x334155,0x1d4ed8,0xb45309,0xf8fafc,0x10b981];
-    const count=Math.max(40,n||120);
-    for(let i=0;i<count;i++){ const a=(i/count)*Math.PI*2,r=70+Math.random()*10; const d=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:cols[i%cols.length]})); d.position.set(Math.cos(a)*r,5.4+(i%3)*3.1+Math.random()*.4,Math.sin(a)*r); crowdGroup.add(d); }
+    const geo=new THREE.SphereGeometry(.22,8,8); const cols=[0xf59e0b,0x334155,0x1d4ed8,0xb45309,0xf8fafc,0x10b981];
+    const count=Math.max(40,n||120); const dummy=new THREE.Object3D();
+    cols.forEach((col,ci)=>{ const cn=Math.floor(count/cols.length); const inst=new THREE.InstancedMesh(geo,pbr({color:col,roughness:.55}),cn);
+      for(let i=0;i<cn;i++){ const a=((i*cols.length+ci)/count)*Math.PI*2,r=70+Math.random()*10; dummy.position.set(Math.cos(a)*r,5.4+(i%3)*3.1,Math.sin(a)*r); dummy.scale.set(1,1.5,1); dummy.updateMatrix(); inst.setMatrixAt(i,dummy.matrix); }
+      crowdGroup.add(inst); });
     scene.add(crowdGroup);
   }
   function enterCareer(){uiClick();showLoading(['LOAD_CAREER','LOAD_PLAYERS'],()=>{if(GAME_STATE.player.created)openCareerHub();else openPlayerCreator();});}
@@ -1209,81 +1223,95 @@
   function enterStatistics(){uiClick();openStatisticsView();}
   function enterSettings(){uiClick();openSettingsHub();}
   function showSetTab(id){['game','gfx','lang','audio','access','data'].forEach(k=>{const el=document.getElementById('set-'+k);if(el)el.classList.toggle('on',k===id);});}
-  let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,keeperMesh,nonStrikerMesh,fielderMeshes=[],ballPath=null,batGroup=null,animUntil=0,actionKind=null,animDur=1100,fieldActor=null,trophyMesh=null,confettiGroup=null,ceremonyActive=false,crowdRoarUntil=0,podiumMesh=null,stumpSets={bat:[],bowl:[]};
+  let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,keeperMesh,nonStrikerMesh,fielderMeshes=[],ballPath=null,batGroup=null,animUntil=0,actionKind=null,animDur=1100,fieldActor=null,trophyMesh=null,confettiGroup=null,ceremonyActive=false,crowdRoarUntil=0,podiumMesh=null,stumpSets={bat:[],bowl:[]},icEnvMap=null;
   function isPhysicallyPortrait(){return window.matchMedia('(orientation: portrait)').matches;}
   async function tryNativeLandscapeLock(){try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');document.documentElement.classList.add('orientation-locked');return true;}}catch(e){}return false;}
   function updateOrientationMode(){const root=document.getElementById('gameRoot');const nativeLandscape=screen.orientation&&/landscape/.test(screen.orientation.type||'');if(nativeLandscape)document.documentElement.classList.add('orientation-locked');if(isPhysicallyPortrait()&&!document.documentElement.classList.contains('orientation-locked'))root.classList.add('force-landscape');else root.classList.remove('force-landscape');if(renderer)onWindowResize();}
   function getViewportSize(){const root=document.getElementById('gameRoot');return root.classList.contains('force-landscape')?{width:window.innerHeight,height:window.innerWidth}:{width:window.innerWidth,height:window.innerHeight};}
   function attachLandscapeGestureListener(){const f=async()=>{await tryNativeLandscapeLock();updateOrientationMode();};document.addEventListener('click',f,{once:true});document.addEventListener('touchend',f,{once:true});}
   window.addEventListener('orientationchange',updateOrientationMode);if(screen.orientation)screen.orientation.addEventListener('change',updateOrientationMode);window.matchMedia('(orientation: portrait)').addEventListener('change',updateOrientationMode);
+  function geoLod(){const g=GAME_STATE.settings.gfx||'HIGH'; if(g==='LOW')return{s:10,h:14,c:12}; if(g==='MEDIUM')return{s:16,h:22,c:16}; if(g==='ULTRA')return{s:32,h:48,c:28}; return{s:24,h:36,c:22};}
+  function pbr(opts){try{const Phys=THREE.MeshPhysicalMaterial||THREE.MeshStandardMaterial; const o=Object.assign({},opts); if(!THREE.MeshPhysicalMaterial){ delete o.clearcoat; delete o.clearcoatRoughness; } const m=new Phys(o); if(icEnvMap) m.envMap=icEnvMap; return m;}catch(e){ return new THREE.MeshStandardMaterial(opts); }}
   function limb(geo,mat,shadow){const m=new THREE.Mesh(geo,mat);m.castShadow=!!shadow;m.receiveShadow=false;return m;}
   function makePlayer(name,role='Player',opts={}){
-    const g=new THREE.Group();
+    const L=geoLod(); const g=new THREE.Group();
     const look=Object.assign({},GAME_STATE.player.look||{},opts.look||{});
     const left=!!opts.left, keeper=!!opts.keeper, bowlLeft=!!opts.bowlLeft;
     const wearHelm=role==='batter'||role==='keeper';
     const skinHex=opts.skin||look.skin||0xc47a4a;
-    const skin=new THREE.MeshStandardMaterial({color:skinHex,roughness:.48,metalness:.02});
-    const shirt=new THREE.MeshStandardMaterial({color:opts.shirt||0x1d4ed8,roughness:.38,metalness:.08});
-    const trim=new THREE.MeshStandardMaterial({color:opts.trim||0xf59e0b,roughness:.32,metalness:.18});
-    const white=new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:.5});
-    const dark=new THREE.MeshStandardMaterial({color:0x111827,roughness:.32,metalness:.22});
-    const wood=new THREE.MeshStandardMaterial({color:0xd6b370,roughness:.36,metalness:.05});
+    const skin=pbr({color:skinHex,roughness:.42,metalness:.04,clearcoat:.12,clearcoatRoughness:.6});
+    const shirt=pbr({color:opts.shirt||0x1d4ed8,roughness:.34,metalness:.12});
+    const trim=pbr({color:opts.trim||0xf59e0b,roughness:.28,metalness:.22});
+    const white=pbr({color:0xf4f1ea,roughness:.46});
+    const dark=pbr({color:0x111827,roughness:.3,metalness:.28});
+    const wood=pbr({color:0xd6b370,roughness:.32,metalness:.08});
     const hips=new THREE.Group(); hips.position.y=1.02; g.add(hips);
-    const pelvis=limb(new THREE.BoxGeometry(.46,.18,.26),shirt,true); hips.add(pelvis);
+    const pelvis=limb(new THREE.SphereGeometry(.22,L.s,L.s),shirt,true); pelvis.scale.set(1.15,.55,0.85); hips.add(pelvis);
     function leg(side){
       const root=new THREE.Group(); root.position.set(side*.15,0,0);
-      const thigh=limb(new THREE.CylinderGeometry(.1,.12,.48,8),white,true); thigh.position.y=-.25; root.add(thigh);
-      const knee=new THREE.Group(); knee.position.y=-.5; root.add(knee);
-      const shin=limb(new THREE.CylinderGeometry(.085,.1,.44,8),white,true); shin.position.y=-.22; knee.add(shin);
-      if(role==='batter'||keeper){ const pad=limb(new THREE.BoxGeometry(.22,.42,.16),white,true); pad.position.set(0,-.12,.09); knee.add(pad); }
-      const foot=limb(new THREE.BoxGeometry(.18,.09,.34),dark,true); foot.position.set(0,-.48,.07); knee.add(foot);
-      const stripe=limb(new THREE.BoxGeometry(.18,.02,.12),trim); stripe.position.set(0,-.44,.16); knee.add(stripe);
+      const thigh=limb(new THREE.CylinderGeometry(.09,.13,.5,L.c),white,true); thigh.position.y=-.26; root.add(thigh);
+      const knee=new THREE.Group(); knee.position.y=-.52; root.add(knee);
+      knee.add(limb(new THREE.SphereGeometry(.075,L.s,L.s),skin,true));
+      const shin=limb(new THREE.CylinderGeometry(.07,.095,.46,L.c),white,true); shin.position.y=-.23; knee.add(shin);
+      if(role==='batter'||keeper){ const pad=limb(new THREE.SphereGeometry(.16,L.s,L.s),white,true); pad.scale.set(.7,1.35,.55); pad.position.set(0,-.12,.08); knee.add(pad); }
+      const foot=limb(new THREE.SphereGeometry(.1,L.s,L.s),dark,true); foot.scale.set(0.95,.45,1.7); foot.position.set(0,-.5,.08); knee.add(foot);
+      const stripe=limb(new THREE.BoxGeometry(.16,.015,.1),trim); stripe.position.set(0,-.46,.16); knee.add(stripe);
       root.userData.knee=knee; hips.add(root); return root;
     }
     const lLeg=leg(-1), rLeg=leg(1);
     const spine=new THREE.Group(); spine.position.y=1.12; g.add(spine);
-    const chest=limb(new THREE.BoxGeometry(.54,.58,.3),shirt,true); chest.position.y=.3; spine.add(chest);
-    const stripe=limb(new THREE.BoxGeometry(.12,.58,.02),trim); stripe.position.set(0,.3,.16); spine.add(stripe);
-    const num=limb(new THREE.BoxGeometry(.18,.2,.02),white); num.position.set(0,.32,-.16); spine.add(num);
-    const collar=limb(new THREE.TorusGeometry(.13,.025,6,12,Math.PI),shirt); collar.position.y=.58; collar.rotation.x=1.15; spine.add(collar);
-    const neck=limb(new THREE.CylinderGeometry(.075,.085,.15,8),skin,true); neck.position.y=.64; spine.add(neck);
+    const chest=limb(new THREE.SphereGeometry(.28,L.h,L.s),shirt,true); chest.scale.set(1.05,1.15,.72); chest.position.y=.32; spine.add(chest);
+    const stripe=limb(new THREE.BoxGeometry(.1,.52,.02),trim); stripe.position.set(0,.32,.2); spine.add(stripe);
+    const num=limb(new THREE.BoxGeometry(.16,.18,.02),white); num.position.set(0,.34,-.18); spine.add(num);
+    const collar=limb(new THREE.TorusGeometry(.12,.02,L.s,L.c,Math.PI),shirt); collar.position.y=.58; collar.rotation.x=1.15; spine.add(collar);
+    const neck=limb(new THREE.CylinderGeometry(.07,.08,.16,L.c),skin,true); neck.position.y=.64; spine.add(neck);
     const head=new THREE.Group(); head.position.y=.84; spine.add(head);
-    head.add(limb(new THREE.SphereGeometry(.17,16,12),skin,true));
-    const whiteEye=new THREE.MeshStandardMaterial({color:0xf8fafc,roughness:.35});
-    const iris=new THREE.MeshStandardMaterial({color:look.eyes||0x1e1b16,roughness:.25});
-    const eL=limb(new THREE.SphereGeometry(.032,8,8),whiteEye); eL.position.set(-.05,.025,.148); head.add(eL);
-    const iL=limb(new THREE.SphereGeometry(.016,8,8),iris); iL.position.set(-.05,.025,.175); head.add(iL);
+    const skull=limb(new THREE.SphereGeometry(.175,L.h,L.h),skin,true); skull.scale.set(0.95,1.08,0.92); head.add(skull);
+    const jaw=limb(new THREE.SphereGeometry(.12,L.s,L.s),skin,true); jaw.scale.set(0.85,.55,.7); jaw.position.set(0,-.08,.04); head.add(jaw);
+    const nose=limb(new THREE.SphereGeometry(.03,L.s,L.s),skin,true); nose.scale.set(.7,1.1,1.2); nose.position.set(0,.01,.175); head.add(nose);
+    const earM=skin; const earL=limb(new THREE.SphereGeometry(.035,L.s,L.s),earM); earL.scale.set(.5,1,.4); earL.position.set(-.17,.0,0); head.add(earL);
+    const earR=earL.clone(); earR.position.x=.17; head.add(earR);
+    const brow=limb(new THREE.BoxGeometry(.16,.012,.04),skin); brow.position.set(0,.06,.15); head.add(brow);
+    const lip=limb(new THREE.BoxGeometry(.07,.012,.03),pbr({color:0xa15c4a,roughness:.4})); lip.position.set(0,-.05,.16); head.add(lip);
+    const whiteEye=pbr({color:0xf8fafc,roughness:.28});
+    const iris=pbr({color:look.eyes||0x1e1b16,roughness:.18,metalness:.1});
+    const eL=limb(new THREE.SphereGeometry(.028,L.s,L.s),whiteEye); eL.position.set(-.05,.03,.155); head.add(eL);
+    const iL=limb(new THREE.SphereGeometry(.014,L.s,L.s),iris); iL.position.set(-.05,.03,.178); head.add(iL);
+    const pupil=limb(new THREE.SphereGeometry(.007,8,8),dark); pupil.position.set(-.05,.03,.19); head.add(pupil);
     const eR=eL.clone(); eR.position.x=.05; head.add(eR);
     const iR=iL.clone(); iR.position.x=.05; head.add(iR);
+    const pR=pupil.clone(); pR.position.x=.05; head.add(pR);
     if(look.hair!=='bald' && !wearHelm){
-      const hairM=new THREE.MeshStandardMaterial({color:look.hairCol||0x1c1917,roughness:.7});
-      if(look.hair==='curly'){ const h=limb(new THREE.SphereGeometry(.18,8,6),hairM,true); h.position.y=.08; head.add(h); }
-      else if(look.hair==='long'){ const h=limb(new THREE.SphereGeometry(.17,8,6,0,Math.PI*2,0,Math.PI/1.4),hairM,true); h.position.y=.04; head.add(h); const tail=limb(new THREE.BoxGeometry(.08,.22,.08),hairM); tail.position.set(0,-.08,-.12); head.add(tail); }
-      else if(look.hair==='bun'){ const h=limb(new THREE.SphereGeometry(.17,8,6,0,Math.PI*2,0,Math.PI/1.8),hairM,true); h.position.y=.06; head.add(h); const bun=limb(new THREE.SphereGeometry(.07,8,6),hairM); bun.position.set(0,.14,-.08); head.add(bun); }
-      else { const h=limb(new THREE.SphereGeometry(.175,8,6,0,Math.PI*2,0,Math.PI/2.1),hairM,true); h.position.y=.06; head.add(h); }
+      const hairM=pbr({color:look.hairCol||0x1c1917,roughness:.62});
+      if(look.hair==='curly'){ const h=limb(new THREE.SphereGeometry(.185,L.s,L.s),hairM,true); h.position.y=.07; head.add(h); }
+      else if(look.hair==='long'){ const h=limb(new THREE.SphereGeometry(.175,L.h,L.s,0,Math.PI*2,0,Math.PI/1.35),hairM,true); h.position.y=.04; head.add(h); const tail=limb(new THREE.CylinderGeometry(.03,.04,.24,L.c),hairM); tail.position.set(0,-.06,-.12); head.add(tail); }
+      else if(look.hair==='bun'){ const h=limb(new THREE.SphereGeometry(.175,L.h,L.s,0,Math.PI*2,0,Math.PI/1.7),hairM,true); h.position.y=.05; head.add(h); const bun=limb(new THREE.SphereGeometry(.065,L.s,L.s),hairM); bun.position.set(0,.14,-.08); head.add(bun); }
+      else { const h=limb(new THREE.SphereGeometry(.178,L.h,L.s,0,Math.PI*2,0,Math.PI/2.05),hairM,true); h.position.y=.055; head.add(h); }
     }
     if(wearHelm){
-      const helm=limb(new THREE.SphereGeometry(.19,12,8,0,Math.PI*2,0,Math.PI/1.65),dark,true); helm.position.y=.04; head.add(helm);
-      const grille=limb(new THREE.BoxGeometry(.2,.11,.13),dark); grille.position.set(0,-.04,.13); head.add(grille);
-      for(let i=-1;i<=1;i++){ const bar=limb(new THREE.BoxGeometry(.018,.13,.018),dark); bar.position.set(i*.05,-.02,.18); head.add(bar); }
+      const helm=limb(new THREE.SphereGeometry(.195,L.h,L.s,0,Math.PI*2,0,Math.PI/1.6),dark,true); helm.position.y=.04; head.add(helm);
+      const grille=limb(new THREE.SphereGeometry(.11,L.s,L.s),dark); grille.scale.set(1,.55,.7); grille.position.set(0,-.03,.14); head.add(grille);
+      for(let i=-2;i<=2;i++){ const bar=limb(new THREE.CylinderGeometry(.008,.008,.14,6),dark); bar.position.set(i*.035,-.01,.185); head.add(bar); }
     } else {
-      const cap=limb(new THREE.SphereGeometry(.175,10,8,0,Math.PI*2,0,Math.PI/2.15),shirt,true); cap.position.y=.05; head.add(cap);
-      const brim=limb(new THREE.BoxGeometry(.24,.025,.13),shirt); brim.position.set(0,.02,.15); head.add(brim);
+      const cap=limb(new THREE.SphereGeometry(.178,L.h,L.s,0,Math.PI*2,0,Math.PI/2.1),shirt,true); cap.position.y=.05; head.add(cap);
+      const brim=limb(new THREE.CylinderGeometry(.13,.02,.03,L.c),shirt); brim.rotation.x=Math.PI/2; brim.position.set(0,.02,.14); head.add(brim);
     }
     function arm(side,bowling){
-      const sh=limb(new THREE.SphereGeometry(.11,8,8),shirt,true); sh.position.set(side*.3,.5,0); spine.add(sh);
+      const sh=limb(new THREE.SphereGeometry(.105,L.s,L.s),shirt,true); sh.position.set(side*.3,.5,0); spine.add(sh);
       const root=new THREE.Group(); root.position.set(side*.3,.44,0); spine.add(root);
-      const upper=limb(new THREE.CylinderGeometry(.075,.085,.4,8),shirt,true); upper.position.y=-.18; root.add(upper);
-      const elbow=new THREE.Group(); elbow.position.y=-.4; root.add(elbow);
-      const fore=limb(new THREE.CylinderGeometry(.058,.075,.36,8),skin,true); fore.position.y=-.16; elbow.add(fore);
-      const hand=limb(new THREE.SphereGeometry(.075,8,8),keeper?new THREE.MeshStandardMaterial({color:0xf59e0b}):skin,true); hand.position.y=-.38; elbow.add(hand);
-      for(let f=0;f<3;f++){ const finger=limb(new THREE.BoxGeometry(.018,.07,.018),keeper?new THREE.MeshStandardMaterial({color:0xf59e0b}):skin); finger.position.set((f-1)*.028,-.46,.02); elbow.add(finger); }
+      const upper=limb(new THREE.CylinderGeometry(.065,.085,.42,L.c),shirt,true); upper.position.y=-.18; root.add(upper);
+      const elbow=new THREE.Group(); elbow.position.y=-.42; root.add(elbow);
+      elbow.add(limb(new THREE.SphereGeometry(.055,L.s,L.s),skin,true));
+      const fore=limb(new THREE.CylinderGeometry(.05,.07,.36,L.c),skin,true); fore.position.y=-.16; elbow.add(fore);
+      const glove=keeper?pbr({color:0xf59e0b,roughness:.4}):skin;
+      const hand=limb(new THREE.SphereGeometry(.07,L.s,L.s),glove,true); hand.position.y=-.38; elbow.add(hand);
+      for(let f=0;f<5;f++){ const finger=limb(new THREE.CylinderGeometry(.012,.01,.075,8),glove); finger.position.set((f-2)*.022,-.46,.015); elbow.add(finger); }
       if(role==='batter' && ((left&&side<0)||(!left&&side>0))){
         const bat=new THREE.Group(); bat.position.set(0,-.42,.02); elbow.add(bat);
-        const blade=limb(new THREE.BoxGeometry(.09,.76,.045),wood,true); blade.position.y=-.3; bat.add(blade);
-        const sticker=limb(new THREE.BoxGeometry(.04,.12,.01),trim); sticker.position.set(0,-.18,.025); bat.add(sticker);
-        const handle=limb(new THREE.CylinderGeometry(.026,.026,.24,8),new THREE.MeshStandardMaterial({color:0x7c2d12})); handle.position.y=.18; bat.add(handle);
+        const blade=limb(new THREE.BoxGeometry(.085,.78,.04,1,6,1),wood,true); blade.position.y=-.3; bat.add(blade);
+        const toe=limb(new THREE.SphereGeometry(.05,L.s,L.s),wood,true); toe.scale.set(0.9,.35,0.5); toe.position.set(0,-.68,0); bat.add(toe);
+        const sticker=limb(new THREE.BoxGeometry(.035,.12,.01),trim); sticker.position.set(0,-.18,.025); bat.add(sticker);
+        const handle=limb(new THREE.CylinderGeometry(.024,.024,.26,L.c),pbr({color:0x7c2d12,roughness:.4})); handle.position.y=.18; bat.add(handle);
         g.userData.bat=bat;
       }
       root.userData.elbow=elbow; root.rotation.z=side*.18;
@@ -1472,12 +1500,14 @@
     scene=new THREE.Scene(); scene.background=new THREE.Color(0x8ec6e6); scene.fog=new THREE.Fog(0x8ec6e6,70,210);
     const z=getViewportSize();
     camera=new THREE.PerspectiveCamera(50,z.width/z.height,.1,600); camera.position.set(18,11,26); camera.lookAt(0,2,0);
-    renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'default',alpha:false});
-    renderer.setSize(z.width,z.height); renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
+    renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',alpha:false});
+    renderer.setSize(z.width,z.height); renderer.setPixelRatio(Math.min(devicePixelRatio||1, GAME_STATE.settings.gfx==='ULTRA'?2:1.75));
     renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap||THREE.BasicShadowMap;
     if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding;
-    if(THREE.ACESFilmicToneMapping){ renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.12; }
+    if(THREE.ACESFilmicToneMapping){ renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.18; }
+    if(renderer.physicallyCorrectLights!==undefined) renderer.physicallyCorrectLights=true;
     c.appendChild(renderer.domElement);
+    try{ if(THREE.PMREMGenerator){ const pm=new THREE.PMREMGenerator(renderer); const es=new THREE.Scene(); es.add(new THREE.HemisphereLight(0x9ec9ff,0x2a4a32,1.2)); icEnvMap=pm.fromScene(es,0.06).texture; } }catch(e){ icEnvMap=null; }
     hemiLight=new THREE.HemisphereLight(0xc8e4ff,0x2a4a32,.7); scene.add(hemiLight);
     scene.add(new THREE.AmbientLight(0xb9c9dc,.28));
     sunLight=new THREE.DirectionalLight(0xfff3d0,1.85); sunLight.position.set(28,52,16);
@@ -1490,11 +1520,11 @@
     animate3DRender();
   }
   function buildPremiumWorld(){
-    skyMesh=new THREE.Mesh(new THREE.SphereGeometry(280,32,20), new THREE.MeshBasicMaterial({map:skyTexture(false,false),side:THREE.BackSide}));
+    skyMesh=new THREE.Mesh(new THREE.SphereGeometry(280,48,28), new THREE.MeshBasicMaterial({map:skyTexture(false,false),side:THREE.BackSide}));
     scene.add(skyMesh);
     const gTex=grassTexture(); gTex.wrapS=gTex.wrapT=THREE.RepeatWrapping; gTex.repeat.set(10,10);
     const grassMat=new THREE.MeshStandardMaterial({map:gTex,color:0x14965a,roughness:.78,metalness:.04});
-    fieldMesh=new THREE.Mesh(new THREE.CylinderGeometry(78,78,.35,64), grassMat);
+    fieldMesh=new THREE.Mesh(new THREE.CylinderGeometry(78,78,.35, geoLod().c>=22?96:48), grassMat);
     fieldMesh.position.y=-.16; fieldMesh.receiveShadow=true; scene.add(fieldMesh);
     const rope=new THREE.Mesh(new THREE.TorusGeometry(61,.16,8,56), new THREE.MeshStandardMaterial({color:0xf8fafc,roughness:.4}));
     rope.rotation.x=Math.PI/2; rope.position.y=.08; scene.add(rope);
@@ -1509,15 +1539,16 @@
     const seats=new THREE.Mesh(new THREE.CylinderGeometry(73,77,1.2,40,1,true), new THREE.MeshStandardMaterial({color:0x0e7490,side:THREE.DoubleSide,roughness:.7}));
     seats.position.y=3.2; scene.add(seats);
     crowdGroup=new THREE.Group();
-    const geo=new THREE.BoxGeometry(.38,.62,.38);
+    const geo=new THREE.SphereGeometry(.22, geoLod().s>=16?10:6, 8);
     const cols=[0xf59e0b,0x334155,0x1d4ed8,0xb45309,0xf8fafc,0x10b981];
     const crowdN=(GFX_PRESETS[(GAME_STATE.settings.gfx||'HIGH')]||GFX_PRESETS.HIGH).crowd;
-    for(let i=0;i<crowdN;i++){
-      const a=(i/crowdN)*Math.PI*2, r=70+Math.random()*10;
-      const d=new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:cols[i%cols.length]}));
-      d.position.set(Math.cos(a)*r, 5.4+(i%3)*3.1+Math.random()*.4, Math.sin(a)*r);
-      crowdGroup.add(d);
-    }
+    const dummy=new THREE.Object3D();
+    cols.forEach((col,ci)=>{
+      const n=Math.floor(crowdN/cols.length);
+      const inst=new THREE.InstancedMesh(geo, pbr({color:col,roughness:.55}), n);
+      for(let i=0;i<n;i++){ const a=((i*cols.length+ci)/crowdN)*Math.PI*2, r=70+Math.random()*10; dummy.position.set(Math.cos(a)*r, 5.4+(i%3)*3.1+Math.random()*.4, Math.sin(a)*r); dummy.scale.set(1,1.4+Math.random()*.4,1); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); }
+      crowdGroup.add(inst);
+    });
     scene.add(crowdGroup);
     const ads=[['INSAN SPORTS','#0f172a','#f59e0b'],['SAGAR PREMIER','#064e3b','#f8fafc'],['RIVERBEND','#1e3a8a','#fde68a'],['INSAN CUP','#7c2d12','#fbbf24']];
     ads.forEach((ad,i)=>{
@@ -1540,7 +1571,7 @@
     const pitch=new THREE.Mesh(new THREE.BoxGeometry(3.05,.12,20.12), new THREE.MeshStandardMaterial({map:pitchTexture(0xb7791f),color:0xb7791f,roughness:.78}));
     pitch.receiveShadow=true; scene.add(pitch); pitchMesh=pitch;
     createWicketStumps(0,.52,9.5); createWicketStumps(0,.52,-9.5);
-    ballMesh=new THREE.Mesh(new THREE.SphereGeometry(.18,16,16), new THREE.MeshStandardMaterial({color:0xb91c1c,roughness:.32,metalness:.08}));
+    ballMesh=new THREE.Mesh(new THREE.SphereGeometry(.18, geoLod().h, geoLod().h), pbr({color:0xb91c1c,roughness:.28,metalness:.12,clearcoat:.25}));
     ballMesh.position.set(0,.5,-8.5); ballMesh.castShadow=true; scene.add(ballMesh);
     const seam=new THREE.Mesh(new THREE.TorusGeometry(.175,.018,6,16), new THREE.MeshStandardMaterial({color:0xfef3c7}));
     seam.rotation.x=Math.PI/2; ballMesh.add(seam);
@@ -1687,7 +1718,67 @@
   function hasSavedMatch(){try{const d=JSON.parse(localStorage.getItem('insan-cricket-match')||'null');return !!(d&&d.match&&(d.match.active||d.match.paused)&&d.match.batters&&d.match.batters.length&&d.match.bowlers);}catch(e){return false;}}
   function refreshContinueCard(){const card=document.getElementById('continueMatchCard');if(!card)return;if(!hasSavedMatch()){card.classList.add('hidden');return;}card.classList.remove('hidden');try{const d=JSON.parse(localStorage.getItem('insan-cricket-match'));const m=d.match; const ov=Math.floor(m.balls/6)+'.'+(m.balls%6); const s=(m.batters&&m.batters[m.striker])||{}; setText('continueMatchMeta',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' '+m.runs+'/'+m.wickets+' · '+ov+' ov · '+(s.name||'—')+' '+(s.runs||0)+'*');}catch(e){}}
   function openMainMenu(){ceremonyActive=false;if(confettiGroup)confettiGroup.visible=false;if(ballMesh)ballMesh.visible=true;hideMatchHud();hideFlowOverlays();showEl('mainMenuOverlay');if(GAME_STATE.match&&GAME_STATE.match.active){GAME_STATE.match.paused=true;GAME_STATE.match.active=false;snapshotMatch();}refreshContinueCard();}
-  function enterMultiplayer(){uiClick();showEl('onlineModal');}
+  function enterMultiplayer(){uiClick();showEl('onlineModal'); const el=document.getElementById('onlineElo'); if(el) el.textContent=String(onlineElo()); setText('onlineStatus', typeof Peer==='undefined'?'PeerJS failed to load — check network':'Ready for P2P rooms');}
+  let icPeer=null, icConn=null, icHost=false, icRoom='', icOnline=false, icRole='', icMode='casual', icPendingState=null;
+  function onlineElo(){try{return +(localStorage.getItem('insan-elo')||1000);}catch(e){return 1000;}}
+  function setOnlineElo(n){try{localStorage.setItem('insan-elo',String(n));}catch(e){}}
+  function sendOnline(msg){ try{ if(icConn&&icConn.open) icConn.send(msg); }catch(e){} }
+  function hostOnlineRoom(mode){
+    if(typeof Peer==='undefined'){ showToast('ONLINE','PeerJS did not load'); return; }
+    disconnectOnline(); icMode=mode||'casual'; icHost=true; icRole='host';
+    icRoom=('IC'+Math.random().toString(36).slice(2,8)).toUpperCase();
+    icPeer=new Peer(icRoom);
+    icPeer.on('open', id=>{ icRoom=id; icOnline=true; setText('onlineStatus','Hosting '+id); setText('onlineRoomCode',id); setText('onlineModeLabel',icMode); document.getElementById('onlineRoomBox').classList.remove('hidden'); setText('onlinePeers','Waiting for opponent…'); });
+    icPeer.on('connection', conn=>{ icConn=conn; conn.on('open',()=>{ setText('onlinePeers','Opponent connected'); sendOnline({t:'hello',name:GAME_STATE.player.name,elo:onlineElo(),mode:icMode}); }); conn.on('data',onOnlineMsg); conn.on('close',()=>setText('onlinePeers','Opponent left')); });
+    icPeer.on('error', err=>setText('onlineStatus','Peer error: '+(err&&err.type||err)));
+  }
+  function joinOnlineRoom(){
+    if(typeof Peer==='undefined'){ showToast('ONLINE','PeerJS did not load'); return; }
+    const code=(document.getElementById('onlineJoinCode').value||'').trim().toUpperCase(); if(!code){showToast('CODE','Enter a room code');return;}
+    disconnectOnline(); icHost=false; icRole='guest'; icRoom=code;
+    icPeer=new Peer();
+    icPeer.on('open', ()=>{
+      icConn=icPeer.connect(code, {reliable:true});
+      icConn.on('open',()=>{ icOnline=true; setText('onlineStatus','Joined '+code); setText('onlineRoomCode',code); document.getElementById('onlineRoomBox').classList.remove('hidden'); setText('onlinePeers','Connected to host'); sendOnline({t:'join',name:GAME_STATE.player.name,elo:onlineElo()}); });
+      icConn.on('data',onOnlineMsg); icConn.on('close',()=>setText('onlinePeers','Host left'));
+    });
+    icPeer.on('error', err=>setText('onlineStatus','Join failed: '+(err&&err.type||err)));
+  }
+  function disconnectOnline(){ try{ if(icConn) icConn.close(); if(icPeer) icPeer.destroy(); }catch(e){} icPeer=null; icConn=null; icOnline=false; icHost=false; icRole=''; const box=document.getElementById('onlineRoomBox'); if(box) box.classList.add('hidden'); setText('onlineStatus','Disconnected'); }
+  function onOnlineMsg(msg){
+    if(!msg||!msg.t)return;
+    if(msg.t==='join'||msg.t==='hello'){ setText('onlinePeers',(msg.name||'Opponent')+' in room · elo '+(msg.elo||'—')); }
+    if(msg.t==='start' && icRole==='guest'){ applyOnlineLobbyStart(msg); }
+    if(msg.t==='input' && icHost){
+      const m=GAME_STATE.match;
+      if(msg.kind==='shot'){ m.shotType=msg.shotType||m.shotType; m.power=msg.power||m.power; m.aimX=msg.aimX; m.aimY=msg.aimY; m.isLofted=!!msg.loft; if(msg.shotT!=null) m.shotT=msg.shotT; if(msg.go||!m.pending) startUserDelivery(true); }
+      if(msg.kind==='bowl'){ m.variation=msg.variation; m.bowlLine=msg.line; m.bowlLength=msg.length; if(m.battingTeam===m.userTeam){ if(!m.pending) startUserDelivery(true); } else if(!m.pending) bowlUserDelivery(); }
+      if(msg.kind==='toss') callToss(msg.call);
+    }
+    if(msg.t==='state' && icRole==='guest'){ applyOnlineState(msg.match); if(msg.anim) playOnlineAnim(msg.anim); }
+  }
+  function applyOnlineLobbyStart(msg){
+    closeModal('onlineModal'); hideEl('mainMenuOverlay');
+    GAME_STATE.match.online=true; GAME_STATE.match.onlineRole='guest';
+    startMatchSession(msg.userTeam||'IND', msg.oppTeam||'AUS', msg.format||'T20', true, {venue:'Riverbend'});
+    GAME_STATE.match.userTeam=msg.oppTeam||'AUS';
+    beginMatch(msg.decision||'bat');
+    GAME_STATE.match.online=true; GAME_STATE.match.onlineRole='guest';
+  }
+  function applyOnlineState(st){ if(!st)return; const keep={online:true,onlineRole:'guest',userTeam:GAME_STATE.match.userTeam}; Object.assign(GAME_STATE.match,st,keep); updateHUD(); }
+  function playOnlineAnim(a){ if(!a)return; GAME_STATE.match.shotType=a.shotType||GAME_STATE.match.shotType; GAME_STATE.match.variation=a.variation; animateDelivery(!!a.batting,a.r,a.wicket); setTimeout(()=>{ startFieldingPlay(a.kind||playKind(a.r,a.wicket), a.r, a.wicket, a.label||''); }, 1100); }
+  function startOnlineMatch(){
+    if(!icHost){ showToast('HOST ONLY','The host starts the match'); return; }
+    if(!icConn||!icConn.open){ showToast('WAIT','Opponent not connected'); return; }
+    closeModal('onlineModal'); hideEl('mainMenuOverlay');
+    startMatchSession('IND','AUS','T20',true,{venue:'Riverbend'});
+    GAME_STATE.match.online=true; GAME_STATE.match.onlineRole='host';
+    beginMatch('bat');
+    sendOnline({t:'start', userTeam:'IND', oppTeam:'AUS', format:'T20', decision:'bat'});
+  }
+  function slimMatch(){const m=GAME_STATE.match; return {runs:m.runs,wickets:m.wickets,balls:m.balls,innings:m.innings,target:m.target,striker:m.striker,nonStriker:m.nonStriker,currentBowler:m.currentBowler,batters:m.batters,bowlers:m.bowlers,battingTeam:m.battingTeam,bowlingTeam:m.bowlingTeam,shotMap:m.shotMap,pending:m.pending};}
+  function broadcastOnline(anim){ if(icOnline&&icHost) sendOnline({t:'state', match:slimMatch(), anim:anim||null}); }
+  function modesForOnlineGuestBatting(){ return icRole==='guest' && GAME_STATE.match.battingTeam!==GAME_STATE.match.userTeam; }
   function openPlayerCreator(){document.getElementById('creatorModal').classList.remove('hidden');fillLocations();const p=GAME_STATE.player;const set=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};set('createName',p.name);set('createNick',p.nick);set('createAge',p.age);set('createNation',p.nationality);set('createCountry',p.country||p.nationality);set('createBirth',p.birthplace||p.town);set('createState',p.state);set('createDistrict',p.district);set('createTown',p.town);set('createRole',p.role);set('createBatHand',p.batHand);set('createBowlStyle',p.bowlStyle);set('createBowlAction',p.bowlAction);set('createBatStyle',p.batStyle);if(p.look){if(document.getElementById('createSkin'))document.getElementById('createSkin').value='0x'+(p.look.skin>>>0).toString(16);set('createHair',p.look.hair);if(document.getElementById('createHairCol'))document.getElementById('createHairCol').value='0x'+(p.look.hairCol>>>0).toString(16);if(document.getElementById('createEyes'))document.getElementById('createEyes').value='0x'+(p.look.eyes>>>0).toString(16);set('createHeight',p.look.height);set('createBuild',p.look.build);}syncBowlActions();}
   function syncBowlActions(){const st=(document.getElementById('createBowlStyle')||{}).value||'';const pace=/fast|medium/i.test(st);const sel=document.getElementById('createBowlAction');if(!sel)return;const paceActs=[['short-run','Short run-up'],['medium-run','Medium run-up'],['long-run','Long run-up'],['high-arm','High-arm'],['side-on','Side-on'],['front-on','Front-on']];const spinActs=[['finger-spin','Finger spin'],['wrist-spin','Wrist spin'],['medium-run','Gather / pivot']];const acts=pace?paceActs:spinActs;const cur=sel.value;sel.innerHTML=acts.map(a=>'<option value="'+a[0]+'">'+a[1]+'</option>').join('');if(acts.some(a=>a[0]===cur))sel.value=cur;}
   function openQuickMatchSetup(){document.getElementById('quickMatchModal').classList.remove('hidden');}
@@ -2187,7 +2278,9 @@
     if(wicket&&!m.dismiss){if(loft||Math.random()<0.4)m.dismiss=Math.random()<0.3?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}
     m.lastTiming=label; m.lastQuality=quality; m.lastShot=(sh.name||m.shotType||''); m.running=r>=1&&r<=3?r:0; return {r,wicket,label,quality};
   }
-  function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active)return;if(GAME_STATE.settings.control==='spectate'){simulateNextBall();return;}if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900));showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
+  function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active)return;if(GAME_STATE.settings.control==='spectate'){simulateNextBall();return;}
+    if(icOnline&&icRole==='guest'){ if(modesForBatting()){ if(!m.pending){ sendOnline({t:'input',kind:'shot',go:true,shotType:m.shotType,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted}); return;} if(m.shotT==null){ const now=performance.now(); m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900)); sendOnline({t:'input',kind:'shot',shotType:m.shotType,shotT:m.shotT,power:m.power,aimX:m.aimX,aimY:m.aimY,loft:!!m.isLofted}); showToast(timingLabel(m.shotT),'Sent to host'); } return; } sendOnline({t:'input',kind:'bowl',variation:m.variation,line:m.bowlLine,length:m.bowlLength}); return; }
+    if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900));showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
   function scoutBucket(map,key){ map[key]=map[key]||{runs:0,balls:0,out:0,sr:0}; return map[key]; }
   function recordScout(r,wicket){
     const p=GAME_STATE.player,m=GAME_STATE.match; p.scout=p.scout||{lengths:{},vars:{},shots:{}};
@@ -2333,7 +2426,9 @@
     setTimeout(()=>finishFieldingPlay(kind,r,wicket,timing),dur);
   }
   function finishFieldingPlay(kind,r,wicket,timing){
+    if(icRole==='guest') return;
     applyDelivery(r,wicket,timing,kind);
+    broadcastOnline({batting:modesForBatting(),r,wicket,kind,label:timing,shotType:GAME_STATE.match.shotType,variation:GAME_STATE.match.variation});
     if(!GAME_STATE.match.active) return;
     if(kind==='six'||kind==='four'||wicket) startOnFieldCelebrate(kind,r,wicket);
   }
@@ -2615,6 +2710,7 @@
           if(dmode==='career'||dmode==='mail'||dmode==='hof'){ seedCareerDemo(dmode); }
           else if(dmode==='qa'){ setTimeout(function(){ try{ runInsanQa(); }catch(e){} }, 200); }
           else if(dmode==='map'){ startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'}); beginMatch('bat'); seedDemoInnings(); openShotMap(); }
+          else if(dmode==='online'){ enterMultiplayer(); setTimeout(function(){ try{ hostOnlineRoom('casual'); }catch(e){} }, 300); }
           else {
           startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'});
           if(dmode==='xi'){ showLineup(); }
