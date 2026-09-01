@@ -188,12 +188,14 @@
             <span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>Live
           </span>
           <span class="text-slate-600">|</span>
-          <span id="hudBattingTeam" class="font-bold text-emerald-400">IND</span>
-          <span id="hudScoreRuns" class="font-bold text-white text-sm font-mono-num">142/3</span>
+          <span id="hudBattingTeam" class="font-bold text-emerald-400">—</span>
+          <span id="hudScoreRuns" class="font-bold text-white text-sm font-mono-num">0/0</span>
           <span class="text-slate-500">|</span>
-          <span class="text-slate-300">Overs: <strong id="hudOvers" class="text-amber-400 font-mono-num">14.2</strong></span>
+          <span class="text-slate-300">Overs: <strong id="hudOvers" class="text-amber-400 font-mono-num">0.0</strong></span>
           <span class="text-slate-500">|</span>
-          <span class="text-slate-300">CRR: <strong id="hudCrr" class="text-white font-mono-num">9.95</strong></span>
+          <span class="text-slate-300">CRR: <strong id="hudCrr" class="text-white font-mono-num">0.00</strong></span>
+          <span class="text-slate-500">|</span>
+          <span id="hudChase" class="text-sky-300 font-mono-num hidden">Need —</span>
         </div>
       </div>
 
@@ -234,16 +236,52 @@
       <!-- Left Controls: Shot Direction / Bowl Line-Length -->
       <div id="gameplayLeftPad" class="pointer-events-auto bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl shadow-2xl backdrop-blur-md flex flex-col items-center">
         <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-2" id="leftPadTitle">Shot Direction</span>
-        <div class="grid grid-cols-3 gap-1.5 w-32 h-32">
-          <button onclick="selectPadDirection('OFF')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">OFF</button>
-          <button onclick="selectPadDirection('STRAIGHT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">STRAIGHT</button>
-          <button onclick="selectPadDirection('LEG')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">LEG</button>
-          <button onclick="selectPadDirection('CUT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">CUT</button>
-          <div class="bg-amber-500/20 border border-amber-500/40 rounded-lg flex items-center justify-center text-amber-400 font-bold text-xs transition-colors duration-200" id="activeDirLabel">MID</div>
-          <button onclick="selectPadDirection('PULL')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">PULL</button>
-          <button onclick="selectPadDirection('COVER')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">COVER</button>
-          <button onclick="selectPadDirection('DEFENCE')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">DEF</button>
-          <button onclick="selectPadDirection('SWEEP')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[10px] font-bold text-slate-300 border border-slate-700">SWEEP</button>
+        <div id="shotPad">
+        <div class="grid grid-cols-3 gap-1.5 w-36">
+          <button onclick="selectShot('COVER')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">COVER</button>
+          <button onclick="selectShot('STRAIGHT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">DRIVE</button>
+          <button onclick="selectShot('FLICK')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">FLICK</button>
+          <button onclick="selectShot('CUT')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">CUT</button>
+          <div class="bg-amber-500/20 border border-amber-500/40 rounded-lg flex items-center justify-center text-amber-400 font-bold text-[8px] px-1 text-center leading-tight" id="activeDirLabel">DRIVE</div>
+          <button onclick="selectShot('PULL')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">PULL</button>
+          <button onclick="selectShot('DEFENCE')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">DEF</button>
+          <button onclick="selectShot('SWEEP')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">SWEEP</button>
+          <button onclick="selectShot('HOOK')" class="btn-press bg-slate-800 hover:bg-amber-500 hover:text-slate-950 rounded-lg text-[9px] font-bold text-slate-300 border border-slate-700 py-1.5">HOOK</button>
+        </div>
+        <div class="grid grid-cols-4 gap-1 mt-1.5 w-36">
+          <button onclick="selectShot('ONDRIVE')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">ON</button>
+          <button onclick="selectShot('GLANCE')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">GLANCE</button>
+          <button onclick="selectShot('LATECUT')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">LATE</button>
+          <button onclick="selectShot('REVERSE')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">REV</button>
+          <button onclick="selectShot('PADDLE')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">PADDLE</button>
+          <button onclick="selectShot('SCOOP')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">SCOOP</button>
+          <button onclick="selectShot('RAMP')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">RAMP</button>
+          <button onclick="selectShot('INSIDEOUT')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">INSIDE</button>
+          <button onclick="selectShot('LOFT')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">LOFT</button>
+          <button onclick="selectShot('POWER')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">POWER</button>
+        </div>
+        </div>
+        <div id="bowlLinePad" class="hidden w-36">
+          <div class="grid grid-cols-3 gap-1">
+            <button onclick="selectLine('wide-off')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">W-OFF</button>
+            <button onclick="selectLine('off')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">OFF</button>
+            <button onclick="selectLine('middle')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">MID</button>
+            <button onclick="selectLine('leg')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">LEG</button>
+            <button onclick="selectLine('wide-leg')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">W-LEG</button>
+            <button onclick="selectLength('yorker')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">YRK</button>
+            <button onclick="selectLength('full')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">FULL</button>
+            <button onclick="selectLength('good')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">GOOD</button>
+            <button onclick="selectLength('short')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">SHORT</button>
+            <button onclick="selectLength('bouncer')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">BNCR</button>
+          </div>
+        </div>
+        <div id="bowlVarPad" class="hidden grid grid-cols-3 gap-1 mt-1.5 w-36"></div>
+        <div id="runCallPad" class="grid grid-cols-5 gap-1 mt-1.5 w-36">
+          <button onclick="callRun('yes')" class="btn-press bg-emerald-800 text-[8px] font-bold py-1 rounded border border-emerald-600">YES</button>
+          <button onclick="callRun('wait')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">WAIT</button>
+          <button onclick="callRun('2')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">2</button>
+          <button onclick="callRun('3')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">3</button>
+          <button onclick="callRun('dive')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">DIVE</button>
         </div>
       </div>
 
@@ -251,7 +289,7 @@
       <div class="pointer-events-auto bg-slate-900/90 border border-slate-700/80 px-4 py-2 rounded-xl text-center shadow-xl space-y-1">
         <div class="flex items-center justify-between text-[10px] text-slate-400">
           <span>STAMINA</span>
-          <span id="staminaText" class="text-emerald-400 font-bold font-mono-num">92%</span>
+          <span id="staminaText" class="text-emerald-400 font-bold font-mono-num">—</span>
         </div>
         <div class="w-36 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
           <div id="staminaBar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full w-[92%] transition-all duration-300"></div>
@@ -285,7 +323,8 @@
         <div class="grid grid-cols-2 gap-1">
           <button onclick="simulateNextBall()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">SIM BALL</button>
           <button onclick="simulateToEvent()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">SIM OVER</button>
-          <button onclick="changeBowler()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700 col-span-2">CHANGE BOWLER</button>
+          <button onclick="changeBowler()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">BOWLER</button>
+          <button onclick="openScorecard()" class="btn-press bg-slate-800 text-[9px] font-bold py-2 rounded-lg border border-slate-700">CARD</button>
         </div>
       </div>
 
@@ -320,7 +359,7 @@
     <div id="scorecardOverlay" class="hidden absolute inset-0 z-35 bg-slate-950/96 backdrop-blur-md p-5 overflow-auto">
       <div class="max-w-5xl mx-auto"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-black">MATCH SCORECARD</h2><button onclick="closeScorecard()" class="text-slate-400">CLOSE</button></div><div id="fullScorecard"></div></div>
     </div>
-    <div id="matchInfo" class="hidden absolute top-16 left-4 z-20 bg-slate-950/85 border border-slate-700 rounded-xl px-3 py-2 text-[10px] backdrop-blur-md"><span id="phaseText">1ST INNINGS</span> • <span id="battersText">A. Sharma 0* | Rohit 0*</span></div>
+    <div id="matchInfo" class="hidden absolute top-16 left-4 z-20 bg-slate-950/85 border border-slate-700 rounded-xl px-3 py-2 text-[10px] backdrop-blur-md"><span id="phaseText">1ST INNINGS</span> • <span id="battersText">— 0* | — 0*</span></div>
     <div id="resultToast" class="hidden absolute bottom-28 left-1/2 -translate-x-1/2 z-25 bg-slate-950/95 border border-amber-500/50 rounded-xl px-5 py-3 text-center shadow-2xl"><div id="resultText" class="font-black text-lg"></div><div id="resultDetail" class="text-xs text-slate-400 mt-1"></div></div>
 
     <!-- MAIN MENU OVERLAY PANEL -->
@@ -328,7 +367,7 @@
       <div class="ic-broadcast flex items-stretch overflow-hidden rounded-t-lg shadow-2xl">
         <div class="bg-amber-500 text-slate-950 font-black text-[10px] px-3 py-2 tracking-[0.18em] flex items-center">INSAN SPORTS</div>
         <div class="flex-1 px-4 py-1.5 flex items-center justify-between gap-4 text-xs">
-          <span id="bcTeams" class="font-bold tracking-wide text-slate-200">INDIA vs AUSTRALIA</span>
+          <span id="bcTeams" class="font-bold tracking-wide text-slate-200">— vs —</span>
           <span id="bcScore" class="font-mono-num font-black text-lg text-white">0/0</span>
           <span id="bcOvers" class="text-amber-400 font-mono-num">0.0 ov</span>
         </div>
@@ -347,7 +386,7 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.7</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v1.8</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
@@ -950,6 +989,18 @@
   }
   if(typeof speechSynthesis!=='undefined') speechSynthesis.addEventListener('voiceschanged',function(){});
   const FIELD_SETS={attacking:[[4.2,0,7.2],[3.6,0,3.1],[5.4,0,-0.6],[-4.8,0,6.4],[7.2,0,1.2],[-7.4,0,-1.6],[11,0,-9],[-2.4,0,9.1]],normal:[[8,0,2],[6,0,-2],[-7,0,1],[10,0,-8],[-10,0,-6],[14,0,8],[-12,0,6],[0,0,-16]],defensive:[[15,0,8],[-14,0,6],[12,0,-10],[-12,0,-8],[18,0,1],[-17,0,2],[0,0,-18],[9,0,4]]};
+  const SHOTS={DEFENCE:{name:'Defence',dir:'DEFENCE',loft:false,pwr:0.4,side:0},STRAIGHT:{name:'Straight drive',dir:'STRAIGHT',loft:false,pwr:0.75,side:0},COVER:{name:'Cover drive',dir:'COVER',loft:false,pwr:0.8,side:1},ONDRIVE:{name:'On drive',dir:'LEG',loft:false,pwr:0.78,side:-1},FLICK:{name:'Flick',dir:'LEG',loft:false,pwr:0.7,side:-1},GLANCE:{name:'Leg glance',dir:'LEG',loft:false,pwr:0.45,side:-1},CUT:{name:'Cut',dir:'CUT',loft:false,pwr:0.72,side:1},LATECUT:{name:'Late cut',dir:'CUT',loft:false,pwr:0.55,side:1},PULL:{name:'Pull',dir:'PULL',loft:false,pwr:0.9,side:-1,short:true},HOOK:{name:'Hook',dir:'PULL',loft:true,pwr:1.0,side:-1,short:true},SWEEP:{name:'Sweep',dir:'SWEEP',loft:false,pwr:0.65,side:-1},REVERSE:{name:'Reverse sweep',dir:'OFF',loft:false,pwr:0.7,side:1},PADDLE:{name:'Paddle',dir:'LEG',loft:false,pwr:0.5,side:-1},RAMP:{name:'Ramp',dir:'OFF',loft:true,pwr:0.85,side:1},SCOOP:{name:'Scoop',dir:'LEG',loft:true,pwr:0.8,side:-1},LOFT:{name:'Loft',dir:'STRAIGHT',loft:true,pwr:1.05,side:0},INSIDEOUT:{name:'Inside-out',dir:'COVER',loft:true,pwr:0.95,side:1},POWER:{name:'Power hit',dir:'STRAIGHT',loft:true,pwr:1.2,side:0}};
+  const PACE_VARS=['yorker','bouncer','short','slower','cutter','off-cutter','leg-cutter','inswinger','outswinger','cross-seam'];
+  const SPIN_LEG=['leg-break','googly','top-spinner','slider','flipper'];
+  const SPIN_OFF=['stock','arm-ball','flight','pace-change'];
+  const SPIN_SLA=['stock','arm-ball','flight','pace-change'];
+  const SPIN_CHIN=['googly','slider','top-spinner','stock'];
+  const BOWL_STYLES_PACE=['Right-arm fast','Right-arm fast-medium','Right-arm medium','Left-arm fast'];
+  const BOWL_STYLES_SPIN=['Off-spin','Leg-spin','Left-arm orthodox','Left-arm wrist-spin'];
+  function isPaceStyle(st){return /fast|medium|seam/i.test(st||'')&&!/spin|orthodox|wrist/i.test(st||'');}
+  function currentBowlStyle(){const m=GAME_STATE.match; if(m.bowlingTeam===m.userTeam) return GAME_STATE.player.bowlStyle||'Right-arm fast'; const b=m.bowlers&&m.bowlers[m.currentBowler]; return (b&&b.style)||'Right-arm fast';}
+  function currentBowlIsSpin(){return !isPaceStyle(currentBowlStyle());}
+  function varsForStyle(st){st=st||currentBowlStyle()||GAME_STATE.player.bowlStyle||''; if(isPaceStyle(st)){ if(/medium$/i.test(st)&&!/fast/i.test(st)) return ['yorker','slower','cutter','inswinger','outswinger','cross-seam']; return PACE_VARS.slice(); } if(/leg-spin/i.test(st)&&!/left/i.test(st)) return SPIN_LEG.slice(); if(/left-arm wrist/i.test(st)) return SPIN_CHIN.slice(); if(/left-arm orthodox|orthodox/i.test(st)) return SPIN_SLA.slice(); return SPIN_OFF.slice(); }
   function setFieldSet(name){GAME_STATE.match.fieldSet=name||'normal'; const spots=FIELD_SETS[name]||FIELD_SETS.normal; (fielderMeshes||[]).forEach((f,i)=>{ if(!spots[i])return; f.position.set(spots[i][0],0,spots[i][2]); f.userData.home=f.position.clone(); f.lookAt(0,0,0); }); showToast('FIELD '+String(name).toUpperCase(), name==='attacking'?'Slips and catching ring':'Rope protection'); uiClick();}
   let trailMeshes=[];
   function ensureTrail(){if(trailMeshes.length||!scene)return; for(let i=0;i<14;i++){ const m=new THREE.Mesh(new THREE.SphereGeometry(.06,6,6), new THREE.MeshBasicMaterial({color:0xf8fafc,transparent:true,opacity:.35-i*.02})); m.visible=false; scene.add(m); trailMeshes.push(m);} }
@@ -987,7 +1038,7 @@
   function enterStatistics(){uiClick();openStatisticsView();}
   function enterSettings(){uiClick();openSettingsHub();}
   function showSetTab(id){['game','gfx','lang','audio','access','data'].forEach(k=>{const el=document.getElementById('set-'+k);if(el)el.classList.toggle('on',k===id);});}
-  let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,keeperMesh,fielderMeshes=[],ballPath=null,batGroup=null,animUntil=0,actionKind=null,animDur=1100,fieldActor=null,trophyMesh=null,confettiGroup=null,ceremonyActive=false,crowdRoarUntil=0,podiumMesh=null;
+  let scene,camera,renderer,pitchMesh,stadiumMesh,ballMesh,batterMesh,bowlerMesh,keeperMesh,nonStrikerMesh,fielderMeshes=[],ballPath=null,batGroup=null,animUntil=0,actionKind=null,animDur=1100,fieldActor=null,trophyMesh=null,confettiGroup=null,ceremonyActive=false,crowdRoarUntil=0,podiumMesh=null,stumpSets={bat:[],bowl:[]};
   function isPhysicallyPortrait(){return window.matchMedia('(orientation: portrait)').matches;}
   async function tryNativeLandscapeLock(){try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');document.documentElement.classList.add('orientation-locked');return true;}}catch(e){}return false;}
   function updateOrientationMode(){const root=document.getElementById('gameRoot');const nativeLandscape=screen.orientation&&/landscape/.test(screen.orientation.type||'');if(nativeLandscape)document.documentElement.classList.add('orientation-locked');if(isPhysicallyPortrait()&&!document.documentElement.classList.contains('orientation-locked'))root.classList.add('force-landscape');else root.classList.remove('force-landscape');if(renderer)onWindowResize();}
@@ -1056,6 +1107,7 @@
       const elbow=new THREE.Group(); elbow.position.y=-.4; root.add(elbow);
       const fore=limb(new THREE.CylinderGeometry(.058,.075,.36,8),skin,true); fore.position.y=-.16; elbow.add(fore);
       const hand=limb(new THREE.SphereGeometry(.075,8,8),keeper?new THREE.MeshStandardMaterial({color:0xf59e0b}):skin,true); hand.position.y=-.38; elbow.add(hand);
+      for(let f=0;f<3;f++){ const finger=limb(new THREE.BoxGeometry(.018,.07,.018),keeper?new THREE.MeshStandardMaterial({color:0xf59e0b}):skin); finger.position.set((f-1)*.028,-.46,.02); elbow.add(finger); }
       if(role==='batter' && ((left&&side<0)||(!left&&side>0))){
         const bat=new THREE.Group(); bat.position.set(0,-.42,.02); elbow.add(bat);
         const blade=limb(new THREE.BoxGeometry(.09,.76,.045),wood,true); blade.position.y=-.3; bat.add(blade);
@@ -1098,9 +1150,20 @@
     if(!p||!p.userData.joints)return;
     const j=p.userData.joints; const bat=p.userData.bat; const sign=p.userData.left?-1:1;
     const st=(GAME_STATE.player.batStyle||'Balanced');
-    const agg=/Aggressive|Power/i.test(st)?1.25:/Defensive|Anchor/i.test(st)?0.7:/Technical|Classical/i.test(st)?0.9:1;
-    if(t<.45){ const u=t/.45; j.spine.rotation.y=-.25*sign*u*agg; if(bat)bat.rotation.x=-1.1*u*agg; j.rLeg.rotation.x=/Technical/i.test(st)?u*.2:0; }
-    else { const u=Math.min(1,(t-.45)/.35); j.spine.rotation.y=(-.25+u*1.1)*sign*agg; if(bat)bat.rotation.x=-1.1+u*2.4*agg; j.rLeg.rotation.x=u*.35*agg; }
+    const shot=GAME_STATE.match.shotType||'STRAIGHT';
+    const agg=/Aggressive|Power/i.test(st)?1.2:/Defensive|Anchor/i.test(st)?0.7:/Technical|Classical/i.test(st)?0.9:1;
+    const sweep=/SWEEP|REVERSE|PADDLE/i.test(shot); const pull=/PULL|HOOK/i.test(shot); const scoop=/SCOOP|RAMP/i.test(shot); const def=/DEFENCE|GLANCE/i.test(shot); const cut=/CUT|LATE/i.test(shot);
+    if(t<.45){ const u=t/.45; j.spine.rotation.y=-.25*sign*u*agg*(pull?-1.2:cut?1.15:1); if(bat)bat.rotation.x=-(sweep?1.6:scoop?1.8:def?.55:1.1)*u*agg; j.rLeg.rotation.x=(sweep?u*.6:/Technical/i.test(st)?u*.2:u*.15); if(j.lKnee)j.lKnee.rotation.x=sweep?-u*.8:0; }
+    else { const u=Math.min(1,(t-.45)/.35); j.spine.rotation.y=(-.25+u*1.1)*sign*agg*(pull?-1:1); if(bat)bat.rotation.x=-(sweep?1.6:def?.55:1.1)+u*(sweep?2.8:def?1.1:2.4)*agg; j.rLeg.rotation.x=u*.35*agg; }
+  }
+  function poseWalk(p,t){if(!p||!p.userData.joints)return; const j=p.userData.joints; const s=Math.sin(t*8); j.lLeg.rotation.x=s*.35; j.rLeg.rotation.x=-s*.35; j.lArm.rotation.x=-s*.25; j.rArm.rotation.x=s*.25; p.position.y=Math.abs(s)*0.03;}
+  function poseSprint(p,t){poseRun(p,t*1.15);}
+  function animateRunning(t,runs){
+    const A=8.2,B=-8.15; const legs=Math.max(1,Math.min(3,runs||1)); const m=GAME_STATE.match;
+    const total=Math.min(0.98,t)*legs; const trip=Math.floor(total); const u=total-trip; const go=trip%2===0;
+    function place(mesh,from,to,turnY){ if(!mesh)return; mesh.position.z=from+(to-from)*u; mesh.position.x=mesh.userData.home?mesh.userData.home.x:0; mesh.rotation.y=turnY; const dive=m.runCall==='dive'&&t>0.82; if(dive) poseDive(mesh,(t-.82)/.18); else if(legs>=2) poseSprint(mesh,t*8); else poseRun(mesh,t*7); }
+    place(batterMesh, go?A:B, go?B:A, go?Math.PI:0);
+    place(nonStrikerMesh, go?B:A, go?A:B, go?0:Math.PI);
   }
   function poseKeepReady(p,t){
     if(!p||!p.userData.joints)return;
@@ -1111,6 +1174,38 @@
     j.lArm.rotation.x=-.9; j.rArm.rotation.x=-.9;
     j.lArm.rotation.z=-.5; j.rArm.rotation.z=.5;
     p.position.y=Math.abs(Math.sin(t*3.2))*0.03;
+  }
+  function poseKeepUp(p,t){
+    if(!p||!p.userData.joints)return;
+    const j=p.userData.joints;
+    j.spine.rotation.x=.08; j.head.rotation.x=.06;
+    j.lLeg.rotation.x=.22; j.rLeg.rotation.x=.22;
+    if(j.lKnee)j.lKnee.rotation.x=-.28; if(j.rKnee)j.rKnee.rotation.x=-.28;
+    j.lArm.rotation.x=-.55; j.rArm.rotation.x=-.55;
+    j.lArm.rotation.z=-.35; j.rArm.rotation.z=.35;
+    p.position.y=Math.abs(Math.sin(t*4))*0.02;
+  }
+  function poseKeeperNow(p,t){ if(currentBowlIsSpin()) poseKeepUp(p,t); else poseKeepReady(p,t); }
+  function poseJump(p,t){
+    if(!p||!p.userData.joints)return;
+    const j=p.userData.joints; const u=Math.min(1,t);
+    p.position.y=Math.sin(u*Math.PI)*0.85;
+    j.lArm.rotation.x=-2.1*u; j.rArm.rotation.x=-2.1*u;
+    j.lLeg.rotation.x=-.4; j.rLeg.rotation.x=-.4;
+  }
+  function poseSlide(p,t){
+    if(!p||!p.userData.joints)return;
+    const j=p.userData.joints; const u=Math.min(1,t);
+    p.rotation.z=u*1.05; p.position.y=0.08;
+    j.lArm.rotation.x=-1.4*u; j.rArm.rotation.x=-.4;
+    j.lLeg.rotation.x=.2; j.rLeg.rotation.x=-.35;
+  }
+  function poseReact(p,t){
+    if(!p||!p.userData.joints)return;
+    const j=p.userData.joints;
+    j.head.rotation.y=Math.sin(t*8)*.25;
+    j.lArm.rotation.x=-.6; j.rArm.rotation.x=-.4;
+    j.spine.rotation.y=Math.sin(t*5)*.12;
   }
   function poseCatch(p,t){
     if(!p||!p.userData.joints)return;
@@ -1287,32 +1382,55 @@
     podiumMesh=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.25,.18,12), new THREE.MeshStandardMaterial({color:0x1e293b,metalness:.3,roughness:.5}));
     podiumMesh.position.set(0,-.2,2); podiumMesh.visible=false; scene.add(podiumMesh);
   }
+  function keeperHomeZ(){return currentBowlIsSpin()?9.55:10.55;}
   function refreshOnFieldPlayers(){
     if(!scene)return;
-    [batterMesh,bowlerMesh,keeperMesh].forEach(m=>{if(m)scene.remove(m);});
+    [batterMesh,bowlerMesh,keeperMesh,nonStrikerMesh].forEach(m=>{if(m)scene.remove(m);});
     (fielderMeshes||[]).forEach(m=>scene.remove(m)); fielderMeshes=[];
     const left=/left/i.test(GAME_STATE.player.batHand);
     const batShirt=0x1d4ed8, fieldShirt=0xb45309;
     batterMesh=makePlayer(GAME_STATE.player.name,'batter',{left,keeper:false,shirt:batShirt,look:GAME_STATE.player.look,skin:(GAME_STATE.player.look&&GAME_STATE.player.look.skin)||0xc47a4a});
     batterMesh.position.set(.25,0,8.2); batterMesh.userData.home=batterMesh.position.clone(); batterMesh.userData.homeY=0; scene.add(batterMesh);
-    bowlerMesh=makePlayer('Bowler','bowler',{bowlLeft:/left-arm/i.test(GAME_STATE.player.bowlStyle),shirt:fieldShirt});
+    nonStrikerMesh=makePlayer('Non-striker','batter',{left:false,shirt:batShirt});
+    nonStrikerMesh.position.set(-.45,0,-8.15); nonStrikerMesh.rotation.y=Math.PI; nonStrikerMesh.userData.home=nonStrikerMesh.position.clone(); nonStrikerMesh.userData.homeY=0; scene.add(nonStrikerMesh);
+    const bowlLeft=/left-arm/i.test(currentBowlStyle());
+    bowlerMesh=makePlayer('Bowler','bowler',{bowlLeft,shirt:fieldShirt});
     bowlerMesh.position.set(0,0,-12); bowlerMesh.rotation.y=Math.PI; bowlerMesh.userData.home=bowlerMesh.position.clone(); bowlerMesh.userData.homeY=0; scene.add(bowlerMesh);
     keeperMesh=makePlayer('Keeper','keeper',{keeper:true,shirt:fieldShirt});
-    keeperMesh.position.set(0,0,10.4); keeperMesh.userData.home=keeperMesh.position.clone(); keeperMesh.userData.homeY=0; scene.add(keeperMesh);
+    keeperMesh.position.set(0,0,keeperHomeZ()); keeperMesh.userData.home=keeperMesh.position.clone(); keeperMesh.userData.homeY=0; scene.add(keeperMesh);
     const spots=FIELD_SETS[GAME_STATE.match.fieldSet||'normal']||FIELD_SETS.normal;
     spots.forEach((p,i)=>{
       const f=makePlayer('F'+i,'fielder',{shirt:fieldShirt});
       f.position.set(p[0],0,p[2]); f.userData.home=f.position.clone(); f.userData.homeY=0; f.lookAt(0,0,0); scene.add(f); fielderMeshes.push(f);
     });
   }
-  function createWicketStumps(x,y,z){for(let i=-1;i<=1;i++){const s=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.75,8),new THREE.MeshStandardMaterial({color:0xfef08a}));s.position.set(x+i*.15,y,z);scene.add(s);}}
+  function createWicketStumps(x,y,z){
+    const wood=new THREE.MeshStandardMaterial({color:0xfef08a});
+    const arr=[];
+    for(let i=-1;i<=1;i++){
+      const s=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.75,8),wood);
+      s.position.set(x+i*.15,y,z); s.userData.home=s.position.clone(); s.castShadow=true; scene.add(s); arr.push(s);
+    }
+    const bail=new THREE.Mesh(new THREE.BoxGeometry(.42,.035,.035),wood);
+    bail.position.set(x,y+.4,z); bail.userData.home=bail.position.clone(); scene.add(bail); arr.push(bail);
+    if(z>0) stumpSets.bat=arr; else stumpSets.bowl=arr;
+  }
+  function scatterStumps(end){
+    const arr=stumpSets[end||'bat']||[];
+    arr.forEach((s,i)=>{ s.position.x+=(i-1.2)*0.35; s.position.y=0.18; s.position.z+= (Math.random()-.3)*0.4; s.rotation.z=(i-1)*0.9; s.rotation.x=.4; });
+  }
+  function resetStumps(){
+    ['bat','bowl'].forEach(k=>(stumpSets[k]||[]).forEach(s=>{ if(s.userData.home){ s.position.copy(s.userData.home); s.rotation.set(0,0,0);} }));
+  }
   function onWindowResize(){if(!renderer)return;const z=getViewportSize();camera.aspect=z.width/z.height;camera.updateProjectionMatrix();renderer.setSize(z.width,z.height);}
   function restoreFieldHomes(){
     if(ceremonyActive)return;
+    resetStumps();
     if(ballMesh){ ballMesh.visible=true; ballMesh.position.set(0,.5,-8.5); }
     if(bowlerMesh){ if(bowlerMesh.userData.home)bowlerMesh.position.copy(bowlerMesh.userData.home); else bowlerMesh.position.set(0,0,-12); bowlerMesh.rotation.y=Math.PI; resetPoseExtras(bowlerMesh); }
-    if(batterMesh){ if(batterMesh.userData.home)batterMesh.position.copy(batterMesh.userData.home); resetPoseExtras(batterMesh); }
-    if(keeperMesh){ if(keeperMesh.userData.home)keeperMesh.position.copy(keeperMesh.userData.home); resetPoseExtras(keeperMesh); }
+    if(batterMesh){ if(batterMesh.userData.home)batterMesh.position.copy(batterMesh.userData.home); resetPoseExtras(batterMesh); batterMesh.rotation.y=0; }
+    if(nonStrikerMesh){ if(nonStrikerMesh.userData.home)nonStrikerMesh.position.copy(nonStrikerMesh.userData.home); resetPoseExtras(nonStrikerMesh); nonStrikerMesh.rotation.y=Math.PI; }
+    if(keeperMesh){ keeperMesh.position.set(0,0,keeperHomeZ()); keeperMesh.userData.home=keeperMesh.position.clone(); resetPoseExtras(keeperMesh); }
     (fielderMeshes||[]).forEach(f=>{ if(f.userData.home)f.position.copy(f.userData.home); resetPoseExtras(f); if(f.userData.home)f.lookAt(0,0,0); });
     fieldActor=null; if(trophyMesh&&!ceremonyActive)trophyMesh.visible=false; if(podiumMesh)podiumMesh.visible=false;
   }
@@ -1326,35 +1444,42 @@
       const t=Math.max(0,Math.min(1,1-(animUntil-now)/Math.max(200,animDur)));
       const p=ballPath(t); if(ballMesh&&p){ ballMesh.position.copy(p); updateTrail(p); }
       const needle=document.getElementById('timingNeedle'); if(needle&&(actionKind==='bowl'||actionKind==='shot')) needle.style.left=(Math.max(0,Math.min(1,t))*100)+'%';
-      if(actionKind==='bowl'){ if(bowlerMesh)poseBowl(bowlerMesh,t); if(batterMesh)poseIdle(batterMesh,tIdle); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
-      else if(actionKind==='shot'){ if(batterMesh)poseShot(batterMesh,t); if(bowlerMesh)poseBowl(bowlerMesh,Math.min(1,t*1.15)); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
-      else if(actionKind==='catch'||actionKind==='drop'||actionKind==='keeperCatch'||actionKind==='ground'||actionKind==='four'){
-        if(batterMesh)poseShot(batterMesh,Math.min(1,t*0.4+0.6));
-        if(keeperMesh&&actionKind==='keeperCatch'){ poseCatch(keeperMesh,t); }
-        else if(keeperMesh) poseKeepReady(keeperMesh,tIdle);
-        if(fieldActor&&actionKind!=='keeperCatch'){
+      if(actionKind==='bowl'){ if(bowlerMesh)poseBowl(bowlerMesh,t); if(batterMesh)poseIdle(batterMesh,tIdle); if(nonStrikerMesh)poseIdle(nonStrikerMesh,tIdle); if(keeperMesh)poseKeeperNow(keeperMesh,tIdle); }
+      else if(actionKind==='shot'){ if(batterMesh)poseShot(batterMesh,t); if(bowlerMesh)poseBowl(bowlerMesh,Math.min(1,t*1.15)); if(nonStrikerMesh)poseIdle(nonStrikerMesh,tIdle); if(keeperMesh)poseKeeperNow(keeperMesh,tIdle); }
+      else if(actionKind==='catch'||actionKind==='drop'||actionKind==='keeperCatch'||actionKind==='ground'||actionKind==='four'||actionKind==='stumped'||actionKind==='runout'){
+        if(batterMesh && actionKind!=='ground' && actionKind!=='runout') poseShot(batterMesh,Math.min(1,t*0.4+0.6));
+        if(keeperMesh&&(actionKind==='keeperCatch'||actionKind==='stumped')){ poseCatch(keeperMesh,t); }
+        else if(keeperMesh) poseKeeperNow(keeperMesh,tIdle);
+        if(fieldActor&&actionKind!=='keeperCatch'&&actionKind!=='stumped'){
           const dest=ballMesh?ballMesh.position.clone():new THREE.Vector3(); dest.y=0;
           if(t<0.62){ fieldActor.position.lerp(dest,.09); fieldActor.lookAt(dest.x,1,dest.z); poseFieldRun(fieldActor,tIdle*2.4); }
+          else if(actionKind==='four') poseSlide(fieldActor,(t-.62)/.38);
           else if(GAME_STATE.match.dive && (actionKind==='catch'||actionKind==='drop')) poseDive(fieldActor,(t-.62)/.38);
+          else if((actionKind==='catch'||actionKind==='drop') && ballMesh && ballMesh.position.y>2.1) poseJump(fieldActor,(t-.62)/.38);
           else if(actionKind==='catch'||actionKind==='drop') poseCatch(fieldActor,(t-.62)/.38);
-          else if(actionKind==='ground') poseThrow(fieldActor,(t-.62)/.38);
+          else if(actionKind==='ground'||actionKind==='runout') poseThrow(fieldActor,(t-.62)/.38);
           else poseFieldRun(fieldActor,tIdle*2.2);
         }
         if(actionKind==='four'&&t>.75&&batterMesh) poseCelebrate(batterMesh,tIdle);
-        if(actionKind==='ground'&&batterMesh) poseRun(batterMesh,tIdle*2);
+        if(actionKind==='drop'&&fieldActor&&t>.7) poseReact(fieldActor,tIdle);
+        if((actionKind==='ground'||actionKind==='runout')&&batterMesh) animateRunning(t, GAME_STATE.match.running||1);
       }
-      else if(actionKind==='six'){ if(batterMesh){ if(t<.35)poseShot(batterMesh,t/.35); else poseCelebrate(batterMesh,tIdle); } if(keeperMesh)poseKeepReady(keeperMesh,tIdle); }
-      else if(actionKind==='bowled'||actionKind==='lbw'){ if(batterMesh)poseShot(batterMesh,Math.min(1,t)); if(keeperMesh)poseKeepReady(keeperMesh,tIdle); if(bowlerMesh&&t>.55)poseCelebrate(bowlerMesh,tIdle); }
+      else if(actionKind==='six'){ if(batterMesh){ if(t<.35)poseShot(batterMesh,t/.35); else poseCelebrate(batterMesh,tIdle); } if(keeperMesh)poseKeeperNow(keeperMesh,tIdle); if(nonStrikerMesh)poseCelebrate(nonStrikerMesh,tIdle); }
+      else if(actionKind==='bowled'||actionKind==='lbw'){ if(batterMesh)poseShot(batterMesh,Math.min(1,t)); if(keeperMesh)poseKeeperNow(keeperMesh,tIdle); if(bowlerMesh&&t>.55)poseCelebrate(bowlerMesh,tIdle); if(t>.45) scatterStumps('bat'); }
       else if(actionKind==='celebrate'){ const hero=fieldActor||batterMesh; if(hero)poseCelebrate(hero,tIdle); (fielderMeshes||[]).forEach((f,i)=>i%2===0?poseCelebrate(f,tIdle+i):poseIdle(f,tIdle)); }
-      else if(actionKind==='trophy'){ const hero=fieldActor||batterMesh; if(hero)poseTrophy(hero,t); [batterMesh,bowlerMesh,keeperMesh].concat(fielderMeshes||[]).forEach(f=>{ if(f&&f!==hero)poseCelebrate(f,tIdle); }); }
+      else if(actionKind==='trophy'){ const hero=fieldActor||batterMesh; if(hero)poseTrophy(hero,t); [batterMesh,bowlerMesh,keeperMesh,nonStrikerMesh].concat(fielderMeshes||[]).forEach(f=>{ if(f&&f!==hero)poseCelebrate(f,tIdle); }); }
       if(actionKind!=='bowl'&&actionKind!=='shot'&&bowlerMesh&&actionKind!=='trophy'&&actionKind!=='celebrate') poseIdle(bowlerMesh,tIdle);
     } else {
       if(ballPath){ ballPath=null; updateTrail(null); if(!ceremonyActive){ actionKind=null; restoreFieldHomes(); } }
       if(ceremonyActive&&fieldActor) poseTrophy(fieldActor,1);
       else {
-        poseIdle(batterMesh,tIdle); poseIdle(bowlerMesh,tIdle);
-        if(keeperMesh) poseKeepReady(keeperMesh,tIdle);
-        (fielderMeshes||[]).forEach(f=>poseIdle(f,tIdle));
+        poseIdle(batterMesh,tIdle); poseIdle(bowlerMesh,tIdle); if(nonStrikerMesh)poseIdle(nonStrikerMesh,tIdle);
+        if(keeperMesh) poseKeeperNow(keeperMesh,tIdle);
+        (fielderMeshes||[]).forEach((f,i)=>{
+          if(i%3===0){ poseWalk(f,tIdle); if(f.userData.home) f.position.x=f.userData.home.x+Math.sin(tIdle*0.45+i)*0.4; }
+          else if(i%5===0) poseSprint(f,tIdle*0.2);
+          else poseIdle(f,tIdle);
+        });
       }
     }
     if(confettiGroup&&confettiGroup.visible){
@@ -1368,7 +1493,7 @@
     if(menuOpen && !GAME_STATE.match.active){ const a=now*0.00012; camera.position.set(Math.sin(a)*32,14,Math.cos(a)*32); camera.lookAt(0,3,0); }
     else if(mode==='Broadcast'){ camera.position.set(Math.sin(now*.00025)*2.2,7.2,22); camera.lookAt(0,1.4,0); }
     else if(mode==='Batting'||mode==='CloseBatting'){ camera.position.set(1.2,2.6,12.5); camera.lookAt(0,1.1,8); }
-    else if(mode==='Bowling'||mode==='BehindBowler'){ camera.position.set(0,3.2,-16); camera.lookAt(0,1.2,-4); }
+    else if(mode==='Bowling'||mode==='BehindBowler'){ camera.position.set(1.1,4.4,-18.5); camera.lookAt(0,1.35,5); }
     else if(mode==='Fielding'){ const look=fieldActor?fieldActor.position:new THREE.Vector3(0,1,0); camera.position.set(look.x+8,4.2,look.z+6); camera.lookAt(look.x,1.1,look.z); }
     else if(mode==='Wicket'||mode==='Replay'){ camera.position.set(3.2,2.1,10.2); camera.lookAt(0,1,9); }
     else if(mode==='Celebration'){ const h=fieldActor||batterMesh; camera.position.set((h?h.position.x:0)+2.4,2.4,(h?h.position.z:8)+4); camera.lookAt(h?h.position.x:0,1.4,h?h.position.z:8); }
@@ -1427,7 +1552,8 @@
       battingTeam:userTeam,bowlingTeam:oppTeam,striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null,
       venue:opts.venue||'Riverbend',isQuick:!!isQuick,userCap:cap,userVice:vice,userKeeper:keeper,
       batters:userNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:i===cap,vice:i===vice,keeper:i===keeper,role:xiRole(i,{captain:i===cap,keeper:i===keeper})})),
-      bowlers:oppNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:i===0,vice:i===1,keeper:i===5,role:xiRole(i,{captain:i===0,keeper:i===5})}))
+      bowlers:oppNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,maidens:0,style:i>=7?BOWL_STYLES_SPIN[(i-7)%BOWL_STYLES_SPIN.length]:BOWL_STYLES_PACE[i%BOWL_STYLES_PACE.length],captain:i===0,vice:i===1,keeper:i===5,role:xiRole(i,{captain:i===0,keeper:i===5})})),
+      shotType:'STRAIGHT',bowlLine:'middle',bowlLength:'good',variation:'',runCall:null,wantedRuns:0,result:null,potm:null
     });
     refreshOnFieldPlayers(); showLineup();
   }
@@ -1480,7 +1606,8 @@
     const cap=m.userCap||0, vice=m.userVice==null?1:m.userVice, keeper=m.userKeeper==null?5:m.userKeeper;
     m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;
     m.batters=batNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:userBatting?i===cap:i===0,vice:userBatting?i===vice:i===1,keeper:userBatting?i===keeper:i===5,role:xiRole(i,{captain:userBatting?i===cap:i===0,keeper:userBatting?i===keeper:i===5})}));
-    m.bowlers=bowlNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,captain:!userBatting?i===cap:i===0,vice:!userBatting?i===vice:i===1,keeper:!userBatting?i===keeper:i===5,role:xiRole(i,{captain:!userBatting?i===cap:i===0,keeper:!userBatting?i===keeper:i===5})}));
+    m.bowlers=bowlNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,maidens:0,style:i>=7?BOWL_STYLES_SPIN[(i-7)%BOWL_STYLES_SPIN.length]:BOWL_STYLES_PACE[i%BOWL_STYLES_PACE.length],captain:!userBatting?i===cap:i===0,vice:!userBatting?i===vice:i===1,keeper:!userBatting?i===keeper:i===5,role:xiRole(i,{captain:!userBatting?i===cap:i===0,keeper:!userBatting?i===keeper:i===5})}));
+    if(m.bowlingTeam===m.userTeam){ const b=m.bowlers[0]; if(b) b.style=GAME_STATE.player.bowlStyle; }
     if(scene)refreshOnFieldPlayers(); updateHUD();
   }
   function continueSavedMatch(){
@@ -1494,60 +1621,104 @@
   }
   function showGameplay(){hideEl('mainMenuOverlay');hideEl('lineupOverlay');hideEl('tossOverlay');hideEl('loadingOverlay');document.getElementById('gameplayControlHUD').classList.remove('hidden');document.getElementById('liveScoreWidget').classList.remove('hidden');document.getElementById('hudCamBtn').classList.remove('hidden');document.getElementById('hudPauseBtn').classList.remove('hidden');document.getElementById('matchInfo').classList.remove('hidden');document.getElementById('liveBatterBowler').classList.remove('hidden');const bs=document.getElementById('broadcastStrip');if(bs)bs.classList.remove('hidden');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');updateHUD();}
   function modesForBatting(){return GAME_STATE.match.battingTeam===GAME_STATE.match.userTeam;}
-  function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);setText('bcTeams',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' vs '+(TEAM_NAMES[m.bowlingTeam]||m.bowlingTeam));setText('bcScore',m.runs+'/'+m.wickets);setText('bcOvers',ov+' ov');setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker],b=m.bowlers[m.currentBowler];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');const sr=s&&s.balls?((s.runs/s.balls)*100).toFixed(0):'—';const econ=b&&b.balls?((b.runs/(b.balls/6))||0).toFixed(1):'—';setText('hudBatterLine',s?`${s.name} ${s.runs}(${s.balls}) 4s ${s.fours} 6s ${s.sixes} SR ${sr}`:'Batter —');setText('hudBowlerLine',b?`${b.name} ${b.overs}.${b.balls%6} ov · ${b.runs}/${b.wickets} · Econ ${econ}`:'Bowler —');}
+  function updateHUD(){const m=GAME_STATE.match;const ov=`${Math.floor(m.balls/6)}.${m.balls%6}`;const crr=m.balls?(m.runs/(m.balls/6)).toFixed(2):'0.00';setText('hudBattingTeam',TEAM_NAMES[m.battingTeam]||m.battingTeam);setText('hudScoreRuns',`${m.runs}/${m.wickets}`);setText('hudOvers',ov);setText('hudCrr',crr);const chase=document.getElementById('hudChase');if(chase){if(m.innings===2&&m.target){chase.classList.remove('hidden');const left=Math.max(0,m.target-m.runs);const ballsLeft=Math.max(1,m.oversLimit*6-m.balls);const rrr=(left/(ballsLeft/6)).toFixed(2);chase.innerText='Need '+left+' · RRR '+rrr;}else chase.classList.add('hidden');}setText('bcTeams',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' vs '+(TEAM_NAMES[m.bowlingTeam]||m.bowlingTeam));setText('bcScore',m.runs+'/'+m.wickets);setText('bcOvers',ov+' ov');setText('staminaText',`${Math.max(0,Math.round(GAME_STATE.player.stamina))}%`);document.getElementById('staminaBar').style.width=`${Math.max(0,GAME_STATE.player.stamina)}%`;const s=m.batters[m.striker],n=m.batters[m.nonStriker],b=m.bowlers[m.currentBowler];setText('battersText',`${s?s.name:'—'} ${s?s.runs:0}${s&&!s.out?'*':''} | ${n?n.name:'—'} ${n?n.runs:0}${n&&!n.out?'*':''}`);setText('phaseText',m.innings===1?'1ST INNINGS':'2ND INNINGS');setText('actionBtnLabel',modesForBatting()?'PLAY SHOT':'BOWL DELIVERY');setText('leftPadTitle',modesForBatting()?'Shot Direction':'Line / Length');const sr=s&&s.balls?((s.runs/s.balls)*100).toFixed(0):'—';const econ=b&&b.balls?((b.runs/(b.balls/6))||0).toFixed(1):'—';setText('hudBatterLine',s?`${s.name} ${s.runs}(${s.balls}) 4s ${s.fours} 6s ${s.sixes} SR ${sr}`:'Batter —');setText('hudBowlerLine',b?`${b.name} ${b.overs}.${b.balls%6} ov · ${b.runs}/${b.wickets} · M ${b.maidens||0} · Econ ${econ}`:'Bowler —');refreshBowlVarPad();}
   function showToast(title,detail=''){setText('resultText',title);setText('resultDetail',detail);const e=document.getElementById('resultToast');e.classList.remove('hidden');clearTimeout(showToast.t);showToast.t=setTimeout(()=>e.classList.add('hidden'),1100);}
   function selectPadDirection(dir){GAME_STATE.match.targetDir=dir;setText('activeDirLabel',dir);}
-  function setPower(p){GAME_STATE.match.power=p;showToast('POWER '+p,'Does not guarantee a six');}
-  function triggerLoftedShot(){GAME_STATE.match.isLofted=!GAME_STATE.match.isLofted;showToast(GAME_STATE.match.isLofted?'LOFTED ON':'LOFTED OFF','Shot mode changed');}
-  function timingLabel(t){if(t<.12)return 'VERY EARLY';if(t<.28)return 'EARLY';if(t>.88)return 'VERY LATE';if(t>.72)return 'LATE';if(t>0.42&&t<0.58)return 'PERFECT';return 'GOOD';}
+  function selectShot(key){const sh=SHOTS[key]||SHOTS.STRAIGHT; GAME_STATE.match.shotType=key; GAME_STATE.match.targetDir=sh.dir; GAME_STATE.match.isLofted=!!sh.loft; setText('activeDirLabel',sh.name.split(' ')[0].slice(0,8).toUpperCase()); showToast(sh.name, sh.loft?'In the air — risk of catch':'Along the ground'); uiClick();}
+  function setPower(p){GAME_STATE.match.power=p;showToast('POWER '+p,'Perfect timing is not an automatic six');}
+  function triggerLoftedShot(){selectShot(GAME_STATE.match.isLofted?'STRAIGHT':'LOFT');}
+  function selectBowlVar(v){const legal=varsForStyle(currentBowlStyle()); if(legal.indexOf(v)<0){showToast('ILLEGAL VAR',currentBowlStyle());return;} GAME_STATE.match.variation=v;showToast('VARIATION',v);uiClick();}
+  function selectLine(line){GAME_STATE.match.bowlLine=line; setText('activeDirLabel',String(line).toUpperCase()); showToast('LINE',line); uiClick();}
+  function selectLength(len){GAME_STATE.match.bowlLength=len; const legal=varsForStyle(currentBowlStyle()); if((len==='yorker'||len==='bouncer'||len==='short')&&legal.indexOf(len)>=0) GAME_STATE.match.variation=len; showToast('LENGTH',len); uiClick();}
+  function callRun(kind){const m=GAME_STATE.match; m.runCall=kind; if(kind==='yes'){m.wantedRuns=Math.max(1,m.wantedRuns||1); showToast('YES','Calling the single');} else if(kind==='wait'){m.wantedRuns=0; showToast('WAIT','Stay in the crease');} else if(kind==='2'){m.wantedRuns=2; showToast('TWO','Turning for two');} else if(kind==='3'){m.wantedRuns=3; showToast('THREE','Looking for three');} else if(kind==='dive'){showToast('DIVE','Stretching for the crease');} uiClick();}
+  function refreshBowlVarPad(){const pad=document.getElementById('bowlVarPad'); const shot=document.getElementById('shotPad'); const line=document.getElementById('bowlLinePad'); const batting=modesForBatting(); if(shot) shot.classList.toggle('hidden', !batting); if(line) line.classList.toggle('hidden', batting); if(!pad)return; pad.classList.toggle('hidden', batting); if(batting)return; const vars=varsForStyle(currentBowlStyle()); pad.innerHTML=vars.slice(0,9).map(v=>`<button onclick="selectBowlVar('${v}')" class="btn-press bg-slate-800 text-[8px] font-bold py-1 rounded border border-slate-700">${v.split('-')[0].slice(0,7)}</button>`).join('');}
+  function timingLabel(t){if(t<.10)return 'VERY EARLY';if(t<.22)return 'EARLY';if(t<.34)return 'SLIGHTLY EARLY';if(t<.42)return 'EXCELLENT';if(t<.58)return 'PERFECT';if(t<.66)return 'GOOD';if(t<.76)return 'SLIGHTLY LATE';if(t<.86)return 'LATE';if(t<.94)return 'VERY LATE';return 'MISTIMED';}
   function resolveShot(){
     const m=GAME_STATE.match,p=GAME_STATE.player,diff={BEGINNER:.08,EASY:.05,NORMAL:0,HARD:-.04,PRO:-.07,LEGEND:-.1}[GAME_STATE.settings.difficulty]||0;
     const t=m.shotT==null?0.5:m.shotT; const label=timingLabel(t);
-    const power={DEFENSIVE:0.35,SOFT:0.55,NORMAL:0.75,STRONG:0.9,POWER:1.05,MAXIMUM:1.2}[m.power]||0.75;
+    const sh=SHOTS[m.shotType]||SHOTS.STRAIGHT;
+    const powerMul=({DEFENSIVE:0.4,SOFT:0.55,NORMAL:0.75,STRONG:0.9,POWER:1.0,MAXIMUM:1.15}[m.power]||0.75)*(sh.pwr||0.75);
     const stam=p.stamina/100; const form=((p.form||50)-50)/400; const fit=((p.fitness||80)-70)/500;
     const skill=(p.attrs.timing+p.attrs.power)/200; const contact=1-Math.abs(t-0.5)*2;
-    let quality=contact*0.5+skill*0.22+stam*0.08+diff+form+fit;
+    let quality=contact*0.48+skill*0.2+stam*0.08+diff+form+fit;
     if(m.pitchType==='Green')quality-=0.04; if(m.pitchType==='Flat')quality+=0.03; if(m.weather==='Overcast')quality-=0.03;
-    if(m.power==='MAXIMUM')quality-=0.08; if(label==='PERFECT')quality+=0.14; if(label==='VERY EARLY'||label==='VERY LATE')quality-=0.24;
-    if(m.targetDir==='DEFENCE')quality+=0.05; if(m.variation==='yorker')quality-=0.06; if(m.variation==='bouncer'&&!m.isLofted)quality-=0.04;
+    if(m.power==='MAXIMUM')quality-=0.1;
+    if(label==='PERFECT')quality+=0.12; else if(label==='EXCELLENT')quality+=0.08; else if(label==='MISTIMED'||label==='VERY EARLY'||label==='VERY LATE')quality-=0.26;
+    const v=m.variation||'stock';
+    if(v==='yorker'&&(sh.short||/PULL|HOOK|SWEEP|SCOOP/i.test(m.shotType||''))) quality-=0.22;
+    if((v==='bouncer'||v==='short')&&/DEFENCE|SWEEP|DRIVE|STRAIGHT/i.test(m.shotType||'')) quality-=0.12;
+    if((v==='bouncer'||v==='short')&&(m.shotType==='PULL'||m.shotType==='HOOK')) quality+=0.08;
+    if(v==='yorker'&&m.shotType==='DEFENCE') quality+=0.05;
+    if(/googly|slider|arm-ball/.test(v)&&m.shotType==='SWEEP') quality-=0.08;
+    if(v==='outswinger'&&(m.shotType==='CUT'||m.shotType==='LATECUT')) { m.edgeChance=0.22; quality-=0.04; } else m.edgeChance=0.06;
+    if(m.bowlLine==='off'&&/LEG|PULL|SWEEP|GLANCE|FLICK|ONDRIVE/i.test(m.shotType||'')) quality-=0.1;
+    if(m.bowlLine==='leg'&&/COVER|CUT|INSIDEOUT|REVERSE/i.test(m.shotType||'')) quality-=0.1;
+    if(m.bowlLength==='yorker'&&sh.short) quality-=0.18;
+    if(m.bowlLength==='short'&&/SWEEP|DEFENCE/i.test(m.shotType||'')) quality-=0.12;
     quality=Math.max(0,Math.min(1,quality));
     const fieldMul=m.fieldSet==='attacking'?1.35:m.fieldSet==='defensive'?0.72:1;
-    const boundMul=m.fieldSet==='defensive'?0.72:m.fieldSet==='attacking'?1.12:1;
+    const boundMul=m.fieldSet==='defensive'?0.7:m.fieldSet==='attacking'?1.1:1;
+    const loft=!!(m.isLofted||sh.loft);
     let wicket=false,r=0; m.dismiss=null;
-    if(quality<0.18){wicket=Math.random()<0.58;r=0;}
-    else if(quality<0.32){r=Math.random()<0.5?0:1;if(Math.random()<0.12*fieldMul)wicket=true;}
-    else if(quality<0.5){r=Math.random()<0.4?1:0;}
-    else if(quality<0.7){r=m.isLofted?(Math.random()<0.25*power*boundMul?4:2):(Math.random()<0.2*boundMul?4:1);}
-    else{const sixChance=(m.isLofted?0.24:0.05)*power*quality*boundMul; const fourChance=0.3*power*quality*boundMul; const roll=Math.random(); if(roll<sixChance)r=6; else if(roll<sixChance+fourChance)r=4; else r=Math.random()<0.45?2:1;}
-    if(m.isLofted&&!wicket&&r<=2&&quality>0.18&&quality<0.66){const field=(0.28+(m.bowlingTeam===m.userTeam?(p.attrs.catching||50)/380:0.12))*fieldMul; if(Math.random()<field){wicket=true;r=0;m.dismiss='catch';}}
-    if(wicket&&!m.dismiss){if(m.isLofted||Math.random()<0.42)m.dismiss=Math.random()<0.28?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}
-    m.lastTiming=label; m.lastQuality=quality; return {r,wicket,label,quality};
+    if(quality<0.16){wicket=Math.random()<0.6;r=0;}
+    else if(quality<0.3){r=Math.random()<0.55?0:1; if(Math.random()<0.14*fieldMul+(m.edgeChance||0))wicket=true;}
+    else if(quality<0.48){r=Math.random()<0.45?1:0;}
+    else if(quality<0.68){r=loft?(Math.random()<0.18*powerMul*boundMul?4:Math.random()<0.5?2:1):(Math.random()<0.18*boundMul?4:Math.random()<0.5?1:2);}
+    else{
+      const sixChance=(loft&&(label==='PERFECT'||label==='EXCELLENT')?0.16:loft?0.06:0.015)*powerMul*quality*boundMul;
+      const fourChance=0.26*powerMul*quality*boundMul*(loft?0.7:1);
+      const roll=Math.random();
+      if(roll<sixChance) r=6;
+      else if(roll<sixChance+fourChance) r=4;
+      else r=Math.random()<0.35?3:Math.random()<0.55?2:1;
+    }
+    if(m.runCall==='wait') r=0;
+    else if(m.wantedRuns>=2 && r===1 && quality>0.5 && Math.random()<0.55) r=2;
+    else if(m.wantedRuns>=3 && r>=2 && r<4 && quality>0.55 && Math.random()<0.4) r=3;
+    else if(m.runCall==='yes' && r===0 && quality>0.42 && Math.random()<0.28) r=1;
+    if(loft&&!wicket&&r<=2&&quality>0.16&&quality<0.68){const field=(0.3+(m.bowlingTeam===m.userTeam?(p.attrs.catching||50)/380:0.12))*fieldMul; if(Math.random()<field){wicket=true;r=0;m.dismiss='catch';}}
+    if(!wicket&&Math.random()<(m.edgeChance||0)*fieldMul&&(label==='LATE'||label==='SLIGHTLY LATE'||label==='MISTIMED')){wicket=true;r=0;m.dismiss='keeperCatch';}
+    if(!wicket&&currentBowlIsSpin()&&m.power==='MAXIMUM'&&quality<0.35&&Math.random()<0.12){wicket=true;r=0;m.dismiss='stumped';}
+    if(!wicket&&(m.runCall==='yes'||m.wantedRuns>=2)&&r>=1&&r<=2&&Math.random()<0.08){wicket=true;r=0;m.dismiss='runout';}
+    if(wicket&&!m.dismiss){if(loft||Math.random()<0.4)m.dismiss=Math.random()<0.3?'keeperCatch':'catch';else m.dismiss=Math.random()<0.55?'bowled':'lbw';}
+    m.lastTiming=label; m.lastQuality=quality; m.lastShot=(sh.name||m.shotType||''); m.running=r>=1&&r<=3?r:0; return {r,wicket,label,quality};
   }
   function triggerActionExecution(){const m=GAME_STATE.match;if(!m.active)return;if(GAME_STATE.settings.control==='spectate'){simulateNextBall();return;}if(m.battingTeam===m.userTeam){if(!m.pending){startUserDelivery(true);return;}if(m.shotT==null){const now=performance.now();m.shotT=Math.max(0,Math.min(1,1-(m.animUntil-now)/900));showToast(timingLabel(m.shotT),'Timing locked');}return;}if(!m.pending)bowlUserDelivery();}
-  function startUserDelivery(batting){const m=GAME_STATE.match;if(m.pending)return;m.pending=true;m.shotT=null;const preview=resolveShot();animateDelivery(batting,preview.r,preview.wicket);m.animUntil=animUntil;setTimeout(()=>{if(m.shotT==null)m.shotT=0.92;const res=resolveShot();afterBallPitch(res.r,res.wicket,res.label);},1100);}
+  function startUserDelivery(batting){const m=GAME_STATE.match;if(m.pending)return;m.pending=true;m.shotT=null; const vars=varsForStyle(currentBowlStyle()); if(!m.variation||vars.indexOf(m.variation)<0) m.variation=vars[Math.floor(Math.random()*vars.length)]; const preview=resolveShot();animateDelivery(batting,preview.r,preview.wicket);m.animUntil=animUntil;setTimeout(()=>{if(m.shotT==null)m.shotT=0.92;const res=resolveShot();afterBallPitch(res.r,res.wicket,res.label);},1100);}
   function playUserShot(){startUserDelivery(true);}
-  function bowlUserDelivery(){const m=GAME_STATE.match;m.pending=true;const pace=/fast|medium/i.test(GAME_STATE.player.bowlStyle);const vars=pace?['yorker','bouncer','slower','cutter','inswinger','outswinger','seam']:['leg-break','googly','top-spinner','arm-ball','flight','slider'];m.variation=vars[Math.floor(Math.random()*vars.length)];const r=Math.random()<.08?6:Math.random()<.2?4:Math.random()<.48?1:Math.random()<.63?2:0;const wicket=Math.random()<(/yorker|googly/.test(m.variation)?0.14:0.08);if(wicket)m.dismiss=Math.random()<0.45?'catch':Math.random()<0.5?'bowled':'lbw';else m.dismiss=null;animateDelivery(false,r,wicket);setTimeout(()=>{afterBallPitch(r,wicket,m.variation);},1100);}
+  function bowlUserDelivery(){const m=GAME_STATE.match;m.pending=true;const vars=varsForStyle(currentBowlStyle());if(!m.variation||vars.indexOf(m.variation)<0)m.variation=vars[Math.floor(Math.random()*vars.length)]; let wicketChance=/yorker|googly|flipper/.test(m.variation)?0.16:0.08; if(m.bowlLength==='yorker')wicketChance+=0.04; if(m.bowlLine==='off'&&/outswing/.test(m.variation||''))wicketChance+=0.03; const wicket=Math.random()<wicketChance; let r=0; if(!wicket){ const roll=Math.random(); r=roll<.06?6:roll<.22?4:roll<.5?1:roll<.68?2:0; } if(wicket)m.dismiss=/yorker/.test(m.variation)?'bowled':Math.random()<0.4?'catch':Math.random()<0.5?'bowled':'lbw';else m.dismiss=null; m.running=r>=1&&r<=3?r:0; animateDelivery(false,r,wicket);setTimeout(()=>{afterBallPitch(r,wicket,m.variation);},1100);}
   function simulateNextBall(){const m=GAME_STATE.match;if(!m.active||m.pending)return;m.pending=true;const r=Math.random()<.06?6:Math.random()<.18?4:Math.random()<.5?1:Math.random()<.65?2:0;const wicket=Math.random()<0.07;if(wicket)m.dismiss=Math.random()<0.5?'catch':'bowled';else m.dismiss=null;animateDelivery(modesForBatting(),r,wicket);setTimeout(()=>afterBallPitch(r,wicket,'SIM'),1100);}
   function simulateToEvent(){let n=0;const step=()=>{if(!GAME_STATE.match.active||n>=6)return;n++;simulateNextBall();if(GAME_STATE.match.active)setTimeout(step,200);};step();}
-  function changeBowler(){const m=GAME_STATE.match; if(!m.active)return; m.currentBowler=(m.currentBowler+1)%Math.max(1,Math.min(m.bowlers.length,7)); updateHUD(); const b=m.bowlers[m.currentBowler]; showToast('NEW BOWLER', b?b.name:'—'); uiClick();}
+  function changeBowler(){const m=GAME_STATE.match; if(!m.active)return; m.currentBowler=(m.currentBowler+1)%Math.max(1,Math.min(m.bowlers.length,7)); const b=m.bowlers[m.currentBowler]; m.variation=''; if(keeperMesh){ keeperMesh.position.set(0,0,keeperHomeZ()); keeperMesh.userData.home=keeperMesh.position.clone(); } updateHUD(); showToast('NEW BOWLER', b?(b.name+' · '+(b.style||'')):'—'); uiClick();}
+  function seedDemoInnings(){
+    const seq=[[4,false,'PERFECT','four'],[1,false,'GOOD','ground'],[0,false,'LATE','dot'],[6,false,'EXCELLENT','six'],[2,false,'SLIGHTLY LATE','ground'],[0,false,'SLIGHTLY EARLY','dot'],[1,false,'GOOD','ground'],[0,true,'MISTIMED','catch']];
+    seq.forEach(function(row){ const m=GAME_STATE.match; if(!m.active)return; m.pending=false; m.dismiss=row[1]?(row[3]||'catch'):null; m.shotType=m.shotType||'COVER'; applyDelivery(row[0],row[1],row[2],row[3]); });
+  }
   function animateDelivery(batting,r,wicket){
     actionKind=batting?'shot':'bowl'; if(bowlerMesh)bowlerMesh.position.z=-13;
     const m=GAME_STATE.match; const dir=m.targetDir||'STRAIGHT';
-    let x=dir==='LEG'||dir==='PULL'||dir==='SWEEP'?-.85:dir==='OFF'||dir==='CUT'||dir==='COVER'?.85:0;
-    let peak=1.05, endY=.42;
-    if(m.variation==='yorker'){ peak=.28; endY=.14; }
-    else if(m.variation==='bouncer'){ peak=2.35; endY=.85; }
-    else if(m.variation==='slower'||m.variation==='flight') peak=1.55;
-    if(m.variation==='inswinger') x-=.35; if(m.variation==='outswinger') x+=.35;
-    if(/spin|googly|break/i.test(m.variation||'')) x+=(Math.random()-.5)*.5;
+    const line=m.bowlLine||'middle'; const length=m.bowlLength||'good'; const v=m.variation||'';
+    let x=line==='wide-off'?1.15:line==='off'?.55:line==='leg'?-.55:line==='wide-leg'?-1.15:(dir==='LEG'||dir==='PULL'||dir==='SWEEP'?-.45:dir==='OFF'||dir==='CUT'||dir==='COVER'?.45:0);
+    let peak=1.05, endY=.42, bounceAt=0.62;
+    if(v==='yorker'||length==='yorker'){ peak=.22; endY=.12; bounceAt=0.88; }
+    else if(v==='bouncer'||length==='bouncer'){ peak=2.35; endY=.9; bounceAt=0.48; }
+    else if(v==='short'||length==='short'){ peak=1.7; bounceAt=0.5; }
+    else if(length==='full'){ peak=.7; bounceAt=0.78; }
+    else if(v==='slower'||v==='flight') peak=1.55;
+    if(v==='inswinger') x-=.35; if(v==='outswinger') x+=.35;
+    if(/spin|googly|break|slider/i.test(v)) x+=(Math.random()-.5)*.55;
     const start=new THREE.Vector3(0.15,1.7,-8.2), end=new THREE.Vector3(x,endY,8.05);
+    const bounceY=v==='bouncer'?0.85:v==='yorker'?0.12:0.22;
     if(ballMesh){ballMesh.visible=true;ballMesh.position.copy(start);} ensureTrail();
     ballPath=t=>{
-      const u=Math.max(0,Math.min(1,(t-0.35)/0.65));
+      if(t<0.28){ return new THREE.Vector3(0.18,1.45+Math.sin(t*8)*0.15,-8.4+t*6); }
+      const u=Math.max(0,Math.min(1,(t-0.28)/0.72));
       const p=start.clone().lerp(end,u);
-      p.y+=Math.sin(Math.PI*u)*peak;
-      const swing=(m.variation==='inswinger'?-1:m.variation==='outswinger'?1:0)*Math.sin(u*Math.PI)*.45;
-      p.x+=swing+Math.sin(u*12)*.04;
+      if(u<bounceAt){ const k=u/bounceAt; p.y=start.y*(1-k)+bounceY*k+Math.sin(Math.PI*k)*peak; }
+      else { const k=(u-bounceAt)/Math.max(0.01,1-bounceAt); p.y=bounceY*(1-k)+endY*k+Math.abs(Math.sin(Math.PI*k))*0.38; }
+      const swing=(v==='inswinger'?-1:v==='outswinger'?1:/googly|leg-break/.test(v)?(v==='googly'?1:-1):0)*Math.sin(u*Math.PI)*.45;
+      p.x+=swing+Math.sin(u*10)*.03;
+      if(p.y<0.12) p.y=0.12;
       return p;
     };
     animDur=1100; animUntil=performance.now()+1100;
@@ -1562,7 +1733,8 @@
     if(kind==='six') return new THREE.Vector3(x*20, 9, -6+x*5);
     if(kind==='four') return new THREE.Vector3(x*24, 0.35, 5);
     if(kind==='catch'||kind==='drop') return new THREE.Vector3(x*9, 2.5, 1.2);
-    if(kind==='keeperCatch') return new THREE.Vector3(0.15, 1.25, 10.15);
+    if(kind==='keeperCatch') return new THREE.Vector3(0.15, 1.25, keeperHomeZ()-0.2);
+    if(kind==='stumped'||kind==='runout') return new THREE.Vector3(0.05, 0.5, 9.4);
     if(kind==='bowled'||kind==='lbw') return new THREE.Vector3(0, 0.42, 9.35);
     if(kind==='dot') return new THREE.Vector3(0.1, 0.3, 9.8);
     return new THREE.Vector3(x*7, 0.32, 2.4);
@@ -1571,22 +1743,27 @@
   function startFieldingPlay(kind,r,wicket,timing){
     const start=ballMesh?ballMesh.position.clone():new THREE.Vector3(0,.8,8);
     const end=shotTarget(kind,r);
-    fieldActor=null; GAME_STATE.match.dive=false; GAME_STATE.match.lastPlay=kind; actionKind=kind;
-    if(kind==='keeperCatch') fieldActor=keeperMesh;
-    else if(kind==='catch'||kind==='drop'||kind==='ground'||kind==='four') fieldActor=nearestFielder(end);
+    fieldActor=null; GAME_STATE.match.dive=false; GAME_STATE.match.lastPlay=kind; actionKind=kind; GAME_STATE.match.running=(kind==='ground'||kind==='runout')?(r||GAME_STATE.match.running||1):0;
+    if(kind==='keeperCatch'||kind==='stumped') fieldActor=keeperMesh;
+    else if(kind==='catch'||kind==='drop'||kind==='ground'||kind==='four'||kind==='runout') fieldActor=nearestFielder(end);
     if(fieldActor&&fieldActor.lookAt) fieldActor.lookAt(end.x,1,end.z);
     if(fieldActor&&(kind==='catch'||kind==='drop')&&fieldActor.position.distanceTo(end)>7) GAME_STATE.match.dive=true;
-    const dur=kind==='six'?1600:kind==='four'?1500:(kind==='catch'||kind==='drop'||kind==='keeperCatch')?1450:kind==='ground'?1300:950;
+    const dur=kind==='six'?1600:kind==='four'?1500:(kind==='catch'||kind==='drop'||kind==='keeperCatch'||kind==='stumped')?1450:kind==='ground'||kind==='runout'?1400:950;
     ballPath=t=>{
       const p=start.clone().lerp(end,t);
       if(kind==='six') p.y=start.y+Math.sin(Math.PI*Math.min(1,t))*8+t*1.6;
       else if(kind==='catch'||kind==='drop'||kind==='keeperCatch') p.y=start.y+Math.sin(Math.PI*t)*2.4;
-      else if(kind==='bowled'||kind==='lbw') p.y=Math.max(0.2,start.y*(1-t)+0.35*t);
-      else p.y=Math.max(0.18,start.y*(1-t)+0.18*t+Math.sin(Math.PI*t)*0.55);
+      else if(kind==='bowled'||kind==='lbw'||kind==='stumped'||kind==='runout'){ p.y=Math.max(0.18,start.y*(1-t)+0.32*t); if(t>0.72) p.y=0.2; }
+      else { p.y=Math.max(0.16,start.y*(1-t)+0.16*t+Math.abs(Math.sin(Math.PI*t*2))*0.42); }
+      if(kind==='four' && t>0.82) p.y=0.18;
       return p;
     };
     animDur=dur; animUntil=performance.now()+dur;
-    GAME_STATE.match.cameraMode=kind==='six'||kind==='four'?'Follow':(kind==='catch'||kind==='keeperCatch'||kind==='drop'||kind==='ground')?'Fielding':kind==='bowled'||kind==='lbw'?'Wicket':'Follow';
+    const demoBowl=(location.search||'').indexOf('demo=bowl')>=0;
+    const demoPlay=(location.search||'').indexOf('demo=play')>=0;
+    if(demoBowl) GAME_STATE.match.cameraMode='Bowling';
+    else if(demoPlay && (kind==='shot'||kind==='ground'||kind==='four'||kind==='six')) GAME_STATE.match.cameraMode='Batting';
+    else GAME_STATE.match.cameraMode=kind==='six'||kind==='four'?'Follow':(kind==='catch'||kind==='keeperCatch'||kind==='drop'||kind==='ground'||kind==='runout')?'Fielding':kind==='bowled'||kind==='lbw'||kind==='stumped'?'Wicket':'Follow';
     setText('camLabel',GAME_STATE.match.cameraMode);
     if(kind==='six'||kind==='four'||kind==='catch'||kind==='keeperCatch'){ roarCrowd(dur); crowdCheer(dur); }
     setTimeout(()=>finishFieldingPlay(kind,r,wicket,timing),dur);
@@ -1607,16 +1784,19 @@
   function applyDelivery(r,wicket,timing,kind){
     const m=GAME_STATE.match,s=m.batters[m.striker],b=m.bowlers[m.currentBowler];
     if(!s||!b){m.pending=false;return;}
-    m.pending=false; m.balls++; s.balls++; b.balls++; b.runs+=r; if(r===4)s.fours++; if(r===6)s.sixes++;
+    m.pending=false; m.balls++; s.balls++; b.balls++; b.runs+=r; b.overConceded=(b.overConceded||0)+r; if(r===4)s.fours++; if(r===6)s.sixes++; b.maidens=b.maidens||0;
     kind=kind||playKind(r,wicket);
     if(m.battingTeam===m.userTeam){GAME_STATE.player.stats.balls++;if(!wicket)GAME_STATE.player.stats.runs+=r;if(r===4)GAME_STATE.player.stats.fours++;if(r===6)GAME_STATE.player.stats.sixes++; const rec=GAME_STATE.player.recent=GAME_STATE.player.recent||[]; rec.push(wicket?0:r); GAME_STATE.player.recent=rec.slice(-12); GAME_STATE.player.form=Math.max(20,Math.min(95,40+GAME_STATE.player.recent.reduce((a,b)=>a+b,0)/1.6));}
     if((kind==='catch'||kind==='keeperCatch')&&m.bowlingTeam===m.userTeam) GAME_STATE.player.stats.catches++;
     if(wicket){
       s.out=true; m.wickets++; b.wickets++;
       if(m.bowlingTeam===m.userTeam) GAME_STATE.player.stats.wickets++;
-      const how=kind==='catch'?'CAUGHT!':kind==='keeperCatch'?'CAUGHT BEHIND!':kind==='bowled'?'BOWLED!':kind==='lbw'?'LBW!':'WICKET!';
+      if(kind==='stumped') GAME_STATE.player.stats.stumpings=(GAME_STATE.player.stats.stumpings||0)+(m.bowlingTeam===m.userTeam?1:0);
+      const how=kind==='catch'?'CAUGHT!':kind==='keeperCatch'?'CAUGHT BEHIND!':kind==='bowled'?'BOWLED!':kind==='lbw'?'LBW!':kind==='stumped'?'STUMPED!':kind==='runout'?'RUN OUT!':'WICKET!';
+      s.dismissal=kind==='bowled'?('b '+b.name):kind==='lbw'?('lbw b '+b.name):kind==='stumped'?('st b '+b.name):kind==='keeperCatch'?('c † b '+b.name):kind==='runout'?'run out':('c b '+b.name);
       showToast(how,`${s.name} is out${timing?' • '+timing:''}`); icComment(kind==='catch'?'CAUGHT':kind==='keeperCatch'?'CAUGHT_BEHIND':kind==='bowled'?'BOWLED':kind==='lbw'?'LBW':'WICKET'); crowdCheer(900);
       if(b.wickets===5&&GAME_STATE.settings.autoPause) triggerMilestoneCelebration('FIVE-FOR',b.name+' has five wickets','wicket');
+      if(m.innings===2&&m.target&&m.runs>=m.target){endMatch(formatMatchResult());return;}
       if(m.wickets>=10){endInnings();return;}
       m.striker=Math.min(m.wickets+1,10); if(m.striker===m.nonStriker)m.striker=Math.min(m.striker+1,10);
     } else {
@@ -1625,9 +1805,11 @@
       if(s.runs>=100&&s.runs-r<100){GAME_STATE.player.stats.hundreds++;if(GAME_STATE.settings.autoPause)triggerMilestoneCelebration('CENTURY! 100 RUNS',s.name+' under lights at Riverbend','bat');}
       if(r%2===1)[m.striker,m.nonStriker]=[m.nonStriker,m.striker];
     }
+    m.runCall=null; m.wantedRuns=0;
     if(m.balls%6===0)[m.striker,m.nonStriker]=[m.nonStriker,m.striker];
-    if(b.balls%6===0)b.overs++;
-    if(m.innings===2&&m.runs>=m.target){endMatch(`${TEAM_NAMES[m.battingTeam]} WIN`);return;}
+    if(b.balls%6===0){ if(!(b.overConceded)) b.maidens=(b.maidens||0)+1; b.overConceded=0; b.overs++; }
+    if(m.innings===2&&m.target&&m.runs>=m.target){endMatch(formatMatchResult());return;}
+    if(m.wickets>=10){endInnings();return;}
     if(m.balls>=m.oversLimit*6){endInnings();return;}
     GAME_STATE.player.stamina=Math.max(20,GAME_STATE.player.stamina-(m.battingTeam===m.userTeam?(m.power==='MAXIMUM'?2.2:m.isLofted?1.8:.7):.4));
     if(m.active) snapshotMatch();
@@ -1639,11 +1821,36 @@
       else { showToast(r===0?'DOT BALL':`${r} RUN${r>1?'S':''}`,timing||'Next delivery'); if(r>0) batCrack(); }
     }
   }
-  function endInnings(){const m=GAME_STATE.match;m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});if(m.innings===1){m.target=m.runs+1;m.innings=2;[m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];m.active=true;resetInningsPlayers();showGameplay();snapshotMatch();showToast('INNINGS BREAK',`${TEAM_NAMES[m.battingTeam]} need ${m.target} to win`);}else{endMatch(m.runs===m.target-1?'MATCH TIED':`${TEAM_NAMES[m.inningsScores[0].team]} WIN`);}}
+  function formatMatchResult(){
+    const m=GAME_STATE.match;
+    const batName=TEAM_NAMES[m.battingTeam]||m.battingTeam;
+    if(m.innings===2&&m.target&&m.runs>=m.target){ const left=Math.max(0,10-m.wickets); return batName+' WIN by '+left+' wicket'+(left===1?'':'s'); }
+    if(m.target&&m.runs===m.target-1) return 'MATCH TIED';
+    const t1=m.inningsScores&&m.inningsScores[0];
+    if(t1){ const margin=Math.max(1,(t1.runs||0)-m.runs); return (TEAM_NAMES[t1.team]||t1.team)+' WIN by '+margin+' run'+(margin===1?'':'s'); }
+    return batName+' WIN';
+  }
+  function endInnings(){
+    const m=GAME_STATE.match;
+    if(!m.active)return;
+    m.pending=false;
+    m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});
+    if(m.innings===1){
+      m.target=m.runs+1; m.innings=2; [m.battingTeam,m.bowlingTeam]=[m.bowlingTeam,m.battingTeam];
+      m.active=true; resetInningsPlayers(); showGameplay(); snapshotMatch();
+      showToast('INNINGS BREAK',(TEAM_NAMES[m.battingTeam]||m.battingTeam)+' need '+m.target+' to win');
+    } else {
+      endMatch(formatMatchResult());
+    }
+  }
   function endMatch(result){
     const m=GAME_STATE.match;
     if(m.active&&m.balls>0){m.inningsScores.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers});}
-    m.active=false; m.paused=false; try{localStorage.removeItem('insan-cricket-match');}catch(e){} GAME_STATE.player.stats.matches++; GAME_STATE.player.stats.captainMatches++;
+    m.active=false; m.paused=false; try{localStorage.removeItem('insan-cricket-match');}catch(e){}
+    let potm='—',best=-1;
+    (m.inningsScores||[]).concat([{batters:m.batters,bowlers:m.bowlers}]).forEach(inn=>{(inn.batters||[]).forEach(p=>{const sc=p.runs+(p.fours||0)+(p.sixes||0)*2; if(sc>best){best=sc;potm=p.name+' ('+p.runs+')';}}); (inn.bowlers||[]).forEach(p=>{const sc=(p.wickets||0)*25-(p.runs||0)*0.2; if(sc>best&&p.wickets){best=sc;potm=p.name+' ('+p.wickets+'/'+p.runs+')';}});});
+    m.potm=potm; m.result=result; m.margin=result;
+    GAME_STATE.player.stats.matches++; GAME_STATE.player.stats.captainMatches++;
     const userLabel=TEAM_NAMES[m.userTeam]||m.userTeam;
     const won=/\bWIN\b/.test(result)&&result.indexOf(userLabel)>=0;
     if(won) GAME_STATE.player.stats.captainWins++;
@@ -1656,7 +1863,7 @@
     document.getElementById('matchInfo').classList.add('hidden');
     const bs=document.getElementById('broadcastStrip'); if(bs) bs.classList.add('hidden');
     saveCareerSlot();
-    if(/TIED/.test(result)){ startOnFieldCelebrate('tie',0,false); showToast(result,'Match tied'); setTimeout(()=>openScorecard(),2200); }
+    if(/TIED/.test(result)){ startOnFieldCelebrate('tie',0,false); showToast(result,'PoTM '+ (m.potm||'—')); setTimeout(()=>openScorecard(),2200); }
     else startTrophyCeremony(result,won);
   }
   function startTrophyCeremony(result,won){
@@ -1688,7 +1895,25 @@
     },4800);
   }
   function openScorecard(){document.getElementById('scorecardOverlay').classList.remove('hidden');renderScorecard();}function closeScorecard(){document.getElementById('scorecardOverlay').classList.add('hidden');}
-  function renderScorecard(){const m=GAME_STATE.match;let html='';for(const inn of m.inningsScores){html+=`<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4"><div class="flex justify-between"><h3 class="font-black text-lg">${TEAM_NAMES[inn.team]||inn.team}</h3><b>${inn.runs}/${inn.wickets} (${Math.floor(inn.balls/6)}.${inn.balls%6})</b></div><h4 class="text-xs text-amber-400 uppercase mt-4 mb-2">Batting</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Batter</span><span>R</span><span>B</span><span>4s</span><span>6s</span></div>${inn.batters.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}${p.out?'':'*'}</span><span>${p.runs}</span><span>${p.balls}</span><span>${p.fours}</span><span>${p.sixes}</span></div>`).join('')}<h4 class="text-xs text-sky-400 uppercase mt-4 mb-2">Bowling</h4><div class="grid grid-cols-5 gap-2 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Bowler</span><span>O</span><span>R</span><span>W</span><span>Dots</span></div>${inn.bowlers.map(p=>`<div class="grid grid-cols-5 gap-2 text-xs py-1"><span>${p.name}</span><span>${p.overs}.${p.balls%6}</span><span>${p.runs}</span><span>${p.wickets}</span><span>—</span></div>`).join('')}</div>`;}document.getElementById('fullScorecard').innerHTML=html||'<div class="text-slate-400">Scorecard will appear after the first completed innings.</div>';}
+  function renderScorecard(){
+    const m=GAME_STATE.match; let html='';
+    const inns=(m.inningsScores||[]).slice();
+    if(m.batters&&m.batters.length&&(m.active||m.paused||m.balls>0)&&!inns.some(i=>i.team===m.battingTeam&&i.balls===m.balls&&i.runs===m.runs)){
+      inns.push({team:m.battingTeam,runs:m.runs,wickets:m.wickets,balls:m.balls,batters:m.batters,bowlers:m.bowlers,live:true});
+    }
+    for(const inn of inns){
+      const ov=Math.floor(inn.balls/6)+'.'+(inn.balls%6);
+      html+=`<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4"><div class="flex justify-between"><h3 class="font-black text-lg">${TEAM_NAMES[inn.team]||inn.team}${inn.live?' <span class="text-red-400 text-xs">LIVE</span>':''}</h3><b>${inn.runs}/${inn.wickets} (${ov})</b></div>`;
+      html+=`<h4 class="text-xs text-amber-400 uppercase mt-4 mb-2">Batting</h4><div class="grid grid-cols-7 gap-1 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Batter</span><span>R</span><span>B</span><span>4s</span><span>6s</span><span>SR</span><span>How</span></div>`;
+      html+=(inn.batters||[]).map(p=>{const sr=p.balls?((p.runs/p.balls)*100).toFixed(0):'—'; const star=!p.out&&p.balls>0?'*':''; const how=p.out?(p.dismissal||'out'):(p.balls? 'not out':''); return `<div class="grid grid-cols-7 gap-1 text-xs py-1"><span>${p.name}${star}</span><span>${p.runs}</span><span>${p.balls}</span><span>${p.fours||0}</span><span>${p.sixes||0}</span><span>${sr}</span><span class="text-slate-500">${how}</span></div>`;}).join('');
+      html+=`<h4 class="text-xs text-sky-400 uppercase mt-4 mb-2">Bowling</h4><div class="grid grid-cols-6 gap-1 text-[10px] text-slate-400 border-b border-slate-800 pb-1"><span>Bowler</span><span>O</span><span>M</span><span>R</span><span>W</span><span>Econ</span></div>`;
+      html+=(inn.bowlers||[]).filter(p=>p.balls||p.overs).map(p=>{const balls=(p.overs||0)*6+(p.balls%6); const econ=balls?((p.runs/(balls/6)).toFixed(1)):'—'; return `<div class="grid grid-cols-6 gap-1 text-xs py-1"><span>${p.name}</span><span>${p.overs}.${p.balls%6}</span><span>${p.maidens||0}</span><span>${p.runs}</span><span>${p.wickets}</span><span>${econ}</span></div>`;}).join('')||'<div class="text-slate-500 text-xs">No overs yet.</div>';
+      html+='</div>';
+    }
+    if(m.result) html=`<div class="bg-amber-500/10 border border-amber-400/40 rounded-2xl p-4 mb-4"><div class="text-[10px] uppercase tracking-widest text-amber-400">Match result</div><div class="text-2xl font-black">${m.result}</div>${m.potm?`<div class="text-amber-300 mt-2 font-bold">Player of the Match: ${m.potm}</div>`:''}</div>`+html;
+    else if(m.potm) html+=`<div class="text-amber-400 font-bold mb-3">Player of the Match: ${m.potm}</div>`;
+    document.getElementById('fullScorecard').innerHTML=html||'<div class="text-slate-400">Scorecard fills from the live match engine after the first ball.</div>';
+  }
   function cycleMatchCamera(){const modes=['Broadcast','Batting','Bowling','Fielding','Follow','Wicket','Celebration','Trophy'];const i=Math.max(0,modes.indexOf(GAME_STATE.match.cameraMode));GAME_STATE.match.cameraMode=modes[(i+1)%modes.length];setText('camLabel',GAME_STATE.match.cameraMode);}
   function pauseMatchMenu(){openMainMenu();showToast('PAUSED','Continue Match on the main menu restores this innings');}
   function triggerMilestoneCelebration(title,subtext,kind){
@@ -1724,12 +1949,14 @@
       const demo=(location.search||'').match(/[?&]demo=([a-z]+)/); const dmode=demo&&demo[1];
       if(dmode){
         setTimeout(function(){
-          GAME_STATE.player.created=true;
+          GAME_STATE.player.created=true; GAME_STATE.settings.autoPause=false;
           startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'});
           if(dmode==='xi'){ showLineup(); }
           else if(dmode==='toss'){ continueToToss(); }
-          else if(dmode==='bowl'){ beginMatch('bowl'); GAME_STATE.match.cameraMode='Bowling'; setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 500); }
-          else { beginMatch('bat'); GAME_STATE.match.cameraMode='Broadcast'; setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 600); }
+          else if(dmode==='bowl'){ beginMatch('bowl'); GAME_STATE.match.cameraMode='Bowling'; selectLine('off'); selectLength('good'); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 500); }
+          else if(dmode==='card'){ beginMatch('bat'); seedDemoInnings(); openScorecard(); }
+          else if(dmode==='field'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Fielding'; GAME_STATE.match.shotType='COVER'; setTimeout(function(){ try{ GAME_STATE.match.dismiss='catch'; afterBallPitch(0,true,'MISTIMED'); }catch(e){} }, 400); }
+          else { beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; [[4,false,'PERFECT','four'],[1,false,'GOOD','ground'],[0,false,'LATE','dot']].forEach(function(row){ GAME_STATE.match.pending=false; GAME_STATE.match.dismiss=null; applyDelivery(row[0],row[1],row[2],row[3]); }); selectShot('COVER'); setPower('NORMAL'); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 400); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 850); }
         }, 800);
       }
     }catch(e){ showLoadFail(); }
