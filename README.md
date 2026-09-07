@@ -10,6 +10,8 @@ Local: open `web/index.html` (needs internet for Three.js / Tailwind CDN).
 
 The playable build is expanded from the user's `INSAN_CRICKET_3D_PREMIUM_GAMEPLAY_FIXED-1.html` (preserved in `original/`).
 
+v2.4: Quick Play squads are independent of Career (Career player is not auto-inserted). Custom Match has an opt-in “Use Career player” (default off). Twelve international sides. Contextual HUD (MORE menu; duplicate score strip hidden). On-field humans use lathe anatomy, kit, pads, helmet grille, gloves — still procedural, not photoreal scans.
+
 v2.3: Mobile batting — small circular shot selector (per delivery, hides after contact) plus **invisible swipe** (direction / distance / speed / timing). Context-sensitive options from length, line, pace vs spin. Existing cursor, timing, power and shot-map stay. Selector size/position, swipe sensitivity and shot assist are in Settings.
 
 v2.2: High-poly procedural players (dense spheres/cylinders, PBR skin, 5 fingers, facial features) scaled by GFX preset. Live **P2P multiplayer** via PeerJS public broker — create/join a room code; host runs the match engine. Not a photoreal WCC3 mesh pipeline and not an INSAN-hosted dedicated game server (GitHub Pages is static). See `server/README.md`.
