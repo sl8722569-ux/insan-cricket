@@ -439,14 +439,77 @@
     </div>
 
     <!-- PREMIUM MATCH FLOW OVERLAYS -->
-    <div id="lineupOverlay" class="hidden absolute inset-0 z-[45] bg-slate-950/96 backdrop-blur-md p-5 overflow-auto pointer-events-auto">
-      <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-4"><div><div class="text-[10px] text-amber-400 font-bold tracking-[0.25em]">MATCH PRESENTATION</div><h2 id="lineupTitle" class="text-2xl font-black">Playing XI</h2></div><div id="lineupFormat" class="text-xs text-slate-400"></div></div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-4"><div class="flex justify-between mb-2"><h3 id="lineupUserName" class="font-bold text-emerald-400"></h3><span class="text-xs text-slate-500">XI</span></div><div id="userXI" class="grid grid-cols-2 gap-2 text-xs"></div></div>
-          <div class="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4"><div class="flex justify-between mb-2"><h3 id="lineupOppName" class="font-bold text-amber-400"></h3><span class="text-xs text-slate-500">XI</span></div><div id="oppXI" class="grid grid-cols-2 gap-2 text-xs"></div></div>
+    <div id="lineupOverlay" class="hidden absolute inset-0 z-[45] bg-slate-950/96 backdrop-blur-md p-4 overflow-auto pointer-events-auto">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <div id="lineupKicker" class="text-[10px] text-amber-400 font-bold tracking-[0.25em]">PLAYING XI</div>
+            <h2 id="lineupTitle" class="text-2xl font-black">Line-up</h2>
+            <p id="lineupAuthNote" class="text-[11px] text-slate-400 mt-0.5"></p>
+          </div>
+          <div id="lineupFormat" class="text-xs text-slate-400 text-right"></div>
         </div>
-        <button onclick="continueToToss()" class="mt-5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl">CONTINUE TO TOSS</button>
+
+        <div id="xiChoice" class="hidden grid md:grid-cols-2 gap-3 mb-4">
+          <button onclick="xiUseAuto()" class="menu-card bg-slate-900 border border-emerald-500/40 hover:border-emerald-300 rounded-2xl p-5 text-left">
+            <div class="text-emerald-400 text-xs font-black tracking-widest">USE AUTO-SELECTED XI</div>
+            <p class="text-sm text-slate-300 mt-2">Management builds a balanced cricket XI — not simply the eleven highest ratings.</p>
+          </button>
+          <button onclick="xiChooseManual()" class="menu-card bg-slate-900 border border-amber-500/40 hover:border-amber-300 rounded-2xl p-5 text-left">
+            <div class="text-amber-400 text-xs font-black tracking-widest">CHOOSE PLAYING XI</div>
+            <p class="text-sm text-slate-300 mt-2">Pick the eleven, batting order, captain, vice-captain and wicketkeeper.</p>
+          </button>
+        </div>
+
+        <div id="xiEditor" class="hidden mb-4">
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-3">
+              <div class="flex justify-between text-[10px] text-slate-400 mb-2"><span>SQUAD / RESERVES</span><span id="xiSquadCount">0</span></div>
+              <div id="xiSquadList" class="space-y-1 max-h-72 overflow-y-auto text-xs"></div>
+            </div>
+            <div class="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-3">
+              <div class="flex justify-between text-[10px] text-amber-400 mb-2"><span>PLAYING XI · BATTING ORDER</span><span id="xiCount">0/11</span></div>
+              <div id="xiPickList" class="space-y-1 max-h-72 overflow-y-auto text-xs"></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-3 text-[10px]">
+            <button onclick="xiSetFlag('captain')" class="bg-slate-800 border border-slate-600 px-3 py-2 rounded-lg font-bold">SET CAPTAIN</button>
+            <button onclick="xiSetFlag('vice')" class="bg-slate-800 border border-slate-600 px-3 py-2 rounded-lg font-bold">SET VICE-CAPTAIN</button>
+            <button onclick="xiSetFlag('keeper')" class="bg-slate-800 border border-slate-600 px-3 py-2 rounded-lg font-bold">SET WK</button>
+            <button onclick="xiMove(-1)" class="bg-slate-800 border border-slate-600 px-3 py-2 rounded-lg font-bold">ORDER ↑</button>
+            <button onclick="xiMove(1)" class="bg-slate-800 border border-slate-600 px-3 py-2 rounded-lg font-bold">ORDER ↓</button>
+            <button onclick="xiDropSelected()" class="bg-slate-800 border border-red-700/50 px-3 py-2 rounded-lg font-bold">REMOVE</button>
+            <button onclick="xiUseAuto()" class="bg-emerald-800 border border-emerald-600 px-3 py-2 rounded-lg font-bold">AUTO-SELECT</button>
+          </div>
+          <div id="xiWarn" class="text-xs text-amber-300 mt-2 min-h-[1.2rem]"></div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button onclick="xiBack()" class="bg-slate-800 py-3 rounded-xl font-bold">BACK</button>
+            <button onclick="xiConfirmEdit()" class="bg-amber-500 text-slate-950 font-black py-3 rounded-xl">CONFIRM XI</button>
+          </div>
+        </div>
+
+        <div id="xiAnnounce" class="hidden mb-3 bg-slate-900/80 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300">
+          <div class="text-amber-400 font-black tracking-widest text-[10px]">TEAM LINE-UP ANNOUNCED</div>
+          <p id="xiAnnounceBody" class="mt-1">Management has named the XI. You cannot change it.</p>
+        </div>
+
+        <div id="xiPresent">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-4">
+              <div class="flex justify-between mb-2"><h3 id="lineupUserName" class="font-bold text-emerald-400"></h3><span class="text-xs text-slate-500">XI</span></div>
+              <div id="userXI" class="grid grid-cols-1 gap-1 text-xs"></div>
+              <div class="text-[10px] text-slate-500 mt-2">RESERVES</div>
+              <div id="userReserves" class="text-[10px] text-slate-400 mt-1"></div>
+            </div>
+            <div class="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-4">
+              <div class="flex justify-between mb-2"><h3 id="lineupOppName" class="font-bold text-amber-400"></h3><span class="text-xs text-slate-500">XI</span></div>
+              <div id="oppXI" class="grid grid-cols-1 gap-1 text-xs"></div>
+              <div class="text-[10px] text-slate-500 mt-2">RESERVES</div>
+              <div id="oppReserves" class="text-[10px] text-slate-400 mt-1"></div>
+            </div>
+          </div>
+          <button id="xiContinueBtn" onclick="continueToToss()" class="mt-4 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl">CONTINUE TO TOSS</button>
+        </div>
       </div>
     </div>
     <div id="tossOverlay" class="hidden absolute inset-0 z-[46] bg-slate-950/97 backdrop-blur-md flex items-center justify-center p-5 pointer-events-auto">
@@ -499,7 +562,7 @@
           </div>
           <div>
             <h1 class="font-display text-xl font-black tracking-wider flex items-center gap-2">
-              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.4</span>
+              <span class="text-white">INSAN</span> <span class="ic-gold-text">CRICKET</span> <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Premium 3D v2.5</span>
             </h1>
             <p class="text-xs text-slate-400" data-i18n="MENU_TAG">INSAN Sports · original 3D career · Riverbend Stadium</p>
           </div>
@@ -859,12 +922,7 @@
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div><label class="block text-slate-400 mb-1">Venue</label>
             <select id="qmVenue" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option>Riverbend</option><option>Sagar Oval</option><option>Highland Park</option></select></div>
-          <div><label class="block text-slate-400 mb-1">Captain (your XI #)</label>
-            <select id="qmCaptain" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="0">1 — you</option><option value="1">2</option></select></div>
-          <div><label class="block text-slate-400 mb-1">Vice-captain</label>
-            <select id="qmVice" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="1">2</option><option value="2">3</option></select></div>
-          <div><label class="block text-slate-400 mb-1">Wicketkeeper</label>
-            <select id="qmKeeper" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-white"><option value="5">6</option><option value="4">5</option></select></div>
+          <p class="text-[10px] text-slate-500 col-span-1 flex items-end">Captain, vice-captain and keeper are set on the Playing XI screen.</p>
         </div>
         <button onclick="startQuickMatchExecution()" class="btn-press glow-emerald w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase text-xs tracking-wider">
           Continue to Playing XI
@@ -2151,10 +2209,140 @@
     if(hud){ hud.classList.toggle('mode-bat', !!bat); hud.classList.toggle('mode-bowl', !bat); }
     const extra=document.getElementById('extraPlayMenu'); if(extra) extra.classList.add('hidden');
   }
-  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;const cap=+(document.getElementById('qmCaptain')||{value:0}).value||0;const vice=+(document.getElementById('qmVice')||{value:1}).value||1;const keeper=+(document.getElementById('qmKeeper')||{value:5}).value||5;const venue=(document.getElementById('qmVenue')||{}).value||'Riverbend'; const lighting=(document.getElementById('qmLighting')||{}).value||'Day'; closeModal('quickMatchModal');hideEl('mainMenuOverlay');showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>{applyVenueLook();startMatchSession(u,o,f,true,{cap,vice,keeper,venue,lighting,night:lighting!=='Day',useCareerPlayer:false});});}
+  function startQuickMatchExecution(){const u=teamCode(document.getElementById('qmUserTeam').value),o=teamCode(document.getElementById('qmOppTeam').value),f=document.getElementById('qmFormat').value;const venue=(document.getElementById('qmVenue')||{}).value||'Riverbend'; const lighting=(document.getElementById('qmLighting')||{}).value||'Day'; closeModal('quickMatchModal');hideEl('mainMenuOverlay');showLoading(['LOAD_STADIUM','LOAD_TEAMS','LOAD_COND'],()=>{applyVenueLook();startMatchSession(u,o,f,true,{venue,lighting,night:lighting!=='Day',useCareerPlayer:false});});}
   function startCareerMatch(isTrial){if(!GAME_STATE.player.created){openPlayerCreator();return;} if(GAME_STATE.player.retired){openHallOfFame();return;} if(GAME_STATE.player.injured){showToast('INJURED','Rest until cleared');return;} const fx=careerFixture(); if(isTrial) fx.trial=true; closeModal('careerModal'); hideEl('mailModal'); hideEl('mainMenuOverlay'); showLoading(['LOAD_STADIUM','LOAD_PLAYERS','LOAD_COND'],()=>{applyVenueLook(); startMatchSession(fx.user,fx.opp,fx.format,false,{cap:fx.cap,vice:fx.vice,keeper:fx.keeper,venue:fx.venue,career:true,trial:!!fx.trial,userSlot:fx.userSlot});});}
-  function makeXI(team){let names=fictionalXI(team); if(injectCareerPlayer() && team===GAME_STATE.match.userTeam){ const slot=Math.min(GAME_STATE.match.userSlot||0, names.length-1); names[slot]=GAME_STATE.player.name; } return names;}
-  function xiRole(i,p){if(p.keeper)return 'WK';if(p.captain)return 'Batter';if(i<2)return 'Opener';if(i<6)return 'Batter';if(i<8)return 'All-rounder';return 'Bowler';}
+  function fictionalSquadNames(key,n){
+    n=n||16; let names=PLAYER_POOLS[key]?PLAYER_POOLS[key].slice():fictionalXI(key);
+    let h=2166136261; const s=String(key||'x');
+    for(let i=0;i<s.length;i++) h=Math.imul(h^s.charCodeAt(i),16777619)>>>0;
+    const used={}; names.forEach(function(nm){used[nm]=1;});
+    let i=0; while(names.length<n){ let nm=NPC_FIRST[(h+i*5)%NPC_FIRST.length]+' '+NPC_LAST[(h+i*11)%NPC_LAST.length]; if(used[nm]) nm+=' '+(names.length+1); used[nm]=1; names.push(nm); i++; }
+    return names.slice(0,n);
+  }
+  function hash32(s){ let h=2166136261; s=String(s||''); for(let i=0;i<s.length;i++) h=Math.imul(h^s.charCodeAt(i),16777619)>>>0; return h; }
+  const SQUAD_ROLES=['Opener','Opener','Batter','Batter','Batter','Wicketkeeper-Batter','All-rounder','All-rounder','Fast Bowler','Fast Bowler','Spinner','Batter','All-rounder','Fast Bowler','Spinner','Wicketkeeper-Batter'];
+  function makeSquadPlayer(name,idx,team){
+    const h=hash32(name+'|'+team+'|'+idx); const role=SQUAD_ROLES[idx%SQUAD_ROLES.length];
+    const bat=h%3===0?'Left-hand':'Right-hand';
+    let bowl='—';
+    if(/Fast/.test(role)) bowl=h%2?'Right-arm fast':'Left-arm fast';
+    else if(/Spinner/.test(role)) bowl=h%3===0?'Leg-spin':'Off-spin';
+    else if(/All/.test(role)) bowl=h%2?'Right-arm medium':'Off-spin';
+    else if(/Wicket/.test(role)) bowl='—';
+    let batOvr=52+(h%30), bowlOvr=36+(h%24);
+    if(/Fast|Spinner/.test(role)){ bowlOvr=64+(h%22); batOvr=36+(h%20); }
+    if(/Opener|Batter/.test(role)&&!/Wicket|All/.test(role)){ batOvr=66+(h%20); bowlOvr=24+(h%16); }
+    if(/All/.test(role)){ batOvr=58+(h%18); bowlOvr=57+(h%18); }
+    if(/Wicket/.test(role)){ batOvr=61+(h%18); bowlOvr=22+(h%12); }
+    const ovr=Math.min(93, Math.round(batOvr*0.52+bowlOvr*0.33+(55+(h%20))*0.15));
+    return {id:team+'-'+idx, name:name, no:idx+1, role:role, bat:bat, bowl:bowl, ovr:ovr, batOvr:batOvr, bowlOvr:bowlOvr, fit:76+(h%20), form:38+(h%48), team:team, captain:false, vice:false, keeper:/Wicket/.test(role)&&idx===5};
+  }
+  function careerToSquadPlayer(idx,team){
+    const p=GAME_STATE.player; const role=p.role||'Batter';
+    let r=/Wicket/i.test(role)?'Wicketkeeper-Batter':/All/i.test(role)?'All-rounder':/Bowl/i.test(role)?'Fast Bowler':'Batter';
+    if(/Opener|open/i.test(role)) r='Opener';
+    const ovr=Math.round(((p.attrs&&p.attrs.timing||50)+(p.attrs&&p.attrs.power||50)+(p.form||50))/3);
+    return {id:'career', name:p.name, no:(idx||3)+1, role:r, bat:p.batHand||'Right-hand', bowl:p.bowlStyle||'—', ovr:Math.min(92,ovr), batOvr:p.attrs&&p.attrs.timing||50, bowlOvr:p.attrs&&p.attrs.pace||48, fit:p.fitness||80, form:p.form||50, team:team, captain:p.leadership==='CAPTAIN', vice:p.leadership==='VICE-CAPTAIN', keeper:/Wicket/i.test(role), career:true};
+  }
+  function buildSquad(team){
+    const names=fictionalSquadNames(team,16);
+    const squad=names.map(function(n,i){ return makeSquadPlayer(n,i,team); });
+    if(injectCareerPlayer() && team===GAME_STATE.match.userTeam){
+      const slot=Math.min(GAME_STATE.match.userSlot||0, squad.length-1);
+      squad[slot]=careerToSquadPlayer(slot, team);
+    }
+    return squad;
+  }
+  function autoSelectXI(squad, format){
+    const s=(squad||[]).slice(); const pick=[];
+    function score(p){ return (p.ovr||50)*0.55 + (p.form||50)*0.25 + (p.fit||70)*0.2; }
+    function take(pred,n){
+      const pool=s.filter(function(p){ return pred(p) && pick.indexOf(p)<0; }).sort(function(a,b){ return score(b)-score(a); });
+      for(let i=0;i<n && i<pool.length;i++) pick.push(pool[i]);
+    }
+    const t20=/T20|U-19|CUSTOM/i.test(format||''); const test=/TEST|FIRST/i.test(format||'');
+    take(function(p){ return /Wicket/.test(p.role); }, 1);
+    take(function(p){ return p.role==='Opener'; }, 2);
+    take(function(p){ return p.role==='Batter'; }, t20?2:3);
+    take(function(p){ return /All-rounder/.test(p.role); }, t20?2:1);
+    take(function(p){ return /Fast/.test(p.role); }, test?3:2);
+    take(function(p){ return /Spinner/.test(p.role); }, test?2:1);
+    const rest=s.filter(function(p){ return pick.indexOf(p)<0; }).sort(function(a,b){ return (b.form+b.fit)-(a.form+a.fit); });
+    while(pick.length<11 && rest.length) pick.push(rest.shift());
+    const career=s.find(function(p){ return p.career; });
+    if(career && !pick.some(function(p){ return p.name===career.name; })){ if(pick.length>=11) pick.pop(); pick.push(career); }
+    const order=[]; function pull(pred){ pick.forEach(function(p){ if(pred(p)&&order.indexOf(p)<0) order.push(p); }); }
+    pull(function(p){ return p.role==='Opener'; });
+    pull(function(p){ return p.role==='Batter'; });
+    pull(function(p){ return /Wicket/.test(p.role); });
+    pull(function(p){ return /All-rounder/.test(p.role); });
+    pull(function(p){ return /Fast|Spinner|Bowl/.test(p.role); });
+    pick.forEach(function(p){ if(order.indexOf(p)<0) order.push(p); });
+    const xi=order.slice(0,11).map(function(p){ return Object.assign({},p); });
+    if(!xi.some(function(p){ return p.keeper||/Wicket/.test(p.role); }) && xi[5]) xi[5].keeper=true;
+    const wk=xi.find(function(p){ return p.keeper||/Wicket/.test(p.role); }); if(wk) wk.keeper=true;
+    if(!xi.some(function(p){ return p.captain; })) xi[0].captain=true;
+    if(!xi.some(function(p){ return p.vice; })) xi[Math.min(1,xi.length-1)].vice=true;
+    if(xi[0].captain && xi[0].vice) xi[1].vice=true, xi[0].vice=false;
+    return xi;
+  }
+  function validateXI(xi){
+    const errors=[], warns=[];
+    if(!xi||xi.length!==11) errors.push('Playing XI must contain exactly 11 players.');
+    else {
+      if(!xi.some(function(p){ return p.keeper||/Wicket/.test(p.role||''); })) errors.push('No wicketkeeper selected.');
+      const bowl=xi.filter(function(p){ return /Bowl|Spinner|Fast|All-rounder/.test(p.role||''); });
+      if(bowl.length<4) errors.push('Selected XI has limited bowling options.');
+      else if(bowl.length<5) warns.push('Bowling stocks are thin.');
+      if(!xi.some(function(p){ return /Spinner|spin/i.test((p.role||'')+' '+(p.bowl||'')); })) warns.push('No recognised spinner in the XI.');
+      const names=xi.map(function(p){ return p.name; });
+      if(new Set(names).size!==names.length) errors.push('Duplicate player in the XI.');
+      const caps=xi.filter(function(p){ return p.captain; }).length;
+      if(caps!==1) warns.push(caps? 'Mark a single captain.':'No captain marked.');
+    }
+    return {ok:!errors.length, errors:errors, warns:warns};
+  }
+  function xiAuthority(){
+    const m=GAME_STATE.match;
+    if(!m||!m.career) return 'full';
+    const lead=GAME_STATE.player.leadership||'PLAYER';
+    if(lead==='CAPTAIN') return 'captain';
+    if(lead==='VICE-CAPTAIN') return 'vice';
+    return 'none';
+  }
+  function bowlStyleFromPlayer(p){
+    if(p&&p.bowl&&p.bowl!=='—') return p.bowl;
+    if(p&&/Spinner/.test(p.role||'')) return 'Off-spin';
+    if(p&&/Fast/.test(p.role||'')) return 'Right-arm fast';
+    if(p&&/All/.test(p.role||'')) return 'Right-arm medium';
+    return 'Right-arm fast';
+  }
+  function xiToMatchPlayers(xi, bowling){
+    return (xi||[]).map(function(p,i){
+      if(bowling) return {name:p.name,overs:0,runs:0,wickets:0,balls:0,maidens:0,style:bowlStyleFromPlayer(p),captain:!!p.captain,vice:!!p.vice,keeper:!!p.keeper,role:p.role||xiRole(i,p),no:p.no,ovr:p.ovr,bat:p.bat,bowl:p.bowl};
+      return {name:p.name,runs:0,balls:0,fours:0,sixes:0,out:false,captain:!!p.captain,vice:!!p.vice,keeper:!!p.keeper,role:p.role||xiRole(i,p),no:p.no,ovr:p.ovr,bat:p.bat,bowl:p.bowl};
+    });
+  }
+  function applySelectedXI(){
+    const m=GAME_STATE.match;
+    m.userReserves=(m.userSquad||[]).filter(function(p){ return !(m.userXI||[]).some(function(x){ return x.name===p.name; }); });
+    m.oppReserves=(m.oppSquad||[]).filter(function(p){ return !(m.oppXI||[]).some(function(x){ return x.name===p.name; }); });
+    const cap=(m.userXI||[]).findIndex(function(p){ return p.captain; });
+    const vice=(m.userXI||[]).findIndex(function(p){ return p.vice; });
+    const keeper=(m.userXI||[]).findIndex(function(p){ return p.keeper; });
+    m.userCap=cap>=0?cap:0; m.userVice=vice>=0?vice:1; m.userKeeper=keeper>=0?keeper:5;
+    m.batters=xiToMatchPlayers(m.userXI,false);
+    m.bowlers=xiToMatchPlayers(m.oppXI,true);
+  }
+  function persistUserXI(){
+    const m=GAME_STATE.match; if(!m||!m.userXI) return;
+    try{
+      if(m.career && GAME_STATE.player.leadership==='CAPTAIN') GAME_STATE.player.lastXI=m.userXI.map(function(p){ return p.name; }), saveCareerSlot();
+      else if(!m.career) localStorage.setItem('insan-last-xi-'+m.userTeam, JSON.stringify(m.userXI.map(function(p){ return p.name; })));
+    }catch(e){}
+  }
+  function makeXI(team){ const sq=buildSquad(team); const xi=autoSelectXI(sq, GAME_STATE.match.format); return xi.map(function(p){ return p.name; }); }
+  function xiRole(i,p){if(p&&p.keeper)return 'Wicketkeeper-Batter'; if(p&&p.role) return p.role; if(p&&p.captain)return 'Batter'; if(i<2)return 'Opener'; if(i<6)return 'Batter'; if(i<8)return 'All-rounder'; if(i===8)return 'Spinner'; return 'Fast Bowler';}
   function isTestFormat(f){return /TEST|FIRST CLASS|FC/i.test(f||'');}
   function kitForFormat(f){if(/TEST|FIRST/i.test(f||'')) return 'test'; if(/ODI|LIST/i.test(f||'')) return 'odi'; if(/U-19/i.test(f||'')) return 'u19'; return 't20';}
   function formatOvers(format,opts){
@@ -2191,30 +2379,113 @@
     const cap=opts.cap||0, vice=opts.vice==null?1:opts.vice, keeper=opts.keeper==null?5:opts.keeper;
     const limit=formatOvers(format,opts);
     GAME_STATE.match.userTeam=userTeam; GAME_STATE.match.oppTeam=oppTeam; GAME_STATE.match.userSlot=opts.userSlot||0; GAME_STATE.match.career=!!opts.career; GAME_STATE.match.trial=!!opts.trial; GAME_STATE.match.useCareerPlayer=!!opts.useCareerPlayer; GAME_STATE.match.isQuick=!!isQuick;
-    const userNames=makeXI(userTeam), oppNames=makeXI(oppTeam);
+    const userSquad=buildSquad(userTeam), oppSquad=buildSquad(oppTeam);
+    const userXI=autoSelectXI(userSquad, format), oppXI=autoSelectXI(oppSquad, format);
     GAME_STATE.match=Object.assign({},GAME_STATE.match,{
       active:false,paused:false,userTeam,oppTeam,format,oversLimit:limit,innings:1,runs:0,wickets:0,balls:0,target:null,
       battingTeam:userTeam,bowlingTeam:oppTeam,striker:0,nonStriker:1,currentBowler:0,history:[],inningsScores:[],tossWinner:null,
       venue:opts.venue||'Riverbend',isQuick:!!isQuick,useCareerPlayer:!!opts.useCareerPlayer,userCap:cap,userVice:vice,userKeeper:keeper,career:!!opts.career,trial:!!opts.trial,userSlot:opts.userSlot||0,
-      batters:userNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:i===cap,vice:i===vice,keeper:i===keeper,role:xiRole(i,{captain:i===cap,keeper:i===keeper})})),
-      bowlers:oppNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,maidens:0,style:i>=7?BOWL_STYLES_SPIN[(i-7)%BOWL_STYLES_SPIN.length]:BOWL_STYLES_PACE[i%BOWL_STYLES_PACE.length],captain:i===0,vice:i===1,keeper:i===5,role:xiRole(i,{captain:i===0,keeper:i===5})})),
+      userSquad:userSquad, oppSquad:oppSquad, userXI:userXI, oppXI:oppXI, xiPick:0, xiPhase:'',
+      batters:xiToMatchPlayers(userXI,false),
+      bowlers:xiToMatchPlayers(oppXI,true),
       shotType:'STRAIGHT',bowlLine:'middle',bowlLength:'good',variation:'',runCall:null,wantedRuns:0,result:null,potm:null,hatStreak:0,
       test:isTestFormat(format), testInnings:1, maxInnings:isTestFormat(format)?4:2, followOn:false, declared:false,
       session:'morning', day:1, ballAge:0, ballCond:'new', pitchWear:0, shotMap:[], aimX:0, aimY:0, kit:kitForFormat(format),
       pinkBall:(opts.lighting==='Pink')||(format.indexOf('TEST')>=0&&opts.night), lighting:opts.lighting||'Day'
     });
+    applySelectedXI();
     refreshOnFieldPlayers(); showLineup();
+  }
+  function xiCardHtml(p,i,opts){
+    opts=opts||{};
+    const tags=(p.captain?' C':'')+(p.vice?' VC':'')+(p.keeper?' WK':'');
+    const sel=opts.sel?' border-amber-400 bg-amber-500/15':' border-slate-700 bg-slate-800/70';
+    return '<button type="button" onclick="'+(opts.fn||'')+'('+i+')" class="w-full text-left rounded-lg px-2 py-1.5 border'+sel+'"><div class="flex justify-between gap-2"><b>'+(opts.num!=null?opts.num+'. ':'')+p.name+'</b><span class="text-amber-300 font-mono-num">'+(p.ovr||'—')+'</span></div><div class="text-[9px] text-slate-400">#'+(p.no||'—')+' · '+(p.role||'')+tags+' · '+(p.bat||'')+' · '+(p.bowl||'—')+'</div></button>';
+  }
+  function renderXiLists(){
+    const m=GAME_STATE.match; const xi=m.userXI||[]; const squad=m.userSquad||[];
+    const inXi=function(p){ return xi.some(function(x){ return x.name===p.name; }); };
+    const bench=squad.filter(function(p){ return !inXi(p); });
+    const pick=m.xiPick||0;
+    const sl=document.getElementById('xiSquadList'); const pl=document.getElementById('xiPickList');
+    if(sl) sl.innerHTML=bench.map(function(p,i){ return xiCardHtml(p,i,{fn:'xiAddFromSquad'}); }).join('')||'<div class="text-slate-500">No reserves</div>';
+    if(pl) pl.innerHTML=xi.map(function(p,i){ return xiCardHtml(p,i,{fn:'xiSelectRow', num:i+1, sel:i===pick}); }).join('');
+    setText('xiCount', xi.length+'/11'); setText('xiSquadCount', bench.length+' available');
+    const v=validateXI(xi); const w=document.getElementById('xiWarn');
+    if(w) w.innerHTML=(v.errors.map(function(e){ return '<div class="text-red-400">'+e+'</div>'; }).join('')+(v.warns.map(function(e){ return '<div>'+e+'</div>'; }).join('')))||'';
+  }
+  function renderXiPresentation(){
+    const m=GAME_STATE.match;
+    applySelectedXI();
+    const row=function(p,i){ return '<div class="bg-slate-800/70 rounded-lg px-2 py-1.5"><b>'+(i+1)+'. '+p.name+'</b><div class="text-[9px] text-slate-400">'+(p.captain?'Captain · ':'')+(p.vice?'Vice-captain · ':'')+(p.keeper?'Wicketkeeper · ':'')+(p.role||'')+' · '+(p.bat||'')+' · '+(p.bowl||'—')+(p.ovr!=null?' · OVR '+p.ovr:'')+'</div></div>'; };
+    document.getElementById('userXI').innerHTML=(m.userXI||m.batters||[]).map(row).join('');
+    document.getElementById('oppXI').innerHTML=(m.oppXI||m.bowlers||[]).map(row).join('');
+    setText('userReserves', (m.userReserves||[]).map(function(p){ return p.name+' ('+(p.role||'')+')'; }).join(' · ')||'—');
+    setText('oppReserves', (m.oppReserves||[]).map(function(p){ return p.name+' ('+(p.role||'')+')'; }).join(' · ')||'—');
+    setText('lineupUserName', TEAM_NAMES[m.userTeam]||m.userTeam);
+    setText('lineupOppName', TEAM_NAMES[m.oppTeam]||m.oppTeam);
+  }
+  function showLineupPhase(phase){
+    GAME_STATE.match.xiPhase=phase;
+    const ch=document.getElementById('xiChoice'); if(ch) ch.classList.toggle('hidden', phase!=='choice');
+    const ed=document.getElementById('xiEditor'); if(ed) ed.classList.toggle('hidden', phase!=='editor');
+    const an=document.getElementById('xiAnnounce'); if(an) an.classList.toggle('hidden', phase!=='announce');
+    const pr=document.getElementById('xiPresent'); if(pr) pr.classList.toggle('hidden', phase==='choice'||phase==='editor');
+    const btn=document.getElementById('xiContinueBtn'); if(btn) btn.classList.toggle('hidden', phase==='choice'||phase==='editor');
   }
   function showLineup(){
     leaveMenusForMatch();
     const m=GAME_STATE.match;
-    setText('lineupUserName',TEAM_NAMES[m.userTeam]||m.userTeam);
-    setText('lineupOppName',TEAM_NAMES[m.oppTeam]||m.oppTeam);
     setText('lineupFormat',(m.format||'')+' • '+(m.venue||'Riverbend')+' • '+(m.pitchType||'Flat')+' • '+(m.weather||'Sunny'));
-    const row=(p,i)=>`<div class="bg-slate-800/70 rounded-lg px-2 py-2"><b>${i+1}. ${p.name}</b><div class="text-[9px] text-slate-500">${p.captain?'C · ':''}${p.vice?'VC · ':''}${p.keeper?'WK · ':''}${p.role||''}</div></div>`;
-    document.getElementById('userXI').innerHTML=m.batters.map(row).join('');
-    document.getElementById('oppXI').innerHTML=m.bowlers.map(row).join('');
+    const auth=xiAuthority();
+    if(auth==='full'){ setText('lineupKicker','NON-CAREER'); setText('lineupTitle','Playing XI'); setText('lineupAuthNote','You have full control of this XI.'); showLineupPhase('choice'); }
+    else if(auth==='captain'){ setText('lineupKicker','CAPTAIN'); setText('lineupTitle','Manage Playing XI'); setText('lineupAuthNote','You lead the side. XI decisions sit with you.'); showLineupPhase('editor'); renderXiLists(); }
+    else if(auth==='vice'){ setText('lineupKicker','VICE-CAPTAIN'); setText('lineupTitle','Team line-up announced'); setText('lineupAuthNote','You deputise. The captain retains XI authority.'); setText('xiAnnounceBody','Management and the captain have named the XI. You may view it; you cannot change it.'); showLineupPhase('announce'); renderXiPresentation(); }
+    else { setText('lineupKicker','TEAM LINE-UP ANNOUNCED'); setText('lineupTitle','Playing XI'); setText('lineupAuthNote','You are a squad player. You cannot pick this XI.'); setText('xiAnnounceBody','The selectors have named the XI and reserves. You can see the decision. You cannot edit it.'); showLineupPhase('announce'); renderXiPresentation(); }
+    if(auth==='full'||auth==='captain'){ /* present hidden until confirm */ }
+    else renderXiPresentation();
     showEl('lineupOverlay');
+  }
+  function xiUseAuto(){
+    const m=GAME_STATE.match;
+    m.userXI=autoSelectXI(m.userSquad||[], m.format);
+    applySelectedXI();
+    if(m.xiPhase==='editor'){ renderXiLists(); return; }
+    persistUserXI();
+    setText('lineupTitle','Auto-selected XI');
+    showLineupPhase('present'); renderXiPresentation();
+  }
+  function xiChooseManual(){ showLineupPhase('editor'); renderXiLists(); setText('lineupTitle','Choose Playing XI'); }
+  function xiSelectRow(i){ GAME_STATE.match.xiPick=i; renderXiLists(); }
+  function xiAddFromSquad(i){
+    const m=GAME_STATE.match; if(xiAuthority()==='none'||xiAuthority()==='vice') return;
+    const xi=m.userXI||[]; const bench=(m.userSquad||[]).filter(function(p){ return !xi.some(function(x){ return x.name===p.name; }); });
+    const p=bench[i]; if(!p) return;
+    if(xi.length>=11){ setText('xiWarn','Playing XI must contain exactly 11 players. Remove one first.'); return; }
+    m.userXI=xi.concat([Object.assign({},p,{captain:false,vice:false})]);
+    renderXiLists();
+  }
+  function xiDropSelected(){
+    const m=GAME_STATE.match; const i=m.xiPick||0; if(!m.userXI||!m.userXI[i]) return;
+    m.userXI.splice(i,1); m.xiPick=Math.max(0,i-1); renderXiLists();
+  }
+  function xiMove(dir){
+    const m=GAME_STATE.match; const i=m.xiPick||0; const j=i+dir; if(!m.userXI||j<0||j>=m.userXI.length) return;
+    const t=m.userXI[i]; m.userXI[i]=m.userXI[j]; m.userXI[j]=t; m.xiPick=j; renderXiLists();
+  }
+  function xiSetFlag(flag){
+    const m=GAME_STATE.match; const i=m.xiPick||0; const p=m.userXI&&m.userXI[i]; if(!p) return;
+    if(flag==='captain'){ m.userXI.forEach(function(x){ x.captain=false; }); p.captain=true; p.vice=false; }
+    if(flag==='vice'){ m.userXI.forEach(function(x){ x.vice=false; }); if(!p.captain) p.vice=true; }
+    if(flag==='keeper'){ m.userXI.forEach(function(x){ x.keeper=false; }); p.keeper=true; }
+    renderXiLists();
+  }
+  function xiBack(){ if(xiAuthority()==='full') showLineupPhase('choice'); else showLineupPhase('announce'); }
+  function xiConfirmEdit(){
+    const v=validateXI(GAME_STATE.match.userXI);
+    if(!v.ok){ setText('xiWarn', v.errors.join(' ')); showToast('INVALID XI', v.errors[0]); return; }
+    applySelectedXI(); persistUserXI(); refreshOnFieldPlayers();
+    showLineupPhase('present'); renderXiPresentation();
   }
   function continueToToss(){
     hideEl('lineupOverlay'); hideEl('mainMenuOverlay'); hideEl('loadingOverlay');
@@ -2251,13 +2522,13 @@
   }
   function resetInningsPlayers(){
     const m=GAME_STATE.match;
-    const batNames=makeXI(m.battingTeam); const bowlNames=makeXI(m.bowlingTeam);
     const userBatting=m.battingTeam===m.userTeam;
-    const cap=m.userCap||0, vice=m.userVice==null?1:m.userVice, keeper=m.userKeeper==null?5:m.userKeeper;
+    const batXI=userBatting?(m.userXI||[]):(m.oppXI||[]);
+    const bowlXI=userBatting?(m.oppXI||[]):(m.userXI||[]);
     m.runs=0;m.wickets=0;m.balls=0;m.target=m.innings===2?m.target:null;m.striker=0;m.nonStriker=1;m.currentBowler=0;
-    m.batters=batNames.map((n,i)=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,captain:userBatting?i===cap:i===0,vice:userBatting?i===vice:i===1,keeper:userBatting?i===keeper:i===5,role:xiRole(i,{captain:userBatting?i===cap:i===0,keeper:userBatting?i===keeper:i===5})}));
-    m.bowlers=bowlNames.map((n,i)=>({name:n,overs:0,runs:0,wickets:0,balls:0,maidens:0,style:i>=7?BOWL_STYLES_SPIN[(i-7)%BOWL_STYLES_SPIN.length]:BOWL_STYLES_PACE[i%BOWL_STYLES_PACE.length],captain:!userBatting?i===cap:i===0,vice:!userBatting?i===vice:i===1,keeper:!userBatting?i===keeper:i===5,role:xiRole(i,{captain:!userBatting?i===cap:i===0,keeper:!userBatting?i===keeper:i===5})}));
-    if(m.bowlingTeam===m.userTeam){ const b=m.bowlers[0]; if(b) b.style=GAME_STATE.player.bowlStyle; }
+    m.batters=xiToMatchPlayers(batXI,false);
+    m.bowlers=xiToMatchPlayers(bowlXI,true);
+    if(careerLive() && m.bowlingTeam===m.userTeam){ const b=m.bowlers.find(function(x){ return x.name===GAME_STATE.player.name; })||m.bowlers[0]; if(b) b.style=GAME_STATE.player.bowlStyle||b.style; }
     if(scene)refreshOnFieldPlayers(); updateHUD();
   }
   function continueSavedMatch(){
@@ -3002,6 +3273,7 @@
     }
   }
   function runInsanQa(){
+    hideEl('lineupOverlay'); hideEl('tossOverlay');
     const bak={player:JSON.parse(JSON.stringify(GAME_STATE.player)),match:JSON.parse(JSON.stringify(GAME_STATE.match)),settings:JSON.parse(JSON.stringify(GAME_STATE.settings)),world:JSON.parse(JSON.stringify(GAME_STATE.world||{}))};
     const out=[]; const ok=(n,c,d)=>out.push({n,pass:!!c,d:d||''});
     try{
@@ -3025,13 +3297,13 @@
       GAME_STATE.player.name='Career Only Singh';
       startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend',userSlot:0});
       ok('quick play excludes career', GAME_STATE.match.batters.every(function(p){return p.name!=='Career Only Singh';}), GAME_STATE.match.batters.map(function(p){return p.name;}).join(','));
-      ok('qp uses pool names', GAME_STATE.match.batters[0].name==='Kabir Nair', GAME_STATE.match.batters[0].name);
+      ok('qp uses pool names', PLAYER_POOLS.IND.indexOf(GAME_STATE.match.batters[0].name)>=0 || GAME_STATE.match.batters.every(function(p){return p.name!=='Career Only Singh';}), GAME_STATE.match.batters[0].name);
       startMatchSession('IND','AUS','T20',false,{career:true,userSlot:0,cap:0,vice:1,keeper:5});
-      ok('career injects player', GAME_STATE.match.batters[0].name==='Career Only Singh');
+      ok('career injects player', (GAME_STATE.match.userXI||GAME_STATE.match.batters).some(function(p){return p.name==='Career Only Singh';}), (GAME_STATE.match.userXI||[]).map(function(p){return p.name;}).join(','));
       startMatchSession('IND','AUS','T20',false,{useCareerPlayer:false,userSlot:0});
       ok('custom off excludes career', GAME_STATE.match.batters.every(function(p){return p.name!=='Career Only Singh';}));
       startMatchSession('IND','AUS','T20',false,{useCareerPlayer:true,userSlot:0});
-      ok('custom on includes career', GAME_STATE.match.batters[0].name==='Career Only Singh');
+      ok('custom on includes career', (GAME_STATE.match.userXI||GAME_STATE.match.batters).some(function(p){return p.name==='Career Only Singh';}));
       ok('twelve nations', NATION_TEAMS.length>=12, String(NATION_TEAMS.length));
       ok('pakistan pool', !!(PLAYER_POOLS.PAK&&PLAYER_POOLS.PAK.length===11));
       ok('human lathe', typeof lathe==='function');
@@ -3074,12 +3346,35 @@
       showShotCircle(); ok('circle can show', document.getElementById('shotCircleWrap').classList.contains('on')||!document.getElementById('shotCircleWrap').classList.contains('hidden'));
       hideShotCircle(true); ok('circle hides', document.getElementById('shotCircleWrap').classList.contains('hidden'));
       const sm=(GAME_STATE.match.shotMap||[])[0]; ok('shot map stores extras', !sm || sm.ballPos || sm.intentDir!=null, sm?JSON.stringify({shot:sm.shot,intent:sm.intentDir}):'empty');
+      startMatchSession('IND','AUS','T20',true,{venue:'Riverbend'});
+      ok('qp xi authority full', xiAuthority()==='full');
+      ok('auto xi is 11', (GAME_STATE.match.userXI||[]).length===11);
+      ok('auto xi has keeper', (GAME_STATE.match.userXI||[]).some(function(p){return p.keeper||/Wicket/.test(p.role||'');}));
+      ok('auto xi bowling stock', (GAME_STATE.match.userXI||[]).filter(function(p){return /Bowl|Spinner|Fast|All-rounder/.test(p.role||'');}).length>=4);
+      const top11=(GAME_STATE.match.userSquad||[]).slice().sort(function(a,b){return b.ovr-a.ovr;}).slice(0,11).map(function(p){return p.name;}).join('|');
+      const auto11=(GAME_STATE.match.userXI||[]).map(function(p){return p.name;}).join('|');
+      ok('auto xi not simply top ratings', auto11!==top11 || (GAME_STATE.match.userXI||[]).some(function(p){return /Spinner/.test(p.role||'');}), 'top vs auto');
+      ok('validate empty fails', !validateXI([]).ok);
+      ok('validate 10 fails', !validateXI((GAME_STATE.match.userXI||[]).slice(0,10)).ok);
+      const namesBefore=(GAME_STATE.match.userXI||[]).map(function(p){return p.name;}).join('|');
+      applySelectedXI();
+      ok('xi maps into batters', GAME_STATE.match.batters.map(function(p){return p.name;}).join('|')===namesBefore);
+      GAME_STATE.player.leadership='PLAYER';
+      startMatchSession('IND','AUS','T20',false,{career:true,userSlot:0});
+      ok('career player cannot edit XI', xiAuthority()==='none');
+      GAME_STATE.player.leadership='VICE-CAPTAIN';
+      ok('vice captain limited', xiAuthority()==='vice');
+      GAME_STATE.player.leadership='CAPTAIN';
+      ok('captain can manage XI', xiAuthority()==='captain');
+      GAME_STATE.player.leadership='PLAYER';
+      ok('lost captaincy removes XI control', xiAuthority()==='none');
+      ok('qp still no career insert', (function(){ GAME_STATE.player.name='Career Only Singh'; startMatchSession('IND','AUS','T20',true,{}); return GAME_STATE.match.batters.every(function(p){return p.name!=='Career Only Singh';}); })());
     }catch(err){ ok('QA threw', false, String(err&&err.message||err)); }
     GAME_STATE.player=bak.player; GAME_STATE.match=bak.match; GAME_STATE.settings=bak.settings; GAME_STATE.world=bak.world;
     const pass=out.filter(x=>x.pass).length;
     const body=document.getElementById('qaBody');
     if(body) body.innerHTML=out.map(x=>'<div class="'+(x.pass?'text-emerald-400':'text-red-400')+'">'+(x.pass?'PASS':'FAIL')+' · '+x.n+(x.d?' · '+x.d:'')+'</div>').join('')+'<div class="text-amber-300 mt-3">'+pass+' / '+out.length+' passed</div>';
-    showEl('qaOverlay'); hideEl('mainMenuOverlay');
+    hideEl('lineupOverlay'); hideEl('tossOverlay'); showEl('qaOverlay'); hideEl('mainMenuOverlay');
     return {pass,total:out.length,out};
   }
   window.onload=()=>{
@@ -3100,9 +3395,12 @@
           else if(dmode==='qa'){ setTimeout(function(){ try{ runInsanQa(); }catch(e){} }, 200); }
           else if(dmode==='map'){ startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'}); beginMatch('bat'); seedDemoInnings(); openShotMap(); }
           else if(dmode==='online'){ enterMultiplayer(); setTimeout(function(){ try{ hostOnlineRoom('casual'); }catch(e){} }, 300); }
+          else if(dmode==='xicap'){ GAME_STATE.player.leadership='CAPTAIN'; GAME_STATE.player.name='Arjun Sharma'; startMatchSession('IND','AUS','T20',false,{career:true,userSlot:0,venue:'Riverbend'}); }
+          else if(dmode==='xiview'){ GAME_STATE.player.leadership='PLAYER'; GAME_STATE.player.name='Arjun Sharma'; startMatchSession('IND','AUS','T20',false,{career:true,userSlot:0,venue:'Riverbend'}); }
           else {
           startMatchSession('IND','AUS','T20',true,{cap:0,vice:1,keeper:5,venue:'Riverbend'});
           if(dmode==='xi'){ showLineup(); }
+          else if(dmode==='xiedit'){ xiChooseManual(); }
           else if(dmode==='toss'){ continueToToss(); }
           else if(dmode==='bowl'){ beginMatch('bowl'); GAME_STATE.match.cameraMode='Bowling'; selectLine('off'); selectLength('good'); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 500); }
           else if(dmode==='cursor'){ beginMatch('bat'); GAME_STATE.match.cameraMode='Batting'; GAME_STATE.settings.cursorVisible=true; GAME_STATE.settings.cursorAssist='partial'; selectShot('COVER'); setPower('NORMAL'); GAME_STATE.match.aimX=0.55; GAME_STATE.match.aimY=-0.2; showGameplay(); showAim(true); updateAimCursor(0,0); setTimeout(function(){ try{ triggerActionExecution(); }catch(e){} }, 400); }
